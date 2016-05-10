@@ -60,3 +60,10 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+
+# Data
+data/
+
+# Good Code
+word2vec.c/
