@@ -53,3 +53,5 @@ class questions_lemma(questions):
             yield self._get("lemma")
 
 
+class answers(object):
+    pass
