@@ -64,6 +64,7 @@ target/
 
 # Data
 data/
+*.npz
 
 # Good Code
 word2vec.c/
