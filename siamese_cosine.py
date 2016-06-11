@@ -8,9 +8,9 @@ import theano
 from theano import config
 import theano.tensor as tensor
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+import preprocess.ppdb_loader as ppdb
 
-import ppdb
-
+LSTM_FILE = './bin/lstm_model.npz'
 datasets = {'ppdb': (ppdb.load_data, ppdb.prepare_data)}
 
 # Set the random number generators' seeds for consistency

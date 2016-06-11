@@ -1,12 +1,9 @@
-import pickle as pkl
-import gzip
-import os
 import sys
 
 import numpy
 import theano
 
-from data import ppdb_indx
+from preprocess.data import PPDB
 
 
 def prepare_data(seqs):
@@ -62,7 +59,7 @@ def load_data(n_words=100000, valid_portion=0.1, maxlen=None):
     # train_set_x, train_set_xp, train_set_y = train_set
     # n_samples = len(train_set_x)
     
-    data = ppdb_indx()
+    data = PPDB()
     train_set_x = []
     train_set_xp = []
     train_set_y = []
