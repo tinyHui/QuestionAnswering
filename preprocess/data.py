@@ -105,7 +105,7 @@ class QAs(object):
 # British National Corpus
 class BNCembedding(object):
     def __init__(self):
-        self.file = './data/embedding.txt'
+        self.file = './data/embeddings.txt'
 
     def __iter__(self):
         for line in open(self.file, 'r'):
