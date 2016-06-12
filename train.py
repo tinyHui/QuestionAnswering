@@ -51,8 +51,8 @@ if __name__ == "__main__":
     logging.info("constructing train data")
     length = len(feats)
     for i, feat in enumerate(feats):
-        if i % INF_FREQ == 0 or i == length - 1:
-            logging.warning("loading: %d/%d" % (i, length))
+        if i % INF_FREQ == 0 or i + 1 == length:
+            logging.warning("loading: %d/%d" % (i + 1, length))
         Qs.append(feat[0])
         As.append(feat[1])
 
