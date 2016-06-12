@@ -4,8 +4,11 @@ import logging
 
 # paraphrased sentences
 class PPDB(object):
-    def __init__(self, mode='str', voc_dict=None):
-        self.file = ''
+    def __init__(self, usage='train', mode='str', voc_dict=None):
+        if usage in ['train', 'test']:
+            self.file = './data/msr_paraphrase_%s.txt' % usage
+        else:
+            raise SystemError("usage can be only train/test")
         self.voc_dict = voc_dict
         if mode == 'index':
             assert voc_dict is not None, "must take vocabulary-index dictionary."
@@ -49,8 +52,11 @@ class PPDB(object):
 
 # question answer pairs
 class QAs(object):
-    def __init__(self, mode='str', voc_dict=None):
-        self.file = './data/qa_pairs.txt'
+    def __init__(self, usage='train', mode='str', voc_dict=None):
+        if usage in ['train', 'test', 'dev']:
+            self.file = './data/WikiQA-%s.txt' % usage
+        else:
+            raise SystemError("usage can be only train/test/dev")
         self.voc_dict = voc_dict
         if mode == 'index':
             assert voc_dict is not None, "must take vocabulary-index dictionary."
@@ -62,7 +68,7 @@ class QAs(object):
 
     def __iter__(self):
         for line in open(self.file, 'r'):
-            q, a, _ = line.strip().split('\t')
+            q, a, label = line.strip().split('\t')
             q_tokens, a_tokens = [re.sub('\d+(\.\d+)?', '1', s.lower()).split(' ') for s in [q, a]]
             # insert sentence start/end symbols
             q_tokens.insert(0, "[")
