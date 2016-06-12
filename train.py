@@ -48,7 +48,7 @@ if __name__ == "__main__":
     else:
         raise IndexError("%s is not an available feature" % feature)
 
-    logging.warning("constructing train data")
+    logging.info("constructing train data")
     length = len(feats)
     for i, feat in enumerate(feats):
         if i % INF_FREQ == 0 or i == length - 1:
@@ -56,10 +56,10 @@ if __name__ == "__main__":
         Qs.append(feat[0])
         As.append(feat[1])
 
-    logging.warning("computing cross-covariance matrix")
+    logging.info("computing cross-covariance matrix")
     model.train(Qs, As)
 
-    logging.warning("dumping model into binary file")
+    logging.info("dumping model into binary file")
     # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
         pkl.dump(model, f)
