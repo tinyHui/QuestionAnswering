@@ -33,6 +33,7 @@ if __name__ == '__main__':
         feats = BoW(data, voc_dict=voc_dict)
 
     elif feature == feature_opt[1]:
+        data.mode = 'str'
         # sentence embedding by paraphrased sentences
         feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
 

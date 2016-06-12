@@ -111,3 +111,9 @@ class BNCembedding(object):
         for line in open(self.file, 'r'):
             w, *emb = line.strip().split()
             yield w, emb
+
+    def __len__(self):
+        return 100148
+
+    def __str__(self):
+        return "BNC word embeddings"

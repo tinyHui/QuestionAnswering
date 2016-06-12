@@ -83,6 +83,9 @@ class WordEmbedding(object):
                 else:
                     new_d[i] = d[i]
 
+    def __len__(self):
+        return len(self.data)
+
 # self.freq_dict = defaultdict(int)
 # try:
 #     with open(FREQ_DICT, "rb") as f:
