@@ -3,15 +3,14 @@ from preprocess.data import QAs
 from preprocess.feats import BoW, LSTM, WordEmbedding
 from siamese_cosine import LSTM_FILE, train_lstm
 from text2embedding import WORD_EMBEDDING_FILE
-from CCA import train
+from CCA import CCA
 import argparse
 import os
 import pickle as pkl
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-CCA_U_FILE = "CCA_model_U_%s.pkl"
-CCA_V_FILE = "CCA_model_V_%s.pkl"
+CCA_FILE = "CCA_model_%s.pkl"
 INF_FREQ = 300
 
 if __name__ == "__main__":
@@ -32,6 +31,7 @@ if __name__ == "__main__":
     feats = None
     Qs = []
     As = []
+    model = CCA()
 
     if feature == feature_opt[0]:
         # bag-of-word
@@ -67,12 +67,10 @@ if __name__ == "__main__":
         i += 1
 
     logging.info("running CCA")
-    U, s, V = train(Qs, As)
+    model.train(Qs, As)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
-    with open(CCA_U_FILE % feature, 'wb') as f:
-        pkl.dump(U, f)
-    with open(CCA_V_FILE % feature, 'wb') as f:
-        pkl.dump(V, f)
+    with open(CCA_FILE % feature, 'wb') as f:
+        pkl.dump(model, f)
 

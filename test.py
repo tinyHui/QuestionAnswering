@@ -1,9 +1,9 @@
-from train import CCA_U_FILE, CCA_V_FILE
+from train import CCA_FILE
 from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
 from siamese_cosine import LSTM_FILE
 from preprocess.feats import BoW, LSTM
-from CCA import find_answer
+from CCA import CCA
 import argparse
 import pickle as pkl
 import logging
@@ -54,18 +54,16 @@ if __name__ == '__main__':
 
     logging.info("loading CCA model")
     # load CCA model
-    with open(CCA_U_FILE % feature, 'rb') as f:
-        U = pkl.load(f)
-
-    with open(CCA_V_FILE % feature, 'rb') as f:
-        V = pkl.load(f)
+    with open(CCA_FILE % feature, 'rb') as f:
+        model = pkl.load(f)
+    assert isinstance(model, CCA)
 
     logging.info("testing")
     correct_num = 0
     for i, q in enumerate(Qs):
         if i % INF_FREQ == 0 or i + 1 == length:
             logging.warning("tested: %d/%d" % (i + 1, length))
-        pred = find_answer(q, As, U=U, V=V)
+        pred = model.find_answer(q, As)
         if pred == i:
             # correct
             correct_num += 1
