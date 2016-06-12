@@ -10,7 +10,7 @@ class BoW(object):
         :param data: data source, such as PPDB, QAs
         :param index: index that contains the sentence data in source data
         '''
-        assert self.data.mode == 'index', "must use word index in input data"
+        assert data.mode == 'index', "must use word index in input data"
         self.data = data
         self.voc_dict = voc_dict
 
@@ -41,7 +41,7 @@ class LSTM(object):
         :param data: data source, such as PPDB, QAs
         :param lstm_file: trained LSTM model
         '''
-        assert self.data.mode == 'index', "must use word index in input data"
+        assert data.mode == 'index', "must use word index in input data"
         self.data = data
         with open(lstm_file, 'rb') as f:
             self.model = pkl.load(f)
@@ -68,7 +68,7 @@ class WordEmbedding(object):
         :param data:
         :param embedding_dict:
         '''
-        assert self.data.mode == 'str', "must use word string in input data"
+        assert data.mode == 'str', "must use word string in input data"
         self.data = data
         with open(embedding_dict_file, 'rb') as f:
             self.embedding_dict = pkl.load(f)
