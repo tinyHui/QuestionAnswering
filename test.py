@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
-    parser.add_argument('--freq', type=int, default=1, help='Information print out frequency')
+    parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
 
     args = parser.parse_args()
     feature = args.feature

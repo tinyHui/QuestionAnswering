@@ -29,6 +29,7 @@ class CCA(object):
         if isinstance(As, list):
             As = np.asarray(As, dtype="float64")
 
+        print(Qs.shape, As.shape)
         logging.info("computing cross-covariance matrix")
         cov = xcov(Qs, As)
         logging.info("decomposition using SVD")

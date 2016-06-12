@@ -9,7 +9,7 @@ class BoW(object):
         '''
         Represent sentence data using OneHot BoW feature
         :param data: data source, such as PPDB, QAs
-        :param index: index that contains the sentence data in source data
+        :param voc_dict: word-index dictionary
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
@@ -40,7 +40,8 @@ class LSTM(object):
         '''
         Represent sentence data using LSTM sentence embedding
         :param data: data source, such as PPDB, QAs
-        :param lstm_file: trained LSTM model
+        :param lstm_file: trained LSTM model file name
+        :param voc_dict: word-index dictionary
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
@@ -63,34 +64,29 @@ class LSTM(object):
 
 
 class WordEmbedding(object):
-    def __init__(self, data, embedding_dict_file):
+    def __init__(self, data, max_length, embedding_dict_file):
         '''
         Represent sentence data using word embedding trained by British National Corpus
-        :param data:
-        :param embedding_dict:
+        :param data: data source, such as PPDB, QAs
+        :param max_length: max legnth of the sentence for correlated column
+        :param embedding_dict_file: word-embedding dictionary file name
         '''
         assert data.mode == 'str', "must use word string in input data"
         self.data = data
         with open(embedding_dict_file, 'rb') as f:
             self.embedding_dict = pkl.load(f)
-
-        self.max_length = defaultdict(int)
-        for d in self.data:
-            for i in self.data.sent_indx:
-                tmp = len(d[i])
-                if tmp > self.max_length[i]:
-                    self.max_length[i] = tmp
+        self.max_length = max_length
 
     def __iter__(self):
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
                 if i in self.data.sent_indx:
-                    new_d[i] = [[0] * 300] * self.max_length[i]
+                    new_d[i] = [0] * 300 * self.max_length[i]
                     for j, w in enumerate(d[i]):
                         # for each token, find its embedding
                         try:
-                            new_d[i][j] = self.embedding_dict[w]
+                            new_d[i][j*300:(j+1)*300] = self.embedding_dict[w]
                         except TypeError:
                             continue
 

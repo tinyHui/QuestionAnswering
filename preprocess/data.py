@@ -70,6 +70,7 @@ class QAs(object):
         self.param_num = 2
         # index of return data contains sentence
         self.sent_indx = (0, 1)
+        self.max_length = {0: 26, 1: 238}
 
     def __iter__(self):
         for line in open(self.file, 'r'):
