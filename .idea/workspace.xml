@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="706830a6-dc0c-4a60-a51d-ff2bddba53c7" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/preprocess/data.py" afterPath="$PROJECT_DIR$/preprocess/data.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/preprocess/feats.py" afterPath="$PROJECT_DIR$/preprocess/feats.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train.py" afterPath="$PROJECT_DIR$/train.py" />
     </list>
     <ignored path="FYD.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -60,6 +61,18 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="data.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/preprocess/data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="894">
+              <caret line="115" column="21" selection-start-line="115" selection-start-column="21" selection-end-line="115" selection-end-column="21" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -91,10 +104,10 @@
         <option value="$PROJECT_DIR$/CCA.py" />
         <option value="$PROJECT_DIR$/text2index.py" />
         <option value="$PROJECT_DIR$/text2embedding.py" />
+        <option value="$PROJECT_DIR$/preprocess/feats.py" />
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/train.py" />
         <option value="$PROJECT_DIR$/preprocess/data.py" />
-        <option value="$PROJECT_DIR$/preprocess/feats.py" />
       </list>
     </option>
   </component>
@@ -655,18 +668,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/preprocess/data.py">
+    <entry file="file://$PROJECT_DIR$/preprocess/feats.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="909">
           <caret line="118" column="25" selection-start-line="118" selection-start-column="25" selection-end-line="118" selection-end-column="25" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+=======
+        <state relative-caret-position="309">
+          <caret line="61" column="0" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
+          <folding />
+>>>>>>> c4f7325afa575fc26aef58abdcc4a73c56e09963
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/preprocess/feats.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="684">
           <caret line="86" column="29" selection-start-line="86" selection-start-column="29" selection-end-line="86" selection-end-column="29" />
           <folding />
@@ -679,6 +699,22 @@
           <caret line="49" column="25" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
           <folding>
             <element signature="e#0#36#0" expanded="true" />
+=======
+        <state relative-caret-position="534">
+          <caret line="49" column="25" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/preprocess/data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="894">
+          <caret line="115" column="21" selection-start-line="115" selection-start-column="21" selection-end-line="115" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+>>>>>>> c4f7325afa575fc26aef58abdcc4a73c56e09963
           </folding>
         </state>
       </provider>

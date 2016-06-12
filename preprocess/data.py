@@ -117,3 +117,4 @@ class BNCembedding(object):
 
     def __str__(self):
         return "BNC word embeddings"
+
