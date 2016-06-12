@@ -14,46 +14,42 @@ def xcov(set1, set2):
     return cov
 
 
-class CCA(object):
-    def __init__(self):
-        self.U = None
-        self.V = None
+def train(Qs, As):
+    '''
+    params q: sentence embedding for question set
+    params a: sentence embedding for answer set
+    '''
+    if isinstance(Qs, list):
+        Qs = np.asarray(Qs, dtype="float64")
+    if isinstance(As, list):
+        As = np.asarray(As, dtype="float64")
 
-    def train(self, Qs, As):
-        '''
-        params q: sentence embedding for question set
-        params a: sentence embedding for answer set
-        '''
-        if isinstance(Qs, list):
-            Qs = np.asarray(Qs, dtype="float64")
-        if isinstance(As, list):
-            As = np.asarray(As, dtype="float64")
+    print(Qs.shape, As.shape)
+    logging.info("computing cross-covariance matrix")
+    cov = xcov(Qs, As)
+    logging.info("decomposition using SVD")
+    U, s, V = np.linalg.svd(cov, full_matrices=False)
 
-        print(Qs.shape, As.shape)
-        logging.info("computing cross-covariance matrix")
-        cov = xcov(Qs, As)
-        logging.info("decomposition using SVD")
-        self.U, s, self.V = np.linalg.svd(cov, full_matrices=False)
 
-    def find_answer(self, v_q, As):
-        assert self.U is not None and \
-               self.V is not None
-        if isinstance(v_q, list):
-            v_q = np.asarray(v_q, dtype="float64")
-        if isinstance(As, list):
-            As = np.asarray(As, dtype="float64")
+def find_answer(v_q, As, U, V):
+    assert U is not None and \
+           V is not None
+    if isinstance(v_q, list):
+        v_q = np.asarray(v_q, dtype="float64")
+    if isinstance(As, list):
+        As = np.asarray(As, dtype="float64")
 
-        v_q_proj = np.dot(v_q, self.U)
+    v_q_proj = np.dot(v_q, U)
 
-        best_distance = np.inf
-        best_indx = 0
-        for i, v_a in enumerate(As):
-            v_a_proj = np.dot(v_a, self.V.T)
-            s = cosine(v_q_proj, v_a_proj)
-            if s <= best_distance:
-                best_distance = s
-                best_indx = i
+    best_distance = np.inf
+    best_indx = 0
+    for i, v_a in enumerate(As):
+        v_a_proj = np.dot(v_a, V.T)
+        s = cosine(v_q_proj, v_a_proj)
+        if s <= best_distance:
+            best_distance = s
+            best_indx = i
 
-        return best_indx
+    return best_indx
 
 
