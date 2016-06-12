@@ -47,6 +47,7 @@ if __name__ == "__main__":
         feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
 
     elif feature == feature_opt[2]:
+        data.mode = 'str'
         # word embedding
         feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
 

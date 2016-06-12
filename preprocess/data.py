@@ -111,3 +111,6 @@ class BNCembedding(object):
         for line in open(self.file, 'r'):
             w, *emb = line.strip().split()
             yield w, emb
+
+    def __len__:
+        return 100148
