@@ -29,6 +29,7 @@ def train(Qs, As):
     cov = xcov(Qs, As)
     logging.info("decomposition using SVD")
     U, s, V = np.linalg.svd(cov, full_matrices=False)
+    return U, s, V
 
 
 def find_answer(v_q, As, U, V):
