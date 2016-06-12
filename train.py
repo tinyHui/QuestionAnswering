@@ -10,6 +10,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 CCA_FILE = "CCA_model_%s.pkl"
+INF_FREQ = 300
 
 if __name__ == "__main__":
     feature_opt = ["bow", "lstm"]
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
-    data = QAs(mode='index', voc_dict=voc_dict)
+    data = QAs(usage='train', mode='index', voc_dict=voc_dict)
     feats = None
     Qs = []
     As = []
@@ -47,12 +48,18 @@ if __name__ == "__main__":
     else:
         raise IndexError("%s is not an available feature" % feature)
 
-    for feat in feats:
+    logging.warning("constructing train data")
+    length = len(feats)
+    for i, feat in enumerate(feats):
+        if i % INF_FREQ == 0 or i == length - 1:
+            logging.warning("loading: %d/%d" % (i, length))
         Qs.append(feat[0])
         As.append(feat[1])
 
+    logging.warning("computing cross-covariance matrix")
     model.train(Qs, As)
 
+    logging.warning("dumping model into binary file")
     # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
         pkl.dump(model, f)

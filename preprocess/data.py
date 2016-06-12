@@ -7,6 +7,7 @@ class PPDB(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
         if usage in ['train', 'test']:
             self.file = './data/msr_paraphrase_%s.txt' % usage
+            self.usage = usage
         else:
             raise SystemError("usage can be only train/test")
         self.voc_dict = voc_dict
@@ -44,7 +45,10 @@ class PPDB(object):
                 raise AttributeError("Mode can be only 'str' or 'index'")
 
     def __len__(self):
-        return 35291309
+        if self.usage == 'train':
+            return 4077
+        elif self.usage == 'test':
+            return 1726
 
     def __str__(self):
         return "PPDB"
@@ -55,6 +59,7 @@ class QAs(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
         if usage in ['train', 'test', 'dev']:
             self.file = './data/WikiQA-%s.txt' % usage
+            self.usage = usage
         else:
             raise SystemError("usage can be only train/test/dev")
         self.voc_dict = voc_dict
@@ -86,7 +91,12 @@ class QAs(object):
                 raise AttributeError("Mode can be only 'str' or 'index'")
 
     def __len__(self):
-        return 35291309
+        if self.usage == 'train':
+            return 20360
+        elif self.usage == 'test':
+            return 6165
+        elif self.usage == 'dev':
+            return 2733
 
     def __str__(self):
         return "QApairs"

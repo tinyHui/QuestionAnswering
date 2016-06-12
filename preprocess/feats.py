@@ -19,7 +19,7 @@ class BoW(object):
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
-                if i in self.data.index:
+                if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
                     new_d[i] = [0] * voc_num
                     for w in d[i]:
@@ -52,11 +52,14 @@ class LSTM(object):
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
-                if i in self.data.index:
+                if i in self.data.sent_indx:
                     # TODO: represent sentence use LSTM, d[i] is a sentence
                     new_d[i] = d[i]
 
             yield new_d
+
+    def __len__(self):
+        return len(self.data)
 
 
 # self.freq_dict = defaultdict(int)
