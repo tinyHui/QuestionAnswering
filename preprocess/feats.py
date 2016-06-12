@@ -48,7 +48,6 @@ class LSTM(object):
         self.voc_dict = voc_dict
 
     def __iter__(self):
-        voc_num = len(self.voc_dict.keys())
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
@@ -61,6 +60,28 @@ class LSTM(object):
     def __len__(self):
         return len(self.data)
 
+
+class WordEmbedding(object):
+    def __init__(self, data, embedding_dict_file):
+        '''
+        Represent sentence data using word embedding trained by British National Corpus
+        :param data:
+        :param embedding_dict:
+        '''
+        assert self.data.mode == 'str', "must use word string in input data"
+        self.data = data
+        with open(embedding_dict_file, 'rb') as f:
+            self.embedding_dict = pkl.load(f)
+
+    def __iter__(self):
+        for d in self.data:
+            new_d = [None] * self.data.param_num
+            for i in range(self.data.param_num):
+                if i in self.data.set_indx:
+                    # for each token, find its embedding
+                    new_d[i] = [self.embedding_dict[w] for w in d[i]]
+                else:
+                    new_d[i] = d[i]
 
 # self.freq_dict = defaultdict(int)
 # try:

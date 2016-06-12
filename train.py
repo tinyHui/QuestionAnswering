@@ -1,7 +1,8 @@
 from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
-from preprocess.feats import BoW, LSTM
+from preprocess.feats import BoW, LSTM, WordEmbedding
 from siamese_cosine import LSTM_FILE, train_lstm
+from text2embedding import WORD_EMBEDDING_FILE
 from CCA import CCA
 import argparse
 import os
@@ -13,7 +14,7 @@ CCA_FILE = "CCA_model_%s.pkl"
 INF_FREQ = 300
 
 if __name__ == "__main__":
-    feature_opt = ["bow", "lstm"]
+    feature_opt = ['bow', 'lstm', 'we']
 
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', nargs=1, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
@@ -45,6 +46,10 @@ if __name__ == "__main__":
             )
         feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
 
+    elif feature == feature_opt[2]:
+        # word embedding
+        feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
+
     else:
         raise IndexError("%s is not an available feature" % feature)
 
@@ -56,7 +61,7 @@ if __name__ == "__main__":
         Qs.append(feat[0])
         As.append(feat[1])
 
-    logging.info("computing cross-covariance matrix")
+    logging.info("running CCA")
     model.train(Qs, As)
 
     logging.info("dumping model into binary file")

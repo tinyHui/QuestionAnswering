@@ -13,11 +13,6 @@ if __name__ == "__main__":
         logging.info("Word index file exists, skip")
         sys.exit(0)
 
-    # remove previous processed files
-    logging.info("Clean up")
-    if os.path.exists(VOC_DICT_FILE):
-        os.remove(VOC_DICT_FILE)
-
     logging.info("Generating source data")
     # data is a group of sentences
     token_list = UserList()

@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cosine
-
+import logging
 
 def xcov(set1, set2):
     num_set1, M = set1.shape
@@ -9,7 +9,7 @@ def xcov(set1, set2):
     assert(num_set1 == num_set2)
 
     cov = np.dot(np.transpose(set1), set2)
-    print(cov.shape)
+    logging.info("get XCOV matrix of shape %s" % cov.shape)
     return cov
 
 
@@ -28,7 +28,9 @@ class CCA(object):
         if isinstance(As, list):
             As = np.asarray(As, dtype="float64")
 
+        logging.info("computing cross-covariance matrix")
         cov = xcov(Qs, As)
+        logging.info("decomposition using SVD")
         self.U, s, self.V = np.linalg.svd(cov, full_matrices=False)
 
     def find_answer(self, v_q, As):

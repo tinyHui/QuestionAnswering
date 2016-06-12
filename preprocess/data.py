@@ -100,3 +100,14 @@ class QAs(object):
 
     def __str__(self):
         return "QApairs"
+
+
+# British National Corpus
+class BNCembedding(object):
+    def __init__(self):
+        self.file = './data/embedding.txt'
+
+    def __iter__(self):
+        for line in open(self.file, 'r'):
+            w, *emb = line.strip().split()
+            yield w, emb
