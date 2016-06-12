@@ -1,5 +1,6 @@
 # convert all sentences to their representations but keep data in other columns
 
+from collections import defaultdict
 import pickle as pkl
 
 
@@ -73,21 +74,30 @@ class WordEmbedding(object):
         with open(embedding_dict_file, 'rb') as f:
             self.embedding_dict = pkl.load(f)
 
+        self.max_length = defaultdict(int)
+        for d in self.data:
+            for i in self.data.sent_indx:
+                tmp = len(d[i])
+                if tmp > self.max_length[i]:
+                    self.max_length[i] = tmp
+
     def __iter__(self):
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
                 if i in self.data.sent_indx:
-                    new_d[i] = []
-                    for w in d[i]:
+                    new_d[i] = [[0] * 300] * self.max_length[i]
+                    for j, w in enumerate(d[i]):
                         # for each token, find its embedding
                         try:
-                            new_d[i].append(self.embedding_dict[w])
+                            new_d[i][j] = self.embedding_dict[w]
                         except TypeError:
-                            new_d[i].append([0] * 300)
+                            continue
 
                 else:
                     new_d[i] = d[i]
+
+            yield new_d
 
     def __len__(self):
         return len(self.data)

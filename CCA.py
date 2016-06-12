@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cosine
 import logging
 
+
 def xcov(set1, set2):
     num_set1, M = set1.shape
     num_set2, N = set2.shape
@@ -9,7 +10,7 @@ def xcov(set1, set2):
     assert(num_set1 == num_set2)
 
     cov = np.dot(np.transpose(set1), set2)
-    logging.info("get XCOV matrix of shape %s" % cov.shape)
+    logging.info("get XCOV matrix of shape R^%d x %d" % (cov.shape[0], cov.shape[1]))
     return cov
 
 
@@ -53,3 +54,5 @@ class CCA(object):
                 best_indx = i
 
         return best_indx
+
+

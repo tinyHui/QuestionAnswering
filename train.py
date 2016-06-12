@@ -64,6 +64,7 @@ if __name__ == "__main__":
             logging.warning("loading: %d/%d" % (i, length))
         Qs.append(feat[0])
         As.append(feat[1])
+        i += 1
 
     logging.info("running CCA")
     model.train(Qs, As)
