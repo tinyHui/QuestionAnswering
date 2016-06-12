@@ -6,6 +6,7 @@ import os
 import sys
 import numpy as np
 
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
 
 

@@ -5,6 +5,7 @@ import pickle as pkl
 import os
 import sys
 
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 VOC_DICT_FILE = './bin/word_indx_hash.pkl'
 
 

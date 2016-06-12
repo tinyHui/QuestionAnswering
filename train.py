@@ -17,10 +17,12 @@ if __name__ == "__main__":
     feature_opt = ['bow', 'lstm', 'we']
 
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', nargs=1, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
+    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
+    parser.add_argument('--freq', type=int, default=1, help='Information print out frequency')
 
     args = parser.parse_args()
-    feature = args.feature[0]
+    feature = args.feature
+    INF_FREQ = args.freq
 
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
@@ -56,9 +58,10 @@ if __name__ == "__main__":
 
     logging.info("constructing train data")
     length = len(feats)
-    for i, feat in enumerate(feats):
-        if i % INF_FREQ == 0 or i + 1 == length:
-            logging.warning("loading: %d/%d" % (i + 1, length))
+    i = 1
+    for feat in feats:
+        if i % INF_FREQ == 0 or i == length:
+            logging.warning("loading: %d/%d" % (i, length))
         Qs.append(feat[0])
         As.append(feat[1])
 

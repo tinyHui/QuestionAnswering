@@ -77,9 +77,15 @@ class WordEmbedding(object):
         for d in self.data:
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
-                if i in self.data.set_indx:
-                    # for each token, find its embedding
-                    new_d[i] = [self.embedding_dict[w] for w in d[i]]
+                if i in self.data.sent_indx:
+                    new_d[i] = []
+                    for w in d[i]:
+                        # for each token, find its embedding
+                        try:
+                            new_d[i].append(self.embedding_dict[w])
+                        except TypeError:
+                            new_d[i].append([0] * 300)
+
                 else:
                     new_d[i] = d[i]
 
