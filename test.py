@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument('--feature', nargs=1, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
 
     args = parser.parse_args()
-    feature = args.feature
+    feature = args.feature[0]
 
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
