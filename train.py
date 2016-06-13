@@ -72,5 +72,5 @@ if __name__ == "__main__":
     logging.info("dumping model into binary file")
     # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
-        pkl.dump(model, f)
+        pkl.dump(model, f, protocol=4)
 
