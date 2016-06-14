@@ -4,7 +4,7 @@ from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
 from collections import defaultdict
 from CCA import find_answer
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool, Queue
 from functools import partial
 import argparse
 import pickle as pkl
@@ -16,13 +16,13 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 INF_FREQ = 10
 
 
-def projection(t, P, no_indx):
+def projection(t, P, no_indx, q):
     i, v = t
     v_proj = np.dot(v, P)
     if no_indx:
-        return v_proj
+        q.put(v_proj)
     else:
-        return i, v_proj
+        q.put(i, v_proj)
 
 
 if __name__ == '__main__':
@@ -76,15 +76,18 @@ if __name__ == '__main__':
         answer_indx += 1
 
     logging.info("generating project vector using trained CCA model")
+    Qs_proj = Queue()
+    As_proj = Queue()
     with Pool(processes=8) as p:
-        Qs = p.map(partial(projection, P=U, no_indx=False), Qs)
-        As = p.map(partial(projection, P=V.T, no_indx=True), As)
+        p.map(partial(projection, P=U, no_indx=False, q=Qs_proj), Qs)
+        p.map(partial(projection, P=V.T, no_indx=True, q=As_proj), As)
+    del Qs, As
 
     logging.info("testing")
     correct_num = 0
     indx = 1
-    for question_indx, q in Qs:
-        pred = find_answer(q, As)
+    for question_indx, q in iter(Qs_proj.get, None):
+        pred = find_answer(q, iter(As_proj.get, None))
         # if the found answer is one of the potential answer of the question
         if pred in q_a_map[question_indx]:
             # correct
