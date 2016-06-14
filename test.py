@@ -11,7 +11,7 @@ import numpy as np
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-INF_FREQ = 50
+INF_FREQ = 300
 
 
 def projection(t, P, no_indx, q):
@@ -91,8 +91,7 @@ if __name__ == '__main__':
         if pred in q_a_map[question_indx]:
             # correct
             correct_num += 1
-        if question_indx % INF_FREQ == 0 or question_indx == q_num:
-            logging.warning("tested: %d/%d, get %d correct" % (question_indx, q_num, correct_num))
+        logging.warning("tested: %d/%d, get %d correct" % (question_indx, q_num, correct_num))
         indx += 1
 
     # output result
