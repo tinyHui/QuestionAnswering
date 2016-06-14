@@ -91,7 +91,8 @@ if __name__ == '__main__':
         if pred in q_a_map[question_indx]:
             # correct
             correct_num += 1
-        logging.warning("tested: %d/%d, get %d correct" % (indx, q_num, correct_num))
+        if question_indx % INF_FREQ == 0 or question_indx == q_num:
+            logging.warning("tested: %d/%d, get %d correct" % (question_indx, q_num, correct_num))
         indx += 1
 
     # output result
