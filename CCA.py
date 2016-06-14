@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.spatial.distance import cosine
 import logging
+from multiprocessing import Pool
+
 
 def xcov(set1, set2):
     num_set1, M = set1.shape
@@ -13,43 +15,33 @@ def xcov(set1, set2):
     return cov
 
 
-class CCA(object):
-    def __init__(self):
-        self.U = None
-        self.V = None
+def train(Qs, As):
+    '''
+    params q: sentence embedding for question set
+    params a: sentence embedding for answer set
+    '''
+    if isinstance(Qs, list):
+        Qs = np.asarray(Qs, dtype="float64")
+    if isinstance(As, list):
+        As = np.asarray(As, dtype="float64")
 
-    def train(self, Qs, As):
-        '''
-        params q: sentence embedding for question set
-        params a: sentence embedding for answer set
-        '''
-        if isinstance(Qs, list):
-            Qs = np.asarray(Qs, dtype="float64")
-        if isinstance(As, list):
-            As = np.asarray(As, dtype="float64")
+    logging.info("computing cross-covariance matrix")
+    cov = xcov(Qs, As)
+    logging.info("decomposition using SVD")
+    U, s, V = np.linalg.svd(cov, full_matrices=False)
+    return U, V
 
-        logging.info("computing cross-covariance matrix")
-        cov = xcov(Qs, As)
-        logging.info("decomposition using SVD")
-        self.U, s, self.V = np.linalg.svd(cov, full_matrices=False)
 
-    def find_answer(self, v_q, As):
-        assert self.U is not None and \
-               self.V is not None
-        if isinstance(v_q, list):
-            v_q = np.asarray(v_q, dtype="float64")
-        if isinstance(As, list):
-            As = np.asarray(As, dtype="float64")
+def find_answer(v_q, As):
+    pool = Pool(processes=8)
 
-        v_q_proj = np.dot(v_q, self.U)
+    # get distance between the question and answer, return with the answer index
+    def distance(indx_t):
+        indx, t = indx_t
+        dist = cosine(v_q, t)
+        return indx, dist
 
-        best_distance = np.inf
-        best_indx = 0
-        for i, v_a in enumerate(As):
-            v_a_proj = np.dot(v_a, self.V.T)
-            s = cosine(v_q_proj, v_a_proj)
-            if s <= best_distance:
-                best_distance = s
-                best_indx = i
+    result = pool.map(distance, As)
+    best_indx, _ = min(result, key=lambda x: x[1])
 
-        return best_indx
+    return best_indx

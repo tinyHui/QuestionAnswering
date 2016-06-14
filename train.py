@@ -1,13 +1,13 @@
 from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
 from preprocess.feats import FEATURE_OPTS, data2feats
-from CCA import CCA
+from CCA import train
 import argparse
 import pickle as pkl
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-CCA_FILE = "CCA_model_%s.pkl"
+CCA_FILE = "./bin/CCA_model_%s.pkl"
 INF_FREQ = 300
 
 if __name__ == "__main__":
@@ -26,7 +26,6 @@ if __name__ == "__main__":
     feats = None
     Qs = []
     As = []
-    model = CCA()
 
     feats = data2feats(data, feature)
 
@@ -35,16 +34,16 @@ if __name__ == "__main__":
     i = 1
     for feat in feats:
         if i % INF_FREQ == 0 or i == length:
-            logging.warning("loading: %d/%d" % (i, length))
+            logging.info("loading: %d/%d" % (i, length))
         Qs.append(feat[0])
         As.append(feat[1])
         i += 1
 
     logging.info("running CCA")
-    model.train(Qs, As)
+    U, V = train(Qs, As)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
-        pkl.dump(model, f, protocol=4)
+        pkl.dump((U, V), f, protocol=4)
 

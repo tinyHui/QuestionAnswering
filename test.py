@@ -2,10 +2,13 @@ from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
-from CCA import CCA
+from collections import defaultdict
+from CCA import find_answer
 import argparse
 import pickle as pkl
 import logging
+import numpy as np
+
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 INF_FREQ = 300
@@ -29,31 +32,48 @@ if __name__ == '__main__':
 
     feats = data2feats(data, feature)
 
-    logging.info("constructing testing data")
-    length = len(feats)
-    i = 1
-    for feat in feats:
-        if i % INF_FREQ == 0 or i == length:
-            logging.warning("loading: %d/%d" % (i, length))
-        Qs.append(feat[0])
-        As.append(feat[1])
-        i += 1
-
     logging.info("loading CCA model")
     # load CCA model
     with open(CCA_FILE % feature, 'rb') as f:
-        model = pkl.load(f)
-    assert isinstance(model, CCA)
+        U, V = pkl.load(f)
+
+    logging.info("constructing testing data")
+    length = len(feats)
+    question_indx = 1
+    answer_indx = 1
+    prev_q = None
+    crt_q = None
+    q_a_map = defaultdict(list)
+    for feat in feats:
+        if answer_indx % INF_FREQ == 0 or answer_indx == length:
+            logging.info("loading: %d/%d" % (answer_indx, length))
+        # project question use CCA
+        crt_q = np.dot(feat[0], U)
+        # question are sorted by alphabet
+        # no need to add repeat questions
+        if crt_q != prev_q:
+            question_indx += 1
+            Qs.append(crt_q)
+
+        prev_q = crt_q
+        # project answer use CCA
+        crt_a = np.dot(feat[1], V.T)
+        # bind answer with its index
+        As.append((answer_indx, crt_a))
+        # current answer is one of the correct answer
+        q_a_map[question_indx].append(answer_indx)
+
+        answer_indx += 1
 
     logging.info("testing")
     correct_num = 0
-    for i, q in enumerate(Qs):
-        if i % INF_FREQ == 0 or i + 1 == length:
-            logging.warning("tested: %d/%d" % (i + 1, length))
-        pred = model.find_answer(q, As)
-        if pred == i:
+    for answer_indx, q in enumerate(Qs):
+        pred = find_answer(q, As)
+        # if the found answer is one of the potential answer of the question
+        if pred in q_a_map[q]:
             # correct
             correct_num += 1
+        logging.warning("tested: %d/%d, get %d correct" % (answer_indx + 1, length, correct_num))
 
     # output result
     accuracy = float(correct_num) / len(QAs)
