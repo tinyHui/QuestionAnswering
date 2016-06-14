@@ -4,8 +4,6 @@ from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
 from collections import defaultdict
 from CCA import find_answer
-from multiprocessing import Pool, Queue
-from functools import partial
 import argparse
 import pickle as pkl
 import logging
@@ -13,16 +11,16 @@ import numpy as np
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-INF_FREQ = 10
+INF_FREQ = 50
 
 
 def projection(t, P, no_indx, q):
     i, v = t
     v_proj = np.dot(v, P)
     if no_indx:
-        q.put(v_proj)
+        q.append(v_proj)
     else:
-        q.put(i, v_proj)
+        q.append(i, v_proj)
 
 
 if __name__ == '__main__':
@@ -65,39 +63,40 @@ if __name__ == '__main__':
         # no need to add repeat questions
         if crt_q != prev_q:
             question_indx += 1
-            Qs.append((question_indx, crt_q_v))
+            Qs.append(crt_q_v)
 
         # bind answer with its index
-        As.append((answer_indx, crt_a_v))
+        As.append(crt_a_v)
         # current answer is one of the correct answer
         q_a_map[question_indx].append(answer_indx)
 
         prev_q = crt_q
         answer_indx += 1
 
+    q_num = len(Qs)
+    a_num = len(As)
+    logging.info("found %d questions, %d answers" % (q_num, a_num))
+
     logging.info("generating project vector using trained CCA model")
-    Qs_proj = Queue()
-    As_proj = Queue()
-    with Pool(processes=8) as p:
-        p.map(partial(projection, P=U, no_indx=False, q=Qs_proj), Qs)
-        p.map(partial(projection, P=V.T, no_indx=True, q=As_proj), As)
+    Qs_proj = np.tensordot(Qs, U, axes=1)
+    As_proj = np.tensordot(As, V.T, axes=1)
     del Qs, As
 
     logging.info("testing")
     correct_num = 0
     indx = 1
-    for question_indx, q in iter(Qs_proj.get, None):
-        pred = find_answer(q, iter(As_proj.get, None))
+    for question_indx, q in enumerate(Qs_proj):
+        pred = find_answer(q, As_proj)
         # if the found answer is one of the potential answer of the question
         if pred in q_a_map[question_indx]:
             # correct
             correct_num += 1
-        logging.warning("tested: %d/%d, get %d correct" % (indx, length, correct_num))
+        logging.warning("tested: %d/%d, get %d correct" % (indx, q_num, correct_num))
         indx += 1
 
     # output result
-    accuracy = float(correct_num) / len(QAs)
-    print("The model get %d/%d correct, precision: %f" % (correct_num, len(QAs), accuracy))
+    accuracy = float(correct_num) / len(data)
+    print("The model get %d/%d correct, precision: %f" % (correct_num, len(data), accuracy))
 
 
 

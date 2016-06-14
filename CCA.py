@@ -34,7 +34,7 @@ def train(Qs, As):
 
 
 # get distance between the question and answer, return with the answer index
-def distance(v_q, indx_t):
+def distance(indx_t, v_q):
     indx, t = indx_t
     dist = cosine(v_q, t)
     return indx, dist
@@ -42,7 +42,7 @@ def distance(v_q, indx_t):
 
 def find_answer(v_q, As):
     with Pool(processes=8) as pool:
-        result = pool.map(partial(distance, v_q=v_q), As)
+        result = pool.map(partial(distance, v_q=v_q), enumerate(As))
     best_indx, _ = min(result, key=lambda x: x[1])
 
     return best_indx
