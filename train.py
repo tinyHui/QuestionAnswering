@@ -32,9 +32,11 @@ if __name__ == "__main__":
     logging.info("constructing train data")
     length = len(feats)
     i = 1
-    for feat in feats:
+    for t in feats:
         if i % INF_FREQ == 0 or i == length:
             logging.info("loading: %d/%d" % (i, length))
+
+        _, feat = t
         Qs.append(feat[0])
         As.append(feat[1])
         i += 1

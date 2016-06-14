@@ -11,12 +11,12 @@ import numpy as np
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-INF_FREQ = 300
+INF_FREQ = 10
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
-    parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
+    parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
 
     args = parser.parse_args()
     feature = args.feature
@@ -43,23 +43,30 @@ if __name__ == '__main__':
     answer_indx = 1
     prev_q = None
     crt_q = None
+    crt_q_proj = None
+    crt_q_indx = None
     q_a_map = defaultdict(list)
-    for feat in feats:
+    for t in feats:
         if answer_indx % INF_FREQ == 0 or answer_indx == length:
             logging.info("loading: %d/%d" % (answer_indx, length))
-        # project question use CCA
-        crt_q = np.dot(feat[0], U)
+
+        data, feat = t
+        crt_q, _ = data
+
         # question are sorted by alphabet
         # no need to add repeat questions
-        if crt_q != prev_q:
+        if crt_q == prev_q:
             question_indx += 1
-            Qs.append(crt_q)
-
+            Qs.append(crt_q_proj)
+        else:
+            # project question use CCA
+            crt_q_proj = np.dot(feat[0], U)
         prev_q = crt_q
+
         # project answer use CCA
-        crt_a = np.dot(feat[1], V.T)
+        crt_a_proj = np.dot(feat[1], V.T)
         # bind answer with its index
-        As.append((answer_indx, crt_a))
+        As.append((answer_indx, crt_a_proj))
         # current answer is one of the correct answer
         q_a_map[question_indx].append(answer_indx)
 

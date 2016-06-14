@@ -34,7 +34,7 @@ def data2feats(data, feat_select):
         feats = WordEmbedding(data, data.max_length, WORD_EMBEDDING_FILE)
 
     else:
-        raise IndexError("%s is not an available feature" % feature)
+        raise IndexError("%s is not an available feature" % feat_select)
 
     return feats
 
@@ -64,7 +64,7 @@ class BoW(object):
                 else:
                     # use original data
                     new_d[i] = d[i]
-            yield new_d
+            yield d, new_d
 
     def __len__(self):
         return len(self.data)
@@ -92,7 +92,7 @@ class LSTM(object):
                     # TODO: represent sentence use LSTM, d[i] is a sentence
                     new_d[i] = d[i]
 
-            yield new_d
+            yield d, new_d
 
     def __len__(self):
         return len(self.data)
@@ -128,7 +128,7 @@ class WordEmbedding(object):
                 else:
                     new_d[i] = d[i]
 
-            yield new_d
+            yield d, new_d
 
     def __len__(self):
         return len(self.data)
