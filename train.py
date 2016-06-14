@@ -1,11 +1,8 @@
 from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
-from preprocess.feats import BoW, LSTM, WordEmbedding
-from siamese_cosine import LSTM_FILE, train_lstm
-from text2embedding import WORD_EMBEDDING_FILE
+from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import CCA
 import argparse
-import os
 import pickle as pkl
 import logging
 
@@ -14,10 +11,8 @@ CCA_FILE = "CCA_model_%s.pkl"
 INF_FREQ = 300
 
 if __name__ == "__main__":
-    feature_opt = ['bow', 'lstm', 'we']
-
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
+    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
 
     args = parser.parse_args()
@@ -33,28 +28,7 @@ if __name__ == "__main__":
     As = []
     model = CCA()
 
-    if feature == feature_opt[0]:
-        # bag-of-word
-        feats = BoW(data, voc_dict=voc_dict)
-
-    elif feature == feature_opt[1]:
-        # sentence embedding by paraphrased sentences
-        if not os.path.exists(LSTM_FILE):
-            train_lstm(
-                max_epochs=100,
-                test_size=2,
-                saveto=LSTM_FILE,
-                reload_model=True
-            )
-        feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
-
-    elif feature == feature_opt[2]:
-        data.mode = 'str'
-        # word embedding
-        feats = WordEmbedding(data, data.max_length, WORD_EMBEDDING_FILE)
-
-    else:
-        raise IndexError("%s is not an available feature" % feature)
+    feats = data2feats(data, feature)
 
     logging.info("constructing train data")
     length = len(feats)

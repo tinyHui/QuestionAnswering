@@ -1,8 +1,7 @@
-from train import CCA_FILE
 from text2index import VOC_DICT_FILE
 from preprocess.data import QAs
-from siamese_cosine import LSTM_FILE
-from preprocess.feats import BoW, LSTM
+from train import CCA_FILE
+from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import CCA
 import argparse
 import pickle as pkl
@@ -12,10 +11,8 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 INF_FREQ = 300
 
 if __name__ == '__main__':
-    feature_opt = ["bow", "lstm"]
-
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(feature_opt)))
+    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
 
     args = parser.parse_args()
@@ -30,17 +27,7 @@ if __name__ == '__main__':
     Qs = []
     As = []
 
-    if feature == feature_opt[0]:
-        # bag-of-word
-        feats = BoW(data, voc_dict=voc_dict)
-
-    elif feature == feature_opt[1]:
-        data.mode = 'str'
-        # sentence embedding by paraphrased sentences
-        feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
-
-    else:
-        raise IndexError("%s is not an available feature" % feature)
+    feats = data2feats(data, feature)
 
     logging.info("constructing testing data")
     length = len(feats)

@@ -1,7 +1,42 @@
 # convert all sentences to their representations but keep data in other columns
 
-from collections import defaultdict
+from siamese_cosine import LSTM_FILE, train_lstm
+from text2embedding import WORD_EMBEDDING_FILE
+from text2index import VOC_DICT_FILE
 import pickle as pkl
+import os
+
+FEATURE_OPTS = ['bow', 'lstm', 'we']
+
+
+def data2feats(data, feat_select):
+    with open(VOC_DICT_FILE, 'rb') as f:
+        voc_dict = pkl.load(f)
+
+    if feat_select == FEATURE_OPTS[0]:
+        # bag-of-word
+        feats = BoW(data, voc_dict=voc_dict)
+
+    elif feat_select == FEATURE_OPTS[1]:
+        # sentence embedding by paraphrased sentences
+        if not os.path.exists(LSTM_FILE):
+            train_lstm(
+                max_epochs=100,
+                test_size=2,
+                saveto=LSTM_FILE,
+                reload_model=True
+            )
+        feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
+
+    elif feat_select == FEATURE_OPTS[2]:
+        data.mode = 'str'
+        # word embedding
+        feats = WordEmbedding(data, data.max_length, WORD_EMBEDDING_FILE)
+
+    else:
+        raise IndexError("%s is not an available feature" % feature)
+
+    return feats
 
 
 class BoW(object):
