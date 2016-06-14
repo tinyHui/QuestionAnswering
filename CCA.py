@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cosine
 import logging
 from multiprocessing import Pool
+from functools import partial
 
 
 def xcov(set1, set2):
@@ -32,16 +33,16 @@ def train(Qs, As):
     return U, V
 
 
+# get distance between the question and answer, return with the answer index
+def distance(v_q, indx_t):
+    indx, t = indx_t
+    dist = cosine(v_q, t)
+    return indx, dist
+
+
 def find_answer(v_q, As):
-    pool = Pool(processes=8)
-
-    # get distance between the question and answer, return with the answer index
-    def distance(indx_t):
-        indx, t = indx_t
-        dist = cosine(v_q, t)
-        return indx, dist
-
-    result = pool.map(distance, As)
+    with Pool(processes=8) as pool:
+        result = pool.map(partial(distance, v_q=v_q), As)
     best_indx, _ = min(result, key=lambda x: x[1])
 
     return best_indx
