@@ -60,6 +60,9 @@ if __name__ == '__main__':
 
         (crt_q, crt_a), (crt_q_v, crt_a_v) = t
 
+        # current answer is one of the correct answer
+        q_a_map[question_indx].append(answer_indx)
+
         # question are sorted by alphabet
         # no need to add repeat questions
         if crt_q != prev_q:
@@ -68,8 +71,6 @@ if __name__ == '__main__':
 
         # bind answer with its index
         As.append(crt_a_v)
-        # current answer is one of the correct answer
-        q_a_map[question_indx].append(answer_indx)
 
         prev_q = crt_q
         answer_indx += 1
@@ -91,7 +92,7 @@ if __name__ == '__main__':
         if pred in q_a_map[question_indx]:
             # correct
             correct_num += 1
-        if indx % 5 == 0 or indx == length:
+        if question_indx % 5 == 0 or question_indx == length:
             logging.info("tested: %d/%d, get %d correct" % (question_indx + 1, q_num, correct_num))
 
     # output result
