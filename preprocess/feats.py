@@ -144,4 +144,3 @@ class WordEmbedding(object):
 #                 self.freq_dict[w] += 1
 #     with open(FREQ_DICT, "wb") as f:
 #         pkl.dump(self.freq_dict, f)
-

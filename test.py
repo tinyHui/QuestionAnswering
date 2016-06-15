@@ -46,16 +46,17 @@ if __name__ == '__main__':
     feats = data2feats(data, feature)
     length = len(feats)
 
-    question_indx = 1
-    answer_indx = 1
+    question_indx = 0
+    answer_indx = 0
     prev_q = None
     crt_q = None
     q_a_map = defaultdict(list)
     Qs = []
     As = []
     for t in feats:
-        if answer_indx % INF_FREQ == 0 or answer_indx == length:
-            logging.info("loading: %d/%d" % (answer_indx, length))
+        indx = answer_indx + 1
+        if indx % INF_FREQ == 0 or indx == length:
+            logging.info("loading: %d/%d" % (indx, length))
 
         (crt_q, crt_a), (crt_q_v, crt_a_v) = t
 
@@ -84,15 +85,14 @@ if __name__ == '__main__':
 
     logging.info("testing")
     correct_num = 0
-    indx = 1
     for question_indx, q in enumerate(Qs_proj):
         pred = find_answer(q, As_proj)
         # if the found answer is one of the potential answer of the question
         if pred in q_a_map[question_indx]:
             # correct
             correct_num += 1
-        logging.warning("tested: %d/%d, get %d correct" % (question_indx, q_num, correct_num))
-        indx += 1
+        if indx % 5 == 0 or indx == length:
+            logging.info("tested: %d/%d, get %d correct" % (question_indx + 1, q_num, correct_num))
 
     # output result
     accuracy = float(correct_num) / len(data)
