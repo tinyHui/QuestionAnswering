@@ -46,7 +46,7 @@ if __name__ == '__main__':
     feats = data2feats(data, feature)
     length = len(feats)
 
-    question_indx = 0
+    question_indx = -1      # question indx will alway add one in the beginning
     answer_indx = 0
     prev_q = None
     crt_q = None
@@ -60,14 +60,14 @@ if __name__ == '__main__':
 
         (crt_q, crt_a), (crt_q_v, crt_a_v) = t
 
-        # current answer is one of the correct answer
-        q_a_map[question_indx].append(answer_indx)
-
         # question are sorted by alphabet
         # no need to add repeat questions
         if crt_q != prev_q:
             question_indx += 1
             Qs.append(crt_q_v)
+
+        # current answer is one of the correct answer
+        q_a_map[question_indx].append(answer_indx)
 
         # bind answer with its index
         As.append(crt_a_v)
