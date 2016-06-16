@@ -50,7 +50,7 @@ if __name__ == '__main__':
     answer_indx = 0
     prev_q = None
     crt_q = None
-    q_a_map = defaultdict(list)
+    q_a_map = defaultdict(int)
     Qs = []
     As = []
     for t in feats:
@@ -58,16 +58,15 @@ if __name__ == '__main__':
         if indx % INF_FREQ == 0 or indx == length:
             logging.info("loading: %d/%d" % (indx, length))
 
-        (crt_q, crt_a), (crt_q_v, crt_a_v) = t
+        (crt_q, crt_a, label), (crt_q_v, crt_a_v) = t
 
         # question are sorted by alphabet
         # no need to add repeat questions
-        if crt_q != prev_q:
+        if label == 1:
             question_indx += 1
             Qs.append(crt_q_v)
-
-        # current answer is one of the correct answer
-        q_a_map[question_indx].append(answer_indx)
+            # current answer is the correct answer
+            q_a_map[question_indx] = answer_indx
 
         # bind answer with its index
         As.append(crt_a_v)
@@ -89,15 +88,15 @@ if __name__ == '__main__':
     for question_indx, q in enumerate(Qs_proj):
         pred = find_answer(q, As_proj)
         # if the found answer is one of the potential answer of the question
-        if pred in q_a_map[question_indx]:
+        if pred == q_a_map[question_indx]:
             # correct
             correct_num += 1
         if question_indx % 5 == 0 or question_indx == length:
             logging.info("tested: %d/%d, get %d correct" % (question_indx + 1, q_num, correct_num))
 
     # output result
-    accuracy = float(correct_num) / len(data)
-    print("The model get %d/%d correct, precision: %f" % (correct_num, len(data), accuracy))
+    accuracy = float(correct_num) / q_num
+    print("The model get %d/%d correct, precision: %f" % (correct_num, q_num, accuracy))
 
 
 

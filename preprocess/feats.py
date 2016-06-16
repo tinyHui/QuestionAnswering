@@ -3,6 +3,7 @@
 from siamese_cosine import LSTM_FILE, train_lstm
 from text2embedding import WORD_EMBEDDING_FILE
 from text2index import VOC_DICT_FILE
+import numpy as np
 import pickle as pkl
 import os
 
@@ -117,13 +118,15 @@ class WordEmbedding(object):
             new_d = [None] * self.data.param_num
             for i in range(self.data.param_num):
                 if i in self.data.sent_indx:
-                    new_d[i] = [0] * 300 * self.max_length[i]
-                    for j, w in enumerate(d[i]):
+                    new_d[i] = np.zeros(300, dtype='float64')
+                    for w in d[i]:
                         # for each token, find its embedding
                         try:
-                            new_d[i][j*300:(j+1)*300] = self.embedding_dict[w]
+                            new_d[i] += np.asarray(self.embedding_dict[w])
                         except TypeError:
                             continue
+                    # calculate the average of sum of embedding of all words
+                    new_d[i] /= len(d[i])
 
                 else:
                     new_d[i] = d[i]

@@ -81,13 +81,15 @@ class QAs(object):
             q_tokens.append("]")
             a_tokens.insert(0, "[")
             a_tokens.append("]")
+            # convert label as integer, right answer, wrong answer
+            label = int(label)
 
             if self.mode == 'str':
-                yield (q_tokens, a_tokens)
+                yield (q_tokens, a_tokens, label)
             elif self.mode == 'index':
                 # index each word using hash dictionary
                 q_tokens_indx, a_tokens_indx = [[self.voc_dict[w] for w in s] for s in [q_tokens, a_tokens]]
-                yield (q_tokens_indx, a_tokens_indx)
+                yield (q_tokens_indx, a_tokens_indx, label)
             else:
                 raise AttributeError("Mode can be only 'str' or 'index'")
 

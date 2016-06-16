@@ -6,8 +6,8 @@ from functools import partial
 
 
 def xcov(set1, set2):
-    num_set1, M = set1.shape
-    num_set2, N = set2.shape
+    num_set1, *M = set1.shape
+    num_set2, *N = set2.shape
     # one-to-one paired
     assert(num_set1 == num_set2)
 
