@@ -50,7 +50,8 @@ if __name__ == '__main__':
     answer_indx = 0
     prev_q = None
     crt_q = None
-    q_a_map = defaultdict(int)
+    q_a_map_list = defaultdict(list)      # all potential answers related to the question
+    q_a_map_crt = defaultdict(int)        # the correct answer for this question
     Qs = []
     As = []
     for t in feats:
@@ -66,8 +67,9 @@ if __name__ == '__main__':
             question_indx += 1
             Qs.append(crt_q_v)
             # current answer is the correct answer
-            q_a_map[question_indx] = answer_indx
+            q_a_map_crt[question_indx] = answer_indx
 
+        q_a_map_list[question_indx].append(answer_indx)
         # bind answer with its index
         As.append(crt_a_v)
 
@@ -86,9 +88,11 @@ if __name__ == '__main__':
     logging.info("testing")
     correct_num = 0
     for question_indx, q in enumerate(Qs_proj):
-        pred = find_answer(q, As_proj)
+        answer_indx_list = q_a_map_list[question_indx]
+        # answer index is stored in accent order
+        pred = find_answer(q, As_proj[answer_indx_list[0]:answer_indx_list[-1]])
         # if the found answer is one of the potential answer of the question
-        if pred == q_a_map[question_indx]:
+        if pred == q_a_map_crt[question_indx]:
             # correct
             correct_num += 1
         if question_indx % 5 == 0 or question_indx == length:

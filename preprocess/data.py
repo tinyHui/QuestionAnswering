@@ -1,5 +1,19 @@
 import re
-import logging
+
+
+def raw2token(raw):
+    s = raw.lower()
+    DATE = r'([0]?[1-9]|[1][0-2])[./-]([0]?[1-9]|[1|2][0-9]|[3][0|1])[./-]([0-9]{4}|[0-9]{2})'
+    TIME = r'[0-2]?[1-9]:[0-5][0-9] ?(am|pm)?'
+    NUMBER = r'[-+]?\d*\.?\d*'
+    EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
+            r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
+    # replace all matched phrase to TOKEN name
+    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
+    for p, t in RE_SET:
+        s = re.sub(p, t, s)
+    # to lower case then to token
+    return s.split()
 
 
 # paraphrased sentences
@@ -14,7 +28,7 @@ class PPDB(object):
         if mode == 'index':
             assert voc_dict is not None, "must take vocabulary-index dictionary."
         self.mode = mode
-        # column number for each iteration
+        # column number for each iteration6
         self.param_num = 3
         # index of return data contains sentence
         self.sent_indx = (0, 1)
@@ -22,10 +36,7 @@ class PPDB(object):
     def __iter__(self):
         for line in open(self.file, 'r'):
             q1, q2 = line.strip().split('\t')
-            # replace all numbers to "1"
-            # to lower case
-            # q1_tokens, q2_tokens = [s.lower().split(' ') for s in [q1, q2]]
-            q1_tokens, q2_tokens = [re.sub('\d+(\.\d+)?', '1', s.lower()).split(' ') for s in [q1, q2]]
+            q1_tokens, q2_tokens = [raw2token(s) for s in [q1, q2]]
             # insert sentence start/end symbols
             q1_tokens.insert(0, "[")
             q1_tokens.append("]")
@@ -57,7 +68,7 @@ class PPDB(object):
 # question answer pairs
 class QAs(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
-        if usage in ['train', 'test', 'dev']:
+        if usage in ['train', 'test']:
             self.file = './data/WikiQA-%s.txt' % usage
             self.usage = usage
         else:
@@ -75,7 +86,7 @@ class QAs(object):
     def __iter__(self):
         for line in open(self.file, 'r'):
             q, a, label = line.strip().split('\t')
-            q_tokens, a_tokens = [re.sub('\d+(\.\d+)?', '1', s.lower()).split(' ') for s in [q, a]]
+            q_tokens, a_tokens = [raw2token(s) for s in [q, a]]
             # insert sentence start/end symbols
             q_tokens.insert(0, "[")
             q_tokens.append("]")
@@ -95,11 +106,9 @@ class QAs(object):
 
     def __len__(self):
         if self.usage == 'train':
-            return 20360
+            return 1180
         elif self.usage == 'test':
             return 6165
-        elif self.usage == 'dev':
-            return 2733
 
     def __str__(self):
         return "QApairs"
