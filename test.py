@@ -94,7 +94,8 @@ if __name__ == '__main__':
             pred = find_answer(q, [As_proj[answer_indx_list[0]]])
         else:
             pred = find_answer(q, As_proj[answer_indx_list[0]:answer_indx_list[-1]])
-
+        # add the offset
+        pred += answer_indx_list[0]
         # if the found answer is one of the potential answer of the question
         if pred == q_a_map_crt[question_indx]:
             # correct
