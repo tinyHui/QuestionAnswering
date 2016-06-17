@@ -87,11 +87,13 @@ if __name__ == '__main__':
 
     logging.info("testing")
     correct_num = 0
+    skipped = 0
     for question_indx, q in enumerate(Qs_proj):
         answer_indx_list = q_a_map_list[question_indx]
         # answer index is stored in accent order
         if len(answer_indx_list) == 1:
             pred = find_answer(q, [As_proj[answer_indx_list[0]]])
+            skipped += 1
         else:
             pred = find_answer(q, As_proj[answer_indx_list[0]:answer_indx_list[-1]])
         # add the offset
@@ -101,7 +103,8 @@ if __name__ == '__main__':
             # correct
             correct_num += 1
         if question_indx % 5 == 0 or question_indx == length:
-            logging.info("tested: %d/%d, get %d correct" % (question_indx + 1, q_num, correct_num))
+            logging.info("tested: %d/%d, get %d correct, %d questions have only one answer"
+                         % (question_indx + 1, q_num, correct_num, skipped))
 
     # output result
     accuracy = float(correct_num) / q_num
