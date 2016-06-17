@@ -91,7 +91,7 @@ if __name__ == '__main__':
         answer_indx_list = q_a_map_list[question_indx]
         # answer index is stored in accent order
         if len(answer_indx_list) == 1:
-            pred = find_answer(q, As_proj[answer_indx_list[0]])
+            pred = find_answer(q, [As_proj[answer_indx_list[0]]])
         else:
             pred = find_answer(q, As_proj[answer_indx_list[0]:answer_indx_list[-1]])
 
