@@ -103,11 +103,12 @@ if __name__ == '__main__':
             # correct
             correct_num += 1
         if question_indx % 5 == 0 or question_indx == length:
-            logging.info("tested: %d/%d, get %d correct, %d questions have only one answer"
-                         % (question_indx + 1, q_num, correct_num, skipped))
+            logging.info("tested: %d/%d, get %d correct"
+                         % (question_indx + 1, q_num, correct_num))
 
     # output result
     accuracy = float(correct_num) / q_num
+    print("%d questions have only one answer" % skipped)
     print("The model get %d/%d correct, precision: %f" % (correct_num, q_num, accuracy))
 
 
