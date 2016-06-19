@@ -5,11 +5,12 @@ def raw2token(raw):
     s = raw.lower()
     DATE = r'([0]?[1-9]|[1][0-2])[./-]([0]?[1-9]|[1|2][0-9]|[3][0|1])[./-]([0-9]{4}|[0-9]{2})'
     TIME = r'[0-2]?[1-9]:[0-5][0-9] ?(am|pm)?'
-    NUMBER = r'[-+]?\d*\.?\d*'
+    MONEY = r'\$ ?\d+(\,\d+)?\.?\d+'
+    NUMBER = r'[-+]?\d+(\,\d+)?\.?\d+'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
+    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     # to lower case then to token
