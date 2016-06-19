@@ -102,7 +102,7 @@ if __name__ == '__main__':
         if pred == q_a_map_crt[question_indx]:
             # correct
             correct_num += 1
-        if question_indx % 5 == 0 or question_indx == length:
+        if question_indx % 5 == 0 or question_indx == q_num:
             logging.info("tested: %d/%d, get %d correct"
                          % (question_indx + 1, q_num, correct_num))
 
