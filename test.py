@@ -91,12 +91,15 @@ if __name__ == '__main__':
     correct_num = 0
     one_candidate = 0
     no_correct = 0
+    more_correct = 0
     for question_indx, q in enumerate(proj_Qs):
         # answer index is stored in accent order
         answer_indx_list = q_a_map_list[question_indx]
         if len(q_a_map_correct[question_indx]) == 0:
             no_correct += 1
             continue
+        if len(q_a_map_correct[question_indx]) > 1:
+            more_correct += 1
         # only have one candidate answer
         elif len(answer_indx_list) == 1:
             pred = find_answer(q, [proj_As[answer_indx_list[0]]])
@@ -118,5 +121,6 @@ if __name__ == '__main__':
     accuracy_fix = float(correct_num - one_candidate) / (q_num - one_candidate - no_correct)
     print("%d questions have only one answer" % one_candidate)
     print("%d questions don't have correct answer" % no_correct)
+    print("%d questions have more than one correct answer" % more_correct)
     print("The model get %d/%d correct, precision: %f, fixed precision: %f"
           % (correct_num, q_num, accuracy, accuracy_fix))
