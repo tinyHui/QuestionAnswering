@@ -8,7 +8,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 CCA_FILE = "./bin/CCA_model_%s.pkl"
-INF_FREQ = 300
+INF_FREQ = 300  # information message frequency
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         i += 1
 
     logging.info("running CCA")
-    U, V = train(Qs, As)
+    Q_k, A_k = train(Qs, As)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
-        pkl.dump((U, V), f, protocol=4)
+        pkl.dump((Q_k, A_k), f, protocol=4)
 

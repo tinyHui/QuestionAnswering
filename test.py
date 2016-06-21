@@ -39,7 +39,7 @@ if __name__ == '__main__':
     logging.info("loading CCA model")
     # load CCA model
     with open(CCA_FILE % feature, 'rb') as f:
-        U, V = pkl.load(f)
+        Q_k, A_k = pkl.load(f)
 
     logging.info("constructing testing data")
     data = QAs(usage='test', mode='index', voc_dict=voc_dict)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     prev_q = None
     crt_q = None
     q_a_map_list = defaultdict(list)      # all potential answers related to the question
-    q_a_map_crt = defaultdict(int)        # the correct answer for this question
+    q_a_map_correct = defaultdict(int)        # the correct answer for this question
     Qs = []
     As = []
     for t in feats:
@@ -63,11 +63,15 @@ if __name__ == '__main__':
 
         # question are sorted by alphabet
         # no need to add repeat questions
-        if label == 1:
+        if prev_q != crt_q:
             question_indx += 1
             Qs.append(crt_q_v)
+            # initial with a negative index
+            q_a_map_correct[question_indx] = -1
+
+        if label == 1:
             # current answer is the correct answer
-            q_a_map_crt[question_indx] = answer_indx
+            q_a_map_correct[question_indx] = answer_indx
 
         q_a_map_list[question_indx].append(answer_indx)
         # bind answer with its index
@@ -81,25 +85,30 @@ if __name__ == '__main__':
     logging.info("found %d questions, %d answers" % (q_num, a_num))
 
     logging.info("generating project vector using trained CCA model")
-    Qs_proj = np.tensordot(Qs, U, axes=1)
-    As_proj = np.tensordot(As, V.T, axes=1)
+    proj_Qs = np.tensordot(Qs, Q_k, axes=1)
+    proj_As = np.tensordot(As, A_k, axes=1)
     del Qs, As
 
     logging.info("testing")
     correct_num = 0
-    skipped = 0
-    for question_indx, q in enumerate(Qs_proj):
-        answer_indx_list = q_a_map_list[question_indx]
+    one_candidate = 0
+    no_correct = 0
+    for question_indx, q in enumerate(proj_Qs):
         # answer index is stored in accent order
-        if len(answer_indx_list) == 1:
-            pred = find_answer(q, [As_proj[answer_indx_list[0]]])
-            skipped += 1
+        answer_indx_list = q_a_map_list[question_indx]
+        if q_a_map_correct[question_indx] == -1:
+            no_correct += 1
+            continue
+        # only have one candidate answer
+        elif len(answer_indx_list) == 1:
+            pred = find_answer(q, [proj_As[answer_indx_list[0]]])
+            one_candidate += 1
         else:
-            pred = find_answer(q, As_proj[answer_indx_list[0]:answer_indx_list[-1]])
+            pred = find_answer(q, proj_As[answer_indx_list[0]:answer_indx_list[-1]])
         # add the offset
         pred += answer_indx_list[0]
         # if the found answer is one of the potential answer of the question
-        if pred == q_a_map_crt[question_indx]:
+        if pred == q_a_map_correct[question_indx]:
             # correct
             correct_num += 1
         if question_indx % 5 == 0 or question_indx == q_num:
@@ -108,8 +117,8 @@ if __name__ == '__main__':
 
     # output result
     accuracy = float(correct_num) / q_num
-    print("%d questions have only one answer" % skipped)
-    print("The model get %d/%d correct, precision: %f" % (correct_num, q_num, accuracy))
-
-
-
+    accuracy_fix = float(correct_num - one_candidate) / (q_num - one_candidate - no_correct)
+    print("%d questions have only one answer" % one_candidate)
+    print("%d questions don't have correct answer" % no_correct)
+    print("The model get %d/%d correct, precision: %f, fixed precision: %f"
+          % (correct_num, q_num, accuracy, accuracy_fix))
