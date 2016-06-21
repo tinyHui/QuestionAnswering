@@ -66,8 +66,6 @@ if __name__ == '__main__':
         if prev_q != crt_q:
             question_indx += 1
             Qs.append(crt_q_v)
-            # initial with a negative index
-            q_a_map_correct[question_indx] = -1
 
         if label == 1:
             # current answer is the correct answer
@@ -96,7 +94,7 @@ if __name__ == '__main__':
     for question_indx, q in enumerate(proj_Qs):
         # answer index is stored in accent order
         answer_indx_list = q_a_map_list[question_indx]
-        if q_a_map_correct[question_indx] == -1:
+        if len(q_a_map_correct[question_indx]) == 0:
             no_correct += 1
             continue
         # only have one candidate answer
