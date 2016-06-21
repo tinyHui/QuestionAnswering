@@ -46,12 +46,12 @@ if __name__ == '__main__':
     feats = data2feats(data, feature)
     length = len(feats)
 
-    question_indx = -1      # question indx will alway add one in the beginning
+    question_indx = -1      # question index will always add one in the beginning
     answer_indx = 0
     prev_q = None
     crt_q = None
     q_a_map_list = defaultdict(list)      # all potential answers related to the question
-    q_a_map_correct = defaultdict(int)        # the correct answer for this question
+    q_a_map_correct = defaultdict(list)        # the correct answer for this question
     Qs = []
     As = []
     for t in feats:
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
         if label == 1:
             # current answer is the correct answer
-            q_a_map_correct[question_indx] = answer_indx
+            q_a_map_correct[question_indx].append(answer_indx)
 
         q_a_map_list[question_indx].append(answer_indx)
         # bind answer with its index
@@ -108,10 +108,10 @@ if __name__ == '__main__':
         # add the offset
         pred += answer_indx_list[0]
         # if the found answer is one of the potential answer of the question
-        if pred == q_a_map_correct[question_indx]:
+        if pred in q_a_map_correct[question_indx]:
             # correct
             correct_num += 1
-        if question_indx % 5 == 0 or question_indx == q_num:
+        if question_indx % 5 == 0 or question_indx + 1 == q_num:
             logging.info("tested: %d/%d, get %d correct"
                          % (question_indx + 1, q_num, correct_num))
 
