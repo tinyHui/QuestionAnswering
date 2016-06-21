@@ -19,6 +19,7 @@ if __name__ == "__main__":
     feature = args.feature
     INF_FREQ = args.freq
 
+    logging.info("loading vocabulary index")
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 

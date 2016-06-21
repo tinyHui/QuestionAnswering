@@ -26,6 +26,7 @@ def train(Qs, As, full_svd=True, k=0):
     c_aa_sqrt = np.diag(np.diag(c_aa_sqrt))
     # get result
     result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
+    logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
     if full_svd:
         U, s, V = np.linalg.svd(result, full_matrices=False)
     else:
