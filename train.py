@@ -14,10 +14,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
+    parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
 
     args = parser.parse_args()
     feature = args.feature
     INF_FREQ = args.freq
+    k = args.svds
+    full_svd = k == -1
 
     logging.info("loading vocabulary index")
     with open(VOC_DICT_FILE, 'rb') as f:
@@ -43,7 +46,7 @@ if __name__ == "__main__":
         i += 1
 
     logging.info("running CCA")
-    Q_k, A_k = train(Qs, As)
+    Q_k, A_k = train(Qs, As, full_svd=full_svd, k=k)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
