@@ -46,6 +46,8 @@ if __name__ == "__main__":
         i += 1
 
     logging.info("running CCA")
+    if not full_svd:
+        logging.info("using svds, k=%d" % k)
     Q_k, A_k = train(Qs, As, full_svd=full_svd, k=k)
 
     logging.info("dumping model into binary file")
