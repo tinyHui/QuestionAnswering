@@ -123,7 +123,7 @@ class WikiQA(object):
 class ReVerb(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
         if usage == 'train':
-            self.file = './data/reverb_clueweb_tuples-1.1.txt.gz'
+            self.file = './data/reverb-tuples'
         elif usage == 'text':
             # TODO: define file
             self.file = ''
@@ -177,7 +177,7 @@ class ReVerb(object):
                 a_tokens = a.split()
 
                 if self.mode == 'str':
-                    yield (q_tokens, a)
+                    yield (q_tokens, a_tokens)
                 elif self.mode == 'index':
                     # index each word using hash dictionary
                     q_tokens_indx, a_tokens_indx = [[word2index(w, self.voc_dict) for w in s]
