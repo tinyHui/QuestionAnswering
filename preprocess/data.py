@@ -88,7 +88,7 @@ class WikiQA(object):
         self.sent_indx = (0, 1)
 
     def __iter__(self):
-        for line in gzip.open(self.file, 'rt', encoding='utf-8'):
+        for line in open(self.file, 'r'):
             q, a, label = line.strip().split('\t')
             q_tokens, a_tokens = [process_raw(s).split() for s in [q, a]]
             # insert sentence start/end symbols
@@ -149,7 +149,7 @@ class ReVerb(object):
                                      ('where was {e1} {r} ?', '{r} ( {e1}, {e2} )')]
 
     def __iter__(self):
-        for line in self.contents:
+        for line in gzip.open(self.file, 'rt', encoding='utf-8'):
             _, _, _, _, e1, r, e2, _, _ = line.strip().split('\t')
             if r.endswith('in') or r.endswith('on'):
                 pattern_list = self.special_pattern_list
