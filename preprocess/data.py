@@ -1,5 +1,5 @@
 import re
-import gzip
+import codecs
 
 
 def process_raw(raw):
@@ -8,11 +8,12 @@ def process_raw(raw):
     DATE = r'([0]?[1-9]|[1][0-2])[./-]([0]?[1-9]|[1|2][0-9]|[3][0|1])[./-]([0-9]{4}|[0-9]{2})'
     TIME = r'[0-2]?[1-9]:[0-5][0-9][ \-]?(am|pm)?'
     MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
-    NUMBER = r'[-+]?\d+(\,\d+)?\.?\d+'
+    PRESENT = r'[-+]?\d+(\,\d+)?(\.\d+)?[ \-]?\%'
+    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
+    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (PRESENT, 'PRESENT'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     return s
@@ -121,11 +122,14 @@ class WikiQA(object):
 # question answer pairs generate from ReVerb corpus
 class ReVerb(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
-        if usage in ['train', 'test']:
+        if usage == 'train':
             self.file = './data/reverb_clueweb_tuples-1.1.txt.gz'
-            self.usage = usage
+        elif usage == 'text':
+            # TODO: define file
+            self.file = ''
         else:
             raise SystemError("usage can be only train/test")
+        self.usage = usage
         self.voc_dict = voc_dict
         if mode == 'index':
             assert voc_dict is not None, "must take vocabulary-index dictionary."
@@ -149,24 +153,28 @@ class ReVerb(object):
                                      ('where was {e1} {r} ?', '{r} ( {e1}, {e2} )')]
 
     def __iter__(self):
-        for line in gzip.open(self.file, 'rt', encoding='utf-8'):
-            _, _, _, _, e1, r, e2, _, _ = line.strip().split('\t')
-            if r.endswith('in') or r.endswith('on'):
+        for line in codecs.open(self.file, 'r', 'utf-8'):
+            r, e1, e2 = line.strip().split('\t')
+            r = r.replace('.r', '')
+            e1 = e1.replace('.e', '')
+            e2 = e2.replace('.e', '')
+
+            # find the suitable pattern
+            if r.endswith('-in') or r.endswith('-on'):
                 pattern_list = self.special_pattern_list
             else:
                 pattern_list = self.normal_pattern_list
 
-            e1, r, e2 = [process_raw(w) for w in [e1, r, e2]]
+            # preprocess & replace '-' with space
+            r, e1, e2 = [process_raw(w).replace('-', ' ') for w in [r, e1, e2]]
 
+            # generate the question
             for s, p in pattern_list:
-                q = s.format(e1=e1, r=r, e2=e2)
-                a = p.format(e1=e1, r=r, e2=e2)
+                q = s.format(r=r, e1=e1, e2=e2)
+                a = p.format(r=r, e1=e1, e2=e2)
 
                 q_tokens = q.split()
                 a_tokens = a.split()
-                # insert sentence start/end symbols
-                q_tokens.insert(0, "[")
-                q_tokens.append("]")
 
                 if self.mode == 'str':
                     yield (q_tokens, a)
@@ -180,9 +188,9 @@ class ReVerb(object):
 
     def __len__(self):
         if self.usage == 'train':
-            return 3189450 * 16
+            return 14377737 * 16
         elif self.usage == 'test':
-            return 3189450 * 16
+            return 0
 
     def __str__(self):
         return "ReVerb"
