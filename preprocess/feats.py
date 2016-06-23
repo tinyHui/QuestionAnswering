@@ -54,18 +54,19 @@ class BoW(object):
     def __iter__(self):
         voc_num = len(self.voc_dict.keys())
         for d in self.data:
-            new_d = [None] * self.data.param_num
-            for i in range(self.data.param_num):
+            param_num = len(d)
+            feat = [None] * param_num
+            for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    new_d[i] = [0] * voc_num
+                    feat[i] = [0] * voc_num
                     for w in d[i]:
                         # one hot
-                        new_d[i][w] += 1
+                        feat[i][w] += 1
                 else:
                     # use original data
-                    new_d[i] = d[i]
-            yield d, new_d
+                    feat[i] = d[i]
+            yield d, feat
 
     def __len__(self):
         return len(self.data)
@@ -87,13 +88,16 @@ class LSTM(object):
 
     def __iter__(self):
         for d in self.data:
-            new_d = [None] * self.data.param_num
-            for i in range(self.data.param_num):
+            param_num = len(d)
+            feat = [None] * param_num
+            for i in range(param_num):
                 if i in self.data.sent_indx:
                     # TODO: represent sentence use LSTM, d[i] is a sentence
-                    new_d[i] = d[i]
-
-            yield d, new_d
+                    feat[i] = d[i]
+                else:
+                    # use original data
+                    feat[i] = d[i]
+            yield d, feat
 
     def __len__(self):
         return len(self.data)
@@ -115,26 +119,28 @@ class WordEmbedding(object):
 
     def __iter__(self):
         for d in self.data:
-            new_d = [None] * self.data.param_num
-            for i in range(self.data.param_num):
+            param_num = len(d)
+            feat = [None] * param_num
+            for i in range(param_num):
                 if i in self.data.sent_indx:
-                    new_d[i] = np.zeros(300, dtype='float64')
+                    feat[i] = np.zeros(300, dtype='float64')
                     for w in d[i]:
                         # for each token, find its embedding
                         try:
-                            new_d[i] += np.asarray(self.embedding_dict[w])
+                            feat[i] += np.asarray(self.embedding_dict[w])
                         except TypeError:
                             continue
                     # calculate the average of sum of embedding of all words
-                    new_d[i] /= len(d[i])
+                    feat[i] /= len(d[i])
 
                 else:
-                    new_d[i] = d[i]
+                    feat[i] = d[i]
 
-            yield d, new_d
+            yield d, feat
 
     def __len__(self):
         return len(self.data)
+
 
 # self.freq_dict = defaultdict(int)
 # try:

@@ -1,5 +1,5 @@
 from text2index import VOC_DICT_FILE
-from preprocess.data import QAs
+from preprocess.data import WikiQA
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
 from collections import defaultdict
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         Q_k, A_k = pkl.load(f)
 
     logging.info("constructing testing data")
-    data = QAs(usage='test', mode='index', voc_dict=voc_dict)
+    data = WikiQA(usage='test', mode='index', voc_dict=voc_dict)
     feats = data2feats(data, feature)
     length = len(feats)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         if indx % INF_FREQ == 0 or indx == length:
             logging.info("loading: %d/%d" % (indx, length))
 
-        (crt_q, crt_a, label), (crt_q_v, crt_a_v) = t
+        (crt_q, crt_a, label), (crt_q_v, crt_a_v, _) = t
 
         # question are sorted by alphabet
         # no need to add repeat questions

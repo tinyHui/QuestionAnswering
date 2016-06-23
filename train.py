@@ -1,5 +1,5 @@
 from text2index import VOC_DICT_FILE
-from preprocess.data import QAs
+from preprocess.data import WikiQA
 from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import train
 import argparse
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
-    data = QAs(usage='train', mode='index', voc_dict=voc_dict)
+    data = WikiQA(usage='train', mode='index', voc_dict=voc_dict)
     feats = None
     Qs = []
     As = []
