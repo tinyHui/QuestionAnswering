@@ -1,10 +1,17 @@
 import re
 import codecs
+from calendar import month_name, month_abbr
 
 
 def process_raw(raw):
     # to lower case
     s = raw.lower()
+    # replace month name to number
+    MONTH_NAME = zip([name.lower() for name in month_name[1:]], [name.lower() for name in month_abbr[1:]])
+    for i, (name, abbr) in enumerate(MONTH_NAME):
+        s = re.sub('{}|{}'.format(name, abbr), '%02d' % i + 1, s)
+
+    # define replace pattern
     DATE = r'([0]?[1-9]|[1][0-2])[./-]([0]?[1-9]|[1|2][0-9]|[3][0|1])[./-]([0-9]{4}|[0-9]{2})'
     TIME = r'[0-2]?[1-9]:[0-5][0-9][ \-]?(am|pm)?'
     MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
@@ -166,7 +173,7 @@ class ReVerb(object):
                 pattern_list = self.normal_pattern_list
 
             # preprocess & replace '-' with space
-            r, e1, e2 = [process_raw(w).replace('-', ' ') for w in [r, e1, e2]]
+            r, e1, e2 = [process_raw(w.replace('-', ' ')) for w in [r, e1, e2]]
 
             # generate the question
             for s, p in pattern_list:
