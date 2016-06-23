@@ -1,5 +1,6 @@
 import re
 import codecs
+import gzip
 
 
 def process_raw(raw):
@@ -122,7 +123,10 @@ class WikiQA(object):
 class ReVerb(object):
     def __init__(self, usage='train', mode='str', voc_dict=None):
         if usage in ['train', 'test']:
-            self.file = './data/reverb_clueweb_tuples-1.1.txt.gz' % usage
+            self.file = './data/reverb_clueweb_tuples-1.1.txt.gz'
+            zf = gzip.open(self.file, 'rb')
+            reader = codecs.getreader('utf-8')
+            self.contents = reader(zf)
             self.usage = usage
         else:
             raise SystemError("usage can be only train/test")
@@ -149,7 +153,7 @@ class ReVerb(object):
                                      ('where was {e1} {r} ?', '{r} ( {e1}, {e2} )')]
 
     def __iter__(self):
-        for line in codecs.open(self.file, 'r', 'utf-8'):
+        for line in self.contents:
             _, _, _, _, e1, r, e2 = line.strip().split('\t')
             if r.endswith('in') or r.endswith('on'):
                 pattern_list = self.special_pattern_list
