@@ -1,5 +1,5 @@
 from collections import UserList, defaultdict
-from preprocess.data import WikiQA, ReVerb
+from preprocess.data import ReVerbPairs
 import logging
 import pickle as pkl
 import os
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logging.info("Generating source data")
     # data is a group of sentences
     token_list = UserList()
-    src_data = [ReVerb(usage='train', mode='str')]
+    src_data = [ReVerbPairs(usage='train', mode='str')]
     for d in src_data:
         for s in d:
             for i in d.sent_indx:

@@ -1,5 +1,5 @@
 from text2index import VOC_DICT_FILE
-from preprocess.data import WikiQA, ReVerb
+from preprocess.data import WikiQA, ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import train
 import argparse
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
-    data = ReVerb(usage='train', mode='index', voc_dict=voc_dict)
+    data = ReVerbPairs(usage='train', mode='index', voc_dict=voc_dict)
     feats = None
     Qs = []
     As = []
