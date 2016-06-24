@@ -15,12 +15,15 @@ if __name__ == "__main__":
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
+    parser.add_argument('--diag_only', action='store_true', default=False,
+                        help='Use only diagonal value for C_AA and C_BB')
 
     args = parser.parse_args()
     feature = args.feature
     INF_FREQ = args.freq
     k = args.svds
     full_svd = k == -1
+    diag_only = args.diag_only
 
     logging.info("loading vocabulary index")
     with open(VOC_DICT_FILE, 'rb') as f:
@@ -45,10 +48,12 @@ if __name__ == "__main__":
         As.append(feat[1])
         i += 1
 
-    logging.info("running CCA")
     if not full_svd:
-        logging.info("using svds, k=%d" % k)
-    Q_k, A_k = train(Qs, As, full_svd=full_svd, k=k)
+        logging.info("running CCA, using SVDs, k=%d" % k)
+    else:
+        logging.info("running CCA, using full SVD")
+
+    Q_k, A_k = train(Qs, As, diag_only=diag_only, full_svd=full_svd, k=k)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse

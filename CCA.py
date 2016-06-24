@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import sqrtm, inv
 from scipy.sparse.linalg import svds
 from scipy.spatial.distance import cosine
 import logging
@@ -6,7 +7,7 @@ from multiprocessing import Pool
 from functools import partial
 
 
-def train(Qs, As, full_svd=True, k=0):
+def train(Qs, As, diag_only, full_svd=True, k=0):
     '''
     params q: sentence embedding for question set
     params a: sentence embedding for answer set
@@ -17,15 +18,19 @@ def train(Qs, As, full_svd=True, k=0):
         As = np.asarray(As, dtype="float64")
 
     logging.info("computing CCA")
-    sample_num = Qs.shape[0]
-    c_qq_sqrt = np.power(Qs.T.dot(Qs), -0.5) / sample_num
-    c_qa = Qs.T.dot(As) / sample_num
-    c_aa_sqrt = np.power(As.T.dot(As), -0.5) / sample_num
-    # keep only diagonal
-    c_qq_sqrt = np.diag(np.diag(c_qq_sqrt))
-    c_aa_sqrt = np.diag(np.diag(c_aa_sqrt))
+    c_qq = Qs.T.dot(Qs)
+    c_aa = As.T.dot(As)
+    if diag_only:
+        c_qq = np.diag(np.diag(c_qq))
+        c_aa = np.diag(np.diag(c_aa))
+
     # get result
+    sample_num = Qs.shape[0]
+    c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
+    c_qa = Qs.T.dot(As) / sample_num
+    c_aa_sqrt = inv(sqrtm(c_aa)) / sample_num
     result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
+
     logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
     if full_svd:
         U, s, V = np.linalg.svd(result, full_matrices=False)
