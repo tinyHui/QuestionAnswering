@@ -1,7 +1,7 @@
 import re
 import codecs
 from calendar import month_name, month_abbr
-
+import sqlite3
 
 def process_raw(raw):
     # to lower case
@@ -130,7 +130,10 @@ class WikiQA(object):
 # question answer pairs generate from ReVerb corpus
 class ReVerbRaw(object):
     def __init__(self):
-        self.file = './data/reverb-tuples'
+        self.file = './data/reverb-tuples.db'
+        conn = sqlite3.connect(self.file)
+        c = conn.cursor()
+        self.content = c.execute("select * from tuples")
         # define the pattern
         self.normal_pattern_list = [('who {r} {e2} ?', '{r} ( {e2}, {e1} )'),
                                     ('what {r} {e2} ?', '{r} ( {e2}, {e1} )'),
@@ -148,8 +151,7 @@ class ReVerbRaw(object):
                                      ('where was {e1} {r} ?', '{r} ( {e1}, {e2} )')]
 
     def __iter__(self):
-        for line in codecs.open(self.file, 'r', 'utf-8'):
-            r, e1, e2 = line.strip().split('\t')
+        for r, e1, e2 in self.content:
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
