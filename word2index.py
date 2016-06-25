@@ -37,7 +37,7 @@ if __name__ == "__main__":
         token_list = UserList()
         for line in src_data:
             token_list += line[i]
-        word_indx_hash_group[i] = token_list
+        word_indx_hash_group[i] = generate_dictionary(token_list)
 
     logging.info("Saving word index hashing table")
     with open(VOC_DICT_FILE, 'wb') as f:
