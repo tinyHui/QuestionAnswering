@@ -52,7 +52,7 @@ class BoW(object):
         self.voc_dict = voc_dict
 
     def __iter__(self):
-        voc_num = [len(v.keys()) for v in self.voc_dict]
+        voc_num = [len(self.voc_dict[k].keys()) for k in self.voc_dict.keys()]
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num

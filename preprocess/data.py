@@ -2,8 +2,6 @@ import re
 from calendar import month_name, month_abbr
 import sqlite3
 
-UNKNOWN_TOKEN = 'UNKNOWN'
-
 
 def process_raw(raw):
     # to lower case

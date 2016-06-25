@@ -1,5 +1,5 @@
 from collections import UserList, defaultdict
-from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN
+from preprocess.data import ReVerbPairs
 import logging
 import pickle as pkl
 import os
@@ -38,11 +38,11 @@ if __name__ == "__main__":
         for line in src_data:
             token_list += line[i]
         word_indx_hash_group[i] = generate_dictionary(token_list)
+        del token_list[:]
 
     logging.info("Saving word index hashing table")
     with open(VOC_DICT_FILE, 'wb') as f:
         pkl.dump(word_indx_hash_group, f)
 
     logging.info("Free up memory")
-    del token_list
     del word_indx_hash_group
