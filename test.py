@@ -1,4 +1,4 @@
-from text2index import VOC_DICT_FILE
+from word2index import VOC_DICT_FILE
 from preprocess.data import WikiQA
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats

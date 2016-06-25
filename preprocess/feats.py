@@ -1,8 +1,8 @@
 # convert all sentences to their representations but keep data in other columns
 
 from siamese_cosine import LSTM_FILE, train_lstm
-from text2embedding import WORD_EMBEDDING_FILE
-from text2index import VOC_DICT_FILE
+from word2embedding import WORD_EMBEDDING_FILE
+from word2index import VOC_DICT_FILE
 import numpy as np
 import pickle as pkl
 import os
@@ -52,14 +52,20 @@ class BoW(object):
         self.voc_dict = voc_dict
 
     def __iter__(self):
-        voc_num = len(self.voc_dict.keys())
+        voc_num = [len(v.keys()) for v in self.voc_dict]
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    feat[i] = [0] * voc_num
+                    if self.data.usage == 'train':
+                        feat[i] = [0] * voc_num[i]
+                    elif self.data.usage == 'test':
+                        # might have unseen token in test data
+                        feat[i] = [0] * (voc_num[i] + 1)
+                    else:
+                        raise SystemError("Not support data usage except train/test")
                     for w in d[i]:
                         # one hot
                         feat[i][w] += 1

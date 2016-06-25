@@ -1,5 +1,5 @@
-from text2index import VOC_DICT_FILE
-from preprocess.data import WikiQA, ReVerbPairs
+from word2index import VOC_DICT_FILE
+from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import train
 import argparse
