@@ -1,5 +1,5 @@
 from collections import UserList, defaultdict
-from preprocess.data import ReVerbPairs
+from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN
 import logging
 import pickle as pkl
 import os
@@ -17,6 +17,7 @@ if __name__ == "__main__":
     logging.info("Generating source data")
     # data is a group of sentences
     token_list = UserList()
+    token_list.append(UNKNOWN_TOKEN)
     src_data = [ReVerbPairs(usage='train', mode='str')]
     for d in src_data:
         for s in d:

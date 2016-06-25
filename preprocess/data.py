@@ -1,7 +1,9 @@
 import re
-import codecs
 from calendar import month_name, month_abbr
 import sqlite3
+
+UNKNOWN_TOKEN = 'UNKNOWN'
+
 
 def process_raw(raw):
     # to lower case
@@ -31,7 +33,7 @@ def word2index(w, voc_dict):
     try:
         return voc_dict[w]
     except KeyError:
-        return voc_dict['UNKNOWN']
+        return voc_dict[UNKNOWN_TOKEN]
 
 
 # paraphrased sentences

@@ -13,7 +13,7 @@ INF_FREQ = 300  # information message frequency
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
-    parser.add_argument('--freq', type=int, default=300, help='Information print out frequency')
+    parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
     parser.add_argument('--diag_only', action='store_true', default=False,
                         help='Use only diagonal value for C_AA and C_BB')
