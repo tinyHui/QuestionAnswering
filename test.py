@@ -46,12 +46,13 @@ if __name__ == '__main__':
     feats = data2feats(data, feature)
     length = len(feats)
 
-    question_indx = -1      # question index will always add one in the beginning
+    crt_q_indx = -1
     answer_indx = 0
-    prev_q = None
     crt_q = None
+    prev_q = None
     q_a_map_list = defaultdict(list)      # all potential answers related to the question
     q_a_map_correct = defaultdict(list)        # the correct answer for this question
+    q_cluster_map = {}                      # map question index to cluster id
     Qs = UserList()
     As = UserList()
     for t in feats:
@@ -59,19 +60,20 @@ if __name__ == '__main__':
         if indx % INF_FREQ == 0 or indx == length:
             logging.info("loading: %d/%d" % (indx, length))
 
-        (crt_q, crt_a, label), (crt_q_v, crt_a_v, _) = t
+        (crt_q, crt_a, crt_q_cluster_id, label), (crt_q_v, crt_a_v, _, _) = t
 
         # question are sorted by alphabet
         # no need to add repeat questions
         if prev_q != crt_q:
-            question_indx += 1
+            crt_q_indx += 1
             Qs.append(crt_q_v)
+            q_cluster_map[crt_q_indx] = crt_q_cluster_id
 
         if label == 1:
             # current answer is the correct answer
-            q_a_map_correct[question_indx].append(answer_indx)
+            q_a_map_correct[crt_q_cluster_id].append(answer_indx)
 
-        q_a_map_list[question_indx].append(answer_indx)
+        q_a_map_list[crt_q_cluster_id].append(answer_indx)
         # bind answer with its index
         As.append(crt_a_v)
 
@@ -92,30 +94,31 @@ if __name__ == '__main__':
     one_candidate = 0
     no_correct = 0
     more_correct = 0
-    for question_indx, q in enumerate(proj_Qs):
+    for crt_q_indx, q in enumerate(proj_Qs):
+        # get cluster id for this question
+        crt_q_cluster_id = q_cluster_map[crt_q_indx]
         # answer index is stored in accent order
-        answer_indx_list = q_a_map_list[question_indx]
-        if len(q_a_map_correct[question_indx]) == 0:
+        answer_indx_list = q_a_map_list[crt_q_cluster_id]
+        if len(q_a_map_correct[crt_q_cluster_id]) == 0:
             no_correct += 1
             continue
-        if len(q_a_map_correct[question_indx]) > 1:
-            more_correct += 1
-            pred = q_a_map_correct[question_indx]
-        # only have one candidate answer
-        elif len(answer_indx_list) == 1:
-            pred = find_answer(q, [proj_As[answer_indx_list[0]]])
+
+        if len(answer_indx_list) == 1:
+            # only have one candidate answer
+            pred = q_a_map_correct[crt_q_cluster_id][0]
             one_candidate += 1
         else:
+            # more than one candidate answers
             pred = find_answer(q, proj_As[answer_indx_list[0]:answer_indx_list[-1]])
         # add the offset
         pred += answer_indx_list[0]
         # if the found answer is one of the potential answer of the question
-        if pred in q_a_map_correct[question_indx]:
+        if pred in q_a_map_correct[crt_q_cluster_id]:
             # correct
             correct_num += 1
-        if question_indx % 5 == 0 or question_indx + 1 == q_num:
+        if crt_q_indx % 5 == 0 or crt_q_indx + 1 == q_num:
             logging.info("tested: %d/%d, get %d correct"
-                         % (question_indx + 1, q_num, correct_num))
+                         % (crt_q_indx + 1, q_num, correct_num))
 
     # output result
     accuracy = float(correct_num) / q_num

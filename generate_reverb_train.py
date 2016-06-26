@@ -1,11 +1,11 @@
-from preprocess.data import ReVerbRaw
+from preprocess.data import ReVerbTrainRaw
 import codecs
 from sys import stdout
 
 FILE = './data/reverb-train.txt'
 
 if __name__ == '__main__':
-    data = ReVerbRaw()
+    data = ReVerbTrainRaw()
     i = 0
     with codecs.open(FILE, 'a', 'utf-8') as f:
         for q, a in data:
