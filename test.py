@@ -1,5 +1,5 @@
 from word2index import VOC_DICT_FILE
-from preprocess.data import WikiQA
+from preprocess.data import ReVerbPairs
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
 from collections import defaultdict
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         Q_k, A_k = pkl.load(f)
 
     logging.info("constructing testing data")
-    data = WikiQA(usage='test', mode='index', voc_dict=voc_dict)
+    data = ReVerbPairs(usage='test', mode='index', voc_dict=voc_dict)
     feats = data2feats(data, feature)
     length = len(feats)
 

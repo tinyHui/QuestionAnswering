@@ -1,5 +1,6 @@
 # convert all sentences to their representations but keep data in other columns
 
+from preprocess.data import UNKNOWN_TOKEN
 from siamese_cosine import LSTM_FILE, train_lstm
 from word2embedding import WORD_EMBEDDING_FILE
 from word2index import VOC_DICT_FILE
@@ -58,15 +59,12 @@ class BoW(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    if self.data.usage == 'train':
-                        feat[i] = [0] * voc_num[i]
-                    elif self.data.usage == 'test':
-                        # might have unseen token in test data
-                        feat[i] = [0] * (voc_num[i] + 1)
-                    else:
-                        raise SystemError("Not support data usage except train/test")
+                    feat[i] = [0] * voc_num[i]
                     for w in d[i]:
-                        # one hot
+                        if w == UNKNOWN_TOKEN:
+                            # deal with unseen token, pass
+                            continue
+                            # one hot
                         feat[i][w] += 1
                 else:
                     # use original data

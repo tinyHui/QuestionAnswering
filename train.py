@@ -1,6 +1,7 @@
 from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
+from collections import UserList
 from CCA import train
 import argparse
 import pickle as pkl
@@ -31,8 +32,8 @@ if __name__ == "__main__":
 
     data = ReVerbPairs(usage='train', mode='index', voc_dict=voc_dict)
     feats = None
-    Qs = []
-    As = []
+    Qs = UserList()
+    As = UserList()
 
     feats = data2feats(data, feature)
 

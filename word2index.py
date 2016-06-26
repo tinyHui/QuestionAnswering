@@ -1,4 +1,4 @@
-from collections import UserList, defaultdict
+from collections import UserList, UserDict
 from preprocess.data import ReVerbPairs
 import logging
 import pickle as pkl
@@ -15,7 +15,7 @@ def generate_dictionary(token_list):
     unique_token_list = set(token_list)
     logging.info("Found %d tokens" % len(unique_token_list))
 
-    word_indx_hash = defaultdict(int)
+    word_indx_hash = UserDict()
     for i, token in enumerate(unique_token_list):
         word_indx_hash[token] = i
 

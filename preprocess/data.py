@@ -2,6 +2,7 @@ import re
 from calendar import month_name, month_abbr
 import sqlite3
 
+UNKNOWN_TOKEN = -1
 
 def process_raw(raw):
     # to lower case
@@ -31,7 +32,8 @@ def word2index(w, voc_dict):
     try:
         return voc_dict[w]
     except KeyError:
-        return len(voc_dict.keys())
+        # unseen token
+        return UNKNOWN_TOKEN
 
 
 # paraphrased sentences
@@ -198,6 +200,7 @@ class ReVerbPairs(object):
                 q_tokens, a_tokens = [s.split() for s in [q, a]]
             else:
                 l, q, a = line.strip().split('\t')
+                l = int(l)
                 q = re.sub(r' \?', ' ?', q)
                 q_tokens = process_raw(q).split()
                 a_tokens = a.split()
@@ -217,9 +220,9 @@ class ReVerbPairs(object):
                 q_tokens_indx = [word2index(w, self.voc_dict[0]) for w in q_tokens]
                 a_tokens_indx = [word2index(w, self.voc_dict[1]) for w in a_tokens]
                 if self.usage == 'train':
-                    yield (q_tokens, a_tokens)
+                    yield (q_tokens_indx, a_tokens_indx)
                 else:
-                    yield (q_tokens, a_tokens, l)
+                    yield (q_tokens_indx, a_tokens_indx, l)
             else:
                 raise AttributeError("Mode can be only 'str' or 'index'")
 
@@ -227,7 +230,7 @@ class ReVerbPairs(object):
         if self.usage == 'train':
             return 117202052
         elif self.usage == 'test':
-            return 0
+            return 48910
 
     def __str__(self):
         return "ReVerb QA pairs"
