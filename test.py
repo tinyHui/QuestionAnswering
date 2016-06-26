@@ -2,7 +2,7 @@ from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
-from collections import defaultdict
+from collections import defaultdict, UserList
 from CCA import find_answer
 import argparse
 import pickle as pkl
@@ -52,8 +52,8 @@ if __name__ == '__main__':
     crt_q = None
     q_a_map_list = defaultdict(list)      # all potential answers related to the question
     q_a_map_correct = defaultdict(list)        # the correct answer for this question
-    Qs = []
-    As = []
+    Qs = UserList()
+    As = UserList()
     for t in feats:
         indx = answer_indx + 1
         if indx % INF_FREQ == 0 or indx == length:
@@ -100,6 +100,7 @@ if __name__ == '__main__':
             continue
         if len(q_a_map_correct[question_indx]) > 1:
             more_correct += 1
+            pred = q_a_map_correct[question_indx]
         # only have one candidate answer
         elif len(answer_indx_list) == 1:
             pred = find_answer(q, [proj_As[answer_indx_list[0]]])

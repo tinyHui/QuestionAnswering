@@ -216,9 +216,14 @@ class ReVerbPairs(object):
                         w = "call"
                     elif w == "females":
                         w = "female"
+                    elif w in ["are", "is"]:
+                        w = "be"
                     return w
 
-                a_tokens = [to_stem(w) for p in a_tokens for w in p.split()]
+                # question need to convert to stem
+                q_tokens = [to_stem(w) for w in q_tokens]
+                # answer is written in stem
+                a_tokens = [w for p in a_tokens for w in p.split()]
 
             # produce the token per line
             if self.mode == 'str':
