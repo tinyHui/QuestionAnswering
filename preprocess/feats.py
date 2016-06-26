@@ -64,8 +64,9 @@ class BoW(object):
                         if w == UNKNOWN_TOKEN:
                             # deal with unseen token, pass
                             continue
-                            # one hot
-                        feat[i][w] += 1
+                        # one hot
+                        # vocabulary index start by 1
+                        feat[i][w-1] += 1
                 else:
                     # use original data
                     feat[i] = d[i]
