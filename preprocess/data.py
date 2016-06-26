@@ -4,6 +4,7 @@ import sqlite3
 
 UNKNOWN_TOKEN = -1
 
+
 def process_raw(raw):
     # to lower case
     s = raw.lower()
@@ -201,13 +202,23 @@ class ReVerbPairs(object):
             else:
                 l, q, a = line.strip().split('\t')
                 l = int(l)
-                q = re.sub(r' \?', ' ?', q)
+                q = re.sub(r'\?', ' ?', q)
                 q_tokens = process_raw(q).split()
                 a_tokens = a.split()
                 # insert brackets into pattern
                 a_tokens.insert(1, '(')
                 a_tokens.append(')')
                 a_tokens = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a_tokens]
+
+                def to_stem(w):
+                    # only work for reverb test
+                    if w == "called":
+                        w = "call"
+                    elif w == "females":
+                        w = "female"
+                    return w
+
+                a_tokens = [to_stem(w) for p in a_tokens for w in p.split()]
 
             # produce the token per line
             if self.mode == 'str':
