@@ -193,8 +193,18 @@ class ReVerbPairs(object):
 
     def __iter__(self):
         for line in open(self.file, 'r'):
-            q, a = line.strip().split('\t')
-            q_tokens, a_tokens = [s.split() for s in [q, a]]
+            if self.usage == 'train':
+                q, a = line.strip().split('\t')
+                q_tokens, a_tokens = [s.split() for s in [q, a]]
+            else:
+                l, q, a = line.strip().split('\t')
+                q = re.sub(r' \?', ' ?', q)
+                q_tokens = process_raw(q).split()
+                a_tokens = a.split()
+                # insert brackets into pattern
+                a_tokens.insert(1, '(')
+                a_tokens.append(')')
+                a_tokens = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a_tokens]
 
             if self.mode == 'str':
                 yield (q_tokens, a_tokens)
