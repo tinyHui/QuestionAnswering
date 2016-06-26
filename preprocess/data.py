@@ -206,13 +206,20 @@ class ReVerbPairs(object):
                 a_tokens.append(')')
                 a_tokens = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a_tokens]
 
+            # produce the token per line
             if self.mode == 'str':
-                yield (q_tokens, a_tokens)
+                if self.usage == 'train':
+                    yield (q_tokens, a_tokens)
+                else:
+                    yield (q_tokens, a_tokens, l)
             elif self.mode == 'index':
                 # index each word using hash dictionary
                 q_tokens_indx = [word2index(w, self.voc_dict[0]) for w in q_tokens]
                 a_tokens_indx = [word2index(w, self.voc_dict[1]) for w in a_tokens]
-                yield (q_tokens_indx, a_tokens_indx)
+                if self.usage == 'train':
+                    yield (q_tokens, a_tokens)
+                else:
+                    yield (q_tokens, a_tokens, l)
             else:
                 raise AttributeError("Mode can be only 'str' or 'index'")
 

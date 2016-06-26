@@ -46,7 +46,10 @@ if __name__ == "__main__":
         _, feat = t
         Qs.append(feat[0])
         As.append(feat[1])
+        del feat[:]
         i += 1
+
+    del data, feats, voc_dict
 
     if not full_svd:
         logging.info("running CCA, using SVDs, k=%d" % k)

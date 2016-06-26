@@ -17,23 +17,28 @@ def train(Qs, As, diag_only, full_svd=True, k=0):
     if isinstance(As, list):
         As = np.asarray(As, dtype="float64")
 
+    sample_num = Qs.shape[0]
     logging.info("calculating C_AA")
     c_qq = Qs.T.dot(Qs)
     logging.info("calculating C_BB")
     c_aa = As.T.dot(As)
+    logging.info("calculating C_AB")
+    c_qa = Qs.T.dot(As) / sample_num
+    del Qs, As
+
     if diag_only:
         logging.info("keep only diagonal")
         c_qq = np.diag(np.diag(c_qq))
         c_aa = np.diag(np.diag(c_aa))
 
-    # get result
-    sample_num = Qs.shape[0]
     logging.info("doing square root and invert")
     c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
-    c_qa = Qs.T.dot(As) / sample_num
+    del c_qq
     c_aa_sqrt = inv(sqrtm(c_aa)) / sample_num
+    del c_aa
     logging.info("C_AA * C_AB * C_BB")
     result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
+    del c_qa
 
     logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
     if full_svd:

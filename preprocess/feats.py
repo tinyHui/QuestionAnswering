@@ -30,7 +30,6 @@ def data2feats(data, feat_select):
         feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
 
     elif feat_select == FEATURE_OPTS[2]:
-        data.mode = 'str'
         # word embedding
         feats = WordEmbedding(data, data.max_length, WORD_EMBEDDING_FILE)
 
@@ -117,7 +116,7 @@ class WordEmbedding(object):
         :param max_length: max legnth of the sentence for correlated column
         :param embedding_dict_file: word-embedding dictionary file name
         '''
-        assert data.mode == 'str', "must use word string in input data"
+        assert data.mode == 'index', "must use word index in input data"
         self.data = data
         with open(embedding_dict_file, 'rb') as f:
             self.embedding_dict = pkl.load(f)
