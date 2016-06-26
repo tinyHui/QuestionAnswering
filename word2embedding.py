@@ -25,8 +25,11 @@ if __name__ == "__main__":
     embedding_dict = defaultdict(np.array)
     src_data = BNCembedding()
     for w, emb in src_data:
-        indx = voc_dict[w]
-        embedding_dict[indx] = np.asarray(emb, dtype='float64')
+        try:
+            indx = voc_dict[w]
+            embedding_dict[indx] = np.asarray(emb, dtype='float64')
+        except KeyError:
+            continue
 
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_FILE, 'wb') as f:
