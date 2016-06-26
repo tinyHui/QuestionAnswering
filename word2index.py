@@ -17,7 +17,7 @@ def generate_dictionary(token_list):
 
     word_indx_hash = UserDict()
     for i, token in enumerate(unique_token_list):
-        word_indx_hash[token] = i
+        word_indx_hash[token] = i + 1
 
     del unique_token_list
     return word_indx_hash

@@ -2,7 +2,7 @@ import re
 from calendar import month_name, month_abbr
 import sqlite3
 
-UNKNOWN_TOKEN = -1
+UNKNOWN_TOKEN = 0
 
 
 def process_raw(raw):
