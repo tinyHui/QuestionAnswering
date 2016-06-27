@@ -97,6 +97,7 @@ class WordEmbedding(object):
                     feat[i] = np.zeros(300, dtype='float64')
                     for w in d[i]:
                         # for each token, find its embedding
+                        # unseen token will automatically take 0 x R^300
                         feat[i] += self.embedding_dict[i][w]
                     # calculate the average of sum of embedding of all words
                     feat[i] /= len(d[i])

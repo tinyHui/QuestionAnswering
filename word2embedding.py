@@ -6,13 +6,14 @@ import pickle as pkl
 import os
 import sys
 import numpy as np
+from functools import partial
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
 
 
 def generate_dictionary(voc_indx_map, w_emb_map):
-    embedding_dict = defaultdict(np.array)
+    embedding_dict = defaultdict(partial(np.zeros, 300))
     for w, indx in voc_indx_map.items():
         try:
             emb = np.asarray(w_emb_map[w], dtype='float64')
