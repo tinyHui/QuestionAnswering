@@ -11,6 +11,14 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
 
 
+def generate_dictionary(voc_indx_map, w_emb_map):
+    embedding_dict = defaultdict(np.array)
+    for w, indx in voc_indx_map.items():
+        emb = np.asarray(w_emb_map[w], dtype='float64')
+        embedding_dict[indx] = emb
+    return embedding_dict
+
+
 if __name__ == "__main__":
     if os.path.exists(WORD_EMBEDDING_FILE):
         logging.info("Word embedding dictionary file exists, skip")
@@ -27,17 +35,13 @@ if __name__ == "__main__":
     for w, emb in src_data:
         w_emb_map[w] = emb
 
-    embedding_dict = defaultdict(np.array)
-    for w, indx in voc_dict.items():
-        try:
-            emb = w_emb_map[w]
-        except KeyError:
-            continue
-        embedding_dict[indx] = np.asarray(emb, dtype='float64')
+    word_emb_hash_group = {}
+    for indx, voc_indx_map in voc_dict.items():
+        word_emb_hash_group[indx] = generate_dictionary(voc_indx_map, w_emb_map)
 
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_FILE, 'wb') as f:
-        pkl.dump(WORD_EMBEDDING_FILE, f)
+        pkl.dump(word_emb_hash_group, f)
 
     logging.info("Free up memory")
-    del w_emb_map, embedding_dict
+    del w_emb_map, word_emb_hash_group

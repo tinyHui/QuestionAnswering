@@ -76,6 +76,40 @@ class BoW(object):
         return len(self.data)
 
 
+class WordEmbedding(object):
+    def __init__(self, data, embedding_dict_file):
+        '''
+        Represent sentence data using word embedding trained by British National Corpus
+        :param data: data source, such as PPDB, QAs
+        :param embedding_dict_file: word-embedding dictionary file name
+        '''
+        assert data.mode == 'index', "must use word index in input data"
+        self.data = data
+        with open(embedding_dict_file, 'rb') as f:
+            self.embedding_dict = pkl.load(f)
+
+    def __iter__(self):
+        for d in self.data:
+            param_num = len(d)
+            feat = [None] * param_num
+            for i in range(param_num):
+                if i in self.data.sent_indx:
+                    feat[i] = np.zeros(300, dtype='float64')
+                    for w in d[i]:
+                        # for each token, find its embedding
+                        feat[i] += self.embedding_dict[i][w]
+                    # calculate the average of sum of embedding of all words
+                    feat[i] /= len(d[i])
+
+                else:
+                    feat[i] = d[i]
+
+            yield d, feat
+
+    def __len__(self):
+        return len(self.data)
+
+
 class LSTM(object):
     def __init__(self, data, lstm_file, voc_dict):
         '''
@@ -101,43 +135,6 @@ class LSTM(object):
                 else:
                     # use original data
                     feat[i] = d[i]
-            yield d, feat
-
-    def __len__(self):
-        return len(self.data)
-
-
-class WordEmbedding(object):
-    def __init__(self, data, embedding_dict_file):
-        '''
-        Represent sentence data using word embedding trained by British National Corpus
-        :param data: data source, such as PPDB, QAs
-        :param embedding_dict_file: word-embedding dictionary file name
-        '''
-        assert data.mode == 'index', "must use word index in input data"
-        self.data = data
-        with open(embedding_dict_file, 'rb') as f:
-            self.embedding_dict = pkl.load(f)
-
-    def __iter__(self):
-        for d in self.data:
-            param_num = len(d)
-            feat = [None] * param_num
-            for i in range(param_num):
-                if i in self.data.sent_indx:
-                    feat[i] = np.zeros(300, dtype='float64')
-                    for w in d[i]:
-                        # for each token, find its embedding
-                        try:
-                            feat[i] += np.asarray(self.embedding_dict[w])
-                        except TypeError:
-                            continue
-                    # calculate the average of sum of embedding of all words
-                    feat[i] /= len(d[i])
-
-                else:
-                    feat[i] = d[i]
-
             yield d, feat
 
     def __len__(self):

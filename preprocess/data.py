@@ -139,20 +139,20 @@ class ReVerbTrainRaw(object):
         c = conn.cursor()
         self.content = c.execute("select * from tuples")
         # define the pattern
-        self.normal_pattern_list = [('who {r} {e2} ?', '{r} ( {e2}, {e1} )'),
-                                    ('what {r} {e2} ?', '{r} ( {e2}, {e1} )'),
-                                    ('who does {e1} {r} ?', '{r} ( {e1}, {e2} )'),
-                                    ('what does {e1} {r} ?', '{r} ( {e1}, {e2} )'),
-                                    ('what is the {r} of {e2} ?', '{r} ( {e2}, {e1} )'),
-                                    ('who is the {r} of {e2} ?', '{r} ( {e2}, {e1} )'),
-                                    ('what is {r} by {e1}', '{r} ( {e1}, {e2} )'),
-                                    ('who is {e2}\'s {r} ?', '{r} ( {e2}, {e1} )'),
-                                    ('what is {e2}\'s {r}', '{r} ( {e2}, {e1} )'),
-                                    ('who is {r} by {e1} ?', '{r} ( {e1}, {e2} )')]
+        self.normal_pattern_list = [('who {r} {e2} ?', '{r} ( {e2} , {e1} )'),
+                                    ('what {r} {e2} ?', '{r} ( {e2} , {e1} )'),
+                                    ('who does {e1} {r} ?', '{r} ( {e1} , {e2} )'),
+                                    ('what does {e1} {r} ?', '{r} ( {e1} , {e2} )'),
+                                    ('what is the {r} of {e2} ?', '{r} ( {e2} , {e1} )'),
+                                    ('who is the {r} of {e2} ?', '{r} ( {e2} , {e1} )'),
+                                    ('what is {r} by {e1}', '{r} ( {e1} , {e2} )'),
+                                    ('who is {e2}\'s {r} ?', '{r} ( {e2} , {e1} )'),
+                                    ('what is {e2}\'s {r}', '{r} ( {e2} , {e1} )'),
+                                    ('who is {r} by {e1} ?', '{r} ( {e1} , {e2} )')]
         # shared by *-in, *-on
-        self.special_pattern_list = [('when did {e1} {r} ?', '{r} ( {e1}, {e2} )'),
-                                     ('when was {e1} {r} ?', '{r} ( {e1}, {e2} )'),
-                                     ('where was {e1} {r} ?', '{r} ( {e1}, {e2} )')]
+        self.special_pattern_list = [('when did {e1} {r} ?', '{r} ( {e1} , {e2} )'),
+                                     ('when was {e1} {r} ?', '{r} ( {e1} , {e2} )'),
+                                     ('where was {e1} {r} ?', '{r} ( {e1} , {e2} )')]
 
     def __iter__(self):
         for r, e1, e2 in self.content:
@@ -228,7 +228,7 @@ class ReVerbTestRaw(object):
             q = ' '.join([to_stem(w) for w in q.split()])
             # normalize answer
             r, e1, e2 = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a.split()]
-            a = "{r} ( {e1}, {e2} )".format(r=r, e1=e1, e2=e2)
+            a = "{r} ( {e1} , {e2} )".format(r=r, e1=e1, e2=e2)
 
             yield q_id, q, a, l
 
