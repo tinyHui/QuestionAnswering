@@ -22,18 +22,22 @@ if __name__ == "__main__":
 
     logging.info("Generating source data")
     # data is a group of sentences
-    embedding_dict = defaultdict(np.array)
     src_data = BNCembedding()
+    w_emb_map = {}
     for w, emb in src_data:
+        w_emb_map[w] = emb
+
+    embedding_dict = defaultdict(np.array)
+    for w, indx in voc_dict.items():
         try:
-            indx = voc_dict[w]
-            embedding_dict[indx] = np.asarray(emb, dtype='float64')
+            emb = w_emb_map[w]
         except KeyError:
             continue
+        embedding_dict[indx] = np.asarray(emb, dtype='float64')
 
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_FILE, 'wb') as f:
         pkl.dump(WORD_EMBEDDING_FILE, f)
 
     logging.info("Free up memory")
-    del embedding_dict
+    del w_emb_map, embedding_dict
