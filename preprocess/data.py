@@ -14,9 +14,6 @@ def process_raw(raw):
     for i, (name, abbr) in enumerate(MONTH_NAME):
         s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
 
-    # replace 's become space 's
-    s = re.sub(r'\'s', ' \'s', s)
-
     # define replace pattern
     DATE = r'(([0]?[1-9]|[1][0-2])[\.\/\- ]([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0-9]{4}|[0-9]{2}))|' \
            r'(([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0]?[1-9]|[1][0-2])[\.\/\- ]([0-9]{4}|[0-9]{2}))'
@@ -149,8 +146,8 @@ class ReVerbTrainRaw(object):
                                     ('what is the {r} of {e2} ?', '{r} ( {e2} , {e1} )'),
                                     ('who is the {r} of {e2} ?', '{r} ( {e2} , {e1} )'),
                                     ('what is {r} by {e1}', '{r} ( {e1} , {e2} )'),
-                                    ('who is {e2}\'s {r} ?', '{r} ( {e2} , {e1} )'),
-                                    ('what is {e2}\'s {r}', '{r} ( {e2} , {e1} )'),
+                                    ('who is {e2} \'s {r} ?', '{r} ( {e2} , {e1} )'),
+                                    ('what is {e2} \'s {r}', '{r} ( {e2} , {e1} )'),
                                     ('who is {r} by {e1} ?', '{r} ( {e1} , {e2} )')]
         # shared by *-in, *-on
         self.special_pattern_list = [('when did {e1} {r} ?', '{r} ( {e1} , {e2} )'),
@@ -194,41 +191,13 @@ class ReVerbTestRaw(object):
             self.q_id_map[q] = id
 
     def __iter__(self):
-        def to_stem(w):
-            # only work for reverb test
-            if w in ["called", "calls"]:
-                w = "call"
-            elif w == "females":
-                w = "female"
-            elif w == "spoken":
-                w = "speak"
-            elif w == "languages":
-                w = "language"
-            elif w == "found":
-                w = "find"
-            elif w in ["uses", "used"]:
-                w = "use"
-            elif w == "marked":
-                w = "mark"
-            elif w == "invented":
-                w = "invent"
-            elif w == "players":
-                w = "player"
-            elif w == "made":
-                w = "make"
-            elif w == "arguments":
-                w = "argument"
-            elif w in ["are", "is", "was", "were", "been"]:
-                w = "be"
-            return w
-
         for line in open(self.file, 'r'):
             l, q, a = line.strip().split('\t')
             q_id = self.q_id_map[q]
             # normalize question
             q = re.sub(r'\?', ' ?', q)
             q = process_raw(q)
-            q = ' '.join([to_stem(w) for w in q.split()])
+            q = ' '.join([w for w in q.split()])
             # normalize answer
             r, e1, e2 = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a.split()]
             a = "{r} ( {e1} , {e2} )".format(r=r, e1=e1, e2=e2)
