@@ -14,7 +14,10 @@ WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
 def generate_dictionary(voc_indx_map, w_emb_map):
     embedding_dict = defaultdict(np.array)
     for w, indx in voc_indx_map.items():
-        emb = np.asarray(w_emb_map[w], dtype='float64')
+        try:
+            emb = np.asarray(w_emb_map[w], dtype='float64')
+        except KeyError:
+            continue
         embedding_dict[indx] = emb
     return embedding_dict
 

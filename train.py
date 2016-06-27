@@ -9,7 +9,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 CCA_FILE = "./bin/CCA_model_%s.pkl"
-INF_FREQ = 300  # information message frequency
+INF_FREQ = 1000  # information message frequency
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
