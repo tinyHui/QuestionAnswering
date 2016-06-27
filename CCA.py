@@ -32,9 +32,10 @@ def train(Qs, As, diag_only, full_svd=True, k=0):
         c_qq = np.diag(np.diag(c_qq))
         c_aa = np.diag(np.diag(c_aa))
 
-    logging.info("doing square root and invert")
+    logging.info("doing square root and invert for C_AA")
     c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
     del c_qq
+    logging.info("doing square root and invert for C_BB")
     c_aa_sqrt = inv(sqrtm(c_aa)) / sample_num
     del c_aa
     logging.info("C_AA * C_AB * C_BB")

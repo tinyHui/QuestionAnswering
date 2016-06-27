@@ -193,11 +193,29 @@ class ReVerbTestRaw(object):
     def __iter__(self):
         def to_stem(w):
             # only work for reverb test
-            if w == "called":
+            if w in ["called", "calls"]:
                 w = "call"
             elif w == "females":
                 w = "female"
-            elif w in ["are", "is"]:
+            elif w == "spoken":
+                w = "speak"
+            elif w == "languages":
+                w = "language"
+            elif w == "found":
+                w = "find"
+            elif w in ["uses", "used"]:
+                w = "use"
+            elif w == "marked":
+                w = "mark"
+            elif w == "invented":
+                w = "invent"
+            elif w == "players":
+                w = "player"
+            elif w == "made":
+                w = "make"
+            elif w == "arguments":
+                w = "argument"
+            elif w in ["are", "is", "was", "were", "been"]:
                 w = "be"
             return w
 
