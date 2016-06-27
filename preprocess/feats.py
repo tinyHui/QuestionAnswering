@@ -32,7 +32,7 @@ def data2feats(data, feat_select):
 
     elif feat_select == FEATURE_OPTS[2]:
         # word embedding
-        feats = WordEmbedding(data, data.max_length, WORD_EMBEDDING_FILE)
+        feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
 
     else:
         raise IndexError("%s is not an available feature" % feat_select)
@@ -108,18 +108,16 @@ class LSTM(object):
 
 
 class WordEmbedding(object):
-    def __init__(self, data, max_length, embedding_dict_file):
+    def __init__(self, data, embedding_dict_file):
         '''
         Represent sentence data using word embedding trained by British National Corpus
         :param data: data source, such as PPDB, QAs
-        :param max_length: max legnth of the sentence for correlated column
         :param embedding_dict_file: word-embedding dictionary file name
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
         with open(embedding_dict_file, 'rb') as f:
             self.embedding_dict = pkl.load(f)
-        self.max_length = max_length
 
     def __iter__(self):
         for d in self.data:
