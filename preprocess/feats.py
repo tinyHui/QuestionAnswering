@@ -56,7 +56,7 @@ class BoW(object):
         self.voc_dict = voc_dict
 
     def __iter__(self):
-        voc_num = [len(self.voc_dict[k].keys()) for k in self.voc_dict.keys()]
+        voc_num = [len(self.voc_dict[i].keys()) for i in self.voc_dict.keys()]
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
@@ -65,12 +65,9 @@ class BoW(object):
                     # convert sentence to One-Hot representation
                     feat[i] = [0] * voc_num[i]
                     for w in d[i]:
-                        if w == UNKNOWN_TOKEN_INDX:
-                            # deal with unseen token, pass
-                            continue
                         # one hot
                         # vocabulary index start by 1
-                        feat[i][w-1] += 1
+                        feat[i][w] += 1
                 else:
                     # use original data
                     feat[i] = d[i]
