@@ -1,17 +1,22 @@
 # convert all sentences to their representations but keep data in other columns
 
 from preprocess.data import UNKNOWN_TOKEN
-from siamese_cosine import LSTM_FILE, train_lstm
+# from siamese_cosine import LSTM_FILE, train_lstm
 from word2embedding import WORD_EMBEDDING_FILE
 from word2index import VOC_DICT_FILE
 import numpy as np
 import pickle as pkl
-import os
 
-FEATURE_OPTS = ['bow', 'lstm', 'we']
+FEATURE_OPTS = ['bow', 'we']
+EMBEDDING_SIZE = 300
 
 
 def data2feats(data, feat_select):
+    '''
+    :param data:
+    :param feat_select: select when execute, in argument
+    :return:
+    '''
     with open(VOC_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
@@ -20,22 +25,22 @@ def data2feats(data, feat_select):
         feats = BoW(data, voc_dict=voc_dict)
 
     elif feat_select == FEATURE_OPTS[1]:
-        # sentence embedding by paraphrased sentences
-        if not os.path.exists(LSTM_FILE):
-            train_lstm(
-                max_epochs=100,
-                test_size=2,
-                saveto=LSTM_FILE,
-                reload_model=True
-            )
-        feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
-
-    elif feat_select == FEATURE_OPTS[2]:
         # word embedding
         feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
 
+    # elif feat_select == FEATURE_OPTS[2]:
+    #     # sentence embedding by paraphrased sentences
+    #     if not os.path.exists(LSTM_FILE):
+    #         train_lstm(
+    #             max_epochs=100,
+    #             test_size=2,
+    #             saveto=LSTM_FILE,
+    #             reload_model=True
+    #         )
+    #     feats = LSTM(data, lstm_file=LSTM_FILE, voc_dict=voc_dict)
+
     else:
-        raise IndexError("%s is not an available feature" % feat_select)
+        raise SystemError("%s is not an available feature" % feat_select)
 
     return feats
 
@@ -94,7 +99,7 @@ class WordEmbedding(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = np.zeros(300, dtype='float64')
+                    feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float64')
                     for w in d[i]:
                         # for each token, find its embedding
                         # unseen token will automatically take 0 x R^300
@@ -111,45 +116,32 @@ class WordEmbedding(object):
         return len(self.data)
 
 
-class LSTM(object):
-    def __init__(self, data, lstm_file, voc_dict):
-        '''
-        Represent sentence data using LSTM sentence embedding
-        :param data: data source, such as PPDB, QAs
-        :param lstm_file: trained LSTM model file name
-        :param voc_dict: word-index dictionary
-        '''
-        assert data.mode == 'index', "must use word index in input data"
-        self.data = data
-        with open(lstm_file, 'rb') as f:
-            self.model = pkl.load(f)
-        self.voc_dict = voc_dict
-
-    def __iter__(self):
-        for d in self.data:
-            param_num = len(d)
-            feat = [None] * param_num
-            for i in range(param_num):
-                if i in self.data.sent_indx:
-                    # TODO: represent sentence use LSTM, d[i] is a sentence
-                    feat[i] = d[i]
-                else:
-                    # use original data
-                    feat[i] = d[i]
-            yield d, feat
-
-    def __len__(self):
-        return len(self.data)
-
-
-# self.freq_dict = defaultdict(int)
-# try:
-#     with open(FREQ_DICT, "rb") as f:
-#         self.freq_dict = pkl.load(f)
-# except FileNotFoundError:
-#     for l in data:
-#         for i in index:
-#             for w in l[i]:
-#                 self.freq_dict[w] += 1
-#     with open(FREQ_DICT, "wb") as f:
-#         pkl.dump(self.freq_dict, f)
+# class LSTM(object):
+#     def __init__(self, data, lstm_file, voc_dict):
+#         '''
+#         Represent sentence data using LSTM sentence embedding
+#         :param data: data source, such as PPDB, QAs
+#         :param lstm_file: trained LSTM model file name
+#         :param voc_dict: word-index dictionary
+#         '''
+#         assert data.mode == 'index', "must use word index in input data"
+#         self.data = data
+#         with open(lstm_file, 'rb') as f:
+#             self.model = pkl.load(f)
+#         self.voc_dict = voc_dict
+#
+#     def __iter__(self):
+#         for d in self.data:
+#             param_num = len(d)
+#             feat = [None] * param_num
+#             for i in range(param_num):
+#                 if i in self.data.sent_indx:
+#                     # TODO: represent sentence use LSTM, d[i] is a sentence
+#                     feat[i] = d[i]
+#                 else:
+#                     # use original data
+#                     feat[i] = d[i]
+#             yield d, feat
+#
+#     def __len__(self):
+#         return len(self.data)

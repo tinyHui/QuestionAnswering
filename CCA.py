@@ -5,7 +5,6 @@ from scipy.spatial.distance import cosine
 import logging
 from multiprocessing import Pool
 from functools import partial
-from collections import UserList
 
 
 def train(Qs, As, diag_only, full_svd=True, k=0):
@@ -13,11 +12,6 @@ def train(Qs, As, diag_only, full_svd=True, k=0):
     params q: sentence embedding for question set
     params a: sentence embedding for answer set
     '''
-    if isinstance(Qs, list) or isinstance(Qs, UserList):
-        Qs = np.asarray(Qs, dtype="float64")
-    if isinstance(As, list) or isinstance(As, UserList):
-        As = np.asarray(As, dtype="float64")
-
     sample_num = Qs.shape[0]
     logging.info("calculating C_AA")
     c_qq = Qs.T.dot(Qs)

@@ -1,7 +1,8 @@
 from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
-from preprocess.feats import FEATURE_OPTS, data2feats
-from collections import UserList
+from preprocess.feats import FEATURE_OPTS, data2feats, BoW, WordEmbedding, EMBEDDING_SIZE
+from scipy.sparse import csr_matrix
+import numpy as np
 from CCA import train
 import argparse
 import pickle as pkl
@@ -31,11 +32,20 @@ if __name__ == "__main__":
         voc_dict = pkl.load(f)
 
     data = ReVerbPairs(usage='train', mode='index', voc_dict=voc_dict)
-    feats = None
-    Qs = UserList()
-    As = UserList()
 
     feats = data2feats(data, feature)
+    # use sparse matrix to initiate Question/Answer matrix
+    pair_num = len(data)
+    if isinstance(feats, BoW):
+        Q_token_num = len(voc_dict[0].keys())
+        A_token_num = len(voc_dict[1].keys())
+        # R^ pair num x token num
+        Qs = csr_matrix(pair_num, Q_token_num)
+        As = csr_matrix(pair_num, A_token_num)
+    elif isinstance(feats, WordEmbedding):
+        # R^ pair num x embedding size
+        Qs = csr_matrix(pair_num, EMBEDDING_SIZE)
+        As = csr_matrix(pair_num, EMBEDDING_SIZE)
 
     logging.info("constructing train data")
     length = len(feats)
@@ -45,9 +55,8 @@ if __name__ == "__main__":
             logging.info("loading: %d/%d" % (i, length))
 
         _, feat = t
-        Qs.append(feat[0])
-        As.append(feat[1])
-        del feat[:]
+        Qs[i-1] = feat[0]
+        As[i-1] = feat[1]
         i += 1
 
     del data, feats, voc_dict

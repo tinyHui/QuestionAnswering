@@ -1,5 +1,6 @@
 from collections import defaultdict
 from preprocess.data import BNCembedding
+from preprocess.feats import EMBEDDING_SIZE
 from word2index import VOC_DICT_FILE
 import logging
 import pickle as pkl
@@ -13,7 +14,7 @@ WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
 
 
 def generate_dictionary(voc_indx_map, w_emb_map):
-    embedding_dict = defaultdict(partial(np.zeros, 300))
+    embedding_dict = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
     for w, indx in voc_indx_map.items():
         try:
             emb = np.asarray(w_emb_map[w], dtype='float64')
