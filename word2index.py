@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import defaultdict
 from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
 import logging
 import pickle as pkl
@@ -20,19 +20,24 @@ if __name__ == "__main__":
     src_data = ReVerbPairs(usage='train', mode='str')
 
     logging.info("Extracting tokens")
-    word_indx_hash_group = {}
+    logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
+    token_count_group = {}
+    token_group = defaultdict(list)
     for line in src_data:
         for i in src_data.sent_indx:
-            try:
-                word_indx_hash_group[i] += Counter(line[i])
-            except KeyError:
-                word_indx_hash_group[i] = Counter(line[i])
+            for w in line[i]:
+                try:
+                    if token_count_group[i][w] > LOWEST_FREQ:
+                        token_group[i].append(w)
+                    token_count_group[i][w] += 1
+                except KeyError:
+                    token_count_group[i] = defaultdict(int)
+                    token_count_group[i][w] += 1
 
-    logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
     logging.info("Generating token dictionary")
+    word_indx_hash_group = {}
     for i in src_data.sent_indx:
-        token_list = [token for token in word_indx_hash_group[i].elements()
-                      if word_indx_hash_group[i][token] > LOWEST_FREQ]
+        token_list = token_group[i]
         word_indx_hash_group[i] = zip(token_list, range(1, len(token_list) + 1))
         word_indx_hash_group[UNKNOWN_TOKEN] = UNKNOWN_TOKEN_INDX
         logging.info("Found %d tokens in %d column" % len(token_list))
