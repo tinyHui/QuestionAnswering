@@ -40,7 +40,7 @@ if __name__ == "__main__":
         token_list = token_group[i]
         word_indx_hash_group[i] = zip(token_list, range(1, len(token_list) + 1))
         word_indx_hash_group[UNKNOWN_TOKEN] = UNKNOWN_TOKEN_INDX
-        logging.info("Found %d tokens in %d column" % len(token_list))
+        logging.info("Found %d tokens" % len(token_list))
 
     logging.info("Saving word index hashing table")
     with open(VOC_DICT_FILE, 'wb') as f:
