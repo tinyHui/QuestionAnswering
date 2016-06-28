@@ -2,7 +2,7 @@ from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats, BoW, WordEmbedding
 from word2embedding import EMBEDDING_SIZE
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, hstack
 from CCA import train
 import argparse
 import pickle as pkl
@@ -36,16 +36,18 @@ if __name__ == "__main__":
     feats = data2feats(data, feature)
     # use sparse matrix to initiate Question/Answer matrix
     pair_num = len(data)
-    if isinstance(feats, BoW):
-        Q_token_num = len(voc_dict[0].keys())
-        A_token_num = len(voc_dict[1].keys())
-        # R^ pair num x token num
-        Qs = csr_matrix((pair_num, Q_token_num), dtype='float64')
-        As = csr_matrix((pair_num, A_token_num), dtype='float64')
-    elif isinstance(feats, WordEmbedding):
-        # R^ pair num x embedding size
-        Qs = csr_matrix((pair_num, EMBEDDING_SIZE), dtype='float64')
-        As = csr_matrix((pair_num, EMBEDDING_SIZE), dtype='float64')
+    # if isinstance(feats, BoW):
+    #     Q_token_num = len(voc_dict[0].keys())
+    #     A_token_num = len(voc_dict[1].keys())
+    #     # R^ pair num x token num
+    #     Qs = csr_matrix((pair_num, Q_token_num), dtype='float64')
+    #     As = csr_matrix((pair_num, A_token_num), dtype='float64')
+    # elif isinstance(feats, WordEmbedding):
+    #     # R^ pair num x embedding size
+    #     Qs = csr_matrix((pair_num, EMBEDDING_SIZE), dtype='float64')
+    #     As = csr_matrix((pair_num, EMBEDDING_SIZE), dtype='float64')
+    Qs = None
+    As = None
 
     logging.info("constructing train data")
     length = len(feats)
@@ -55,8 +57,12 @@ if __name__ == "__main__":
             logging.info("loading: %d/%d" % (i, length))
 
         _, feat = t
-        Qs[i-1][:] = feat[0]
-        As[i-1][:] = feat[1]
+        if i == 1:
+            Qs = feat[0]
+            As = feat[1]
+        else:
+            Qs = hstack(feat[0])
+            As = hstack(feat[1])
         i += 1
 
     del data, feats, voc_dict
