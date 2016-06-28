@@ -3,7 +3,8 @@ from calendar import month_name, month_abbr
 import sqlite3
 from collections import UserDict
 
-UNKNOWN_TOKEN = 0
+UNKNOWN_TOKEN = 'UNKNOWN'
+UNKNOWN_TOKEN_INDX = 0
 
 
 def process_raw(raw):
@@ -35,7 +36,7 @@ def word2index(w, voc_dict):
         return voc_dict[w]
     except KeyError:
         # unseen token
-        return UNKNOWN_TOKEN
+        return UNKNOWN_TOKEN_INDX
 
 
 # question answer pairs (train) generate from ReVerb corpus

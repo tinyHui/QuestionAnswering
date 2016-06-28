@@ -9,7 +9,6 @@ import pickle as pkl
 import logging
 import numpy as np
 
-
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 INF_FREQ = 1000
 
