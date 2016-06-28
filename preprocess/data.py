@@ -137,7 +137,7 @@ class ReVerbTestRaw(object):
             q = re.sub(r'\'s', ' \'s', q)
             q = re.sub(r'\-', ' ', q)
             q = process_raw(q)
-            # q = ' '.join([to_stem(w) for w in q.split()])
+            q = ' '.join([to_stem(w) for w in q.split()])
             # normalize answer
             r, e1, e2 = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a.split()]
             a = "{r} ( {e1} , {e2} )".format(r=r, e1=e1, e2=e2)

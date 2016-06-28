@@ -7,12 +7,11 @@ from multiprocessing import Pool
 from functools import partial
 
 
-def train(Qs, As, diag_only, full_svd=True, k=0):
+def train(Qs, As, sample_num=0, diag_only=False, full_svd=True, k=0):
     '''
     params q: sentence embedding for question set
     params a: sentence embedding for answer set
     '''
-    sample_num = Qs.shape[0]
     logging.info("calculating C_AA")
     c_qq = Qs.T.dot(Qs)
     logging.info("calculating C_BB")

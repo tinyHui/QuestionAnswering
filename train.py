@@ -66,7 +66,7 @@ if __name__ == "__main__":
     else:
         logging.info("running CCA, using full SVD")
 
-    Q_k, A_k = train(Qs, As, diag_only=diag_only, full_svd=full_svd, k=k)
+    Q_k, A_k = train(Qs, As, sample_num=pair_num, diag_only=diag_only, full_svd=full_svd, k=k)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
