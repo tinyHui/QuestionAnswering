@@ -2,13 +2,12 @@
 
 from preprocess.data import UNKNOWN_TOKEN_INDX
 # from siamese_cosine import LSTM_FILE, train_lstm
-from word2embedding import WORD_EMBEDDING_FILE
+from word2embedding import WORD_EMBEDDING_FILE, EMBEDDING_SIZE
 from word2index import VOC_DICT_FILE
 import numpy as np
 import pickle as pkl
 
 FEATURE_OPTS = ['bow', 'we']
-EMBEDDING_SIZE = 300
 
 
 def data2feats(data, feat_select):

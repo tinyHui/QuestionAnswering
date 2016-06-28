@@ -1,6 +1,5 @@
 from collections import defaultdict
 from preprocess.data import BNCembedding
-from preprocess.feats import EMBEDDING_SIZE
 from word2index import VOC_DICT_FILE
 import logging
 import pickle as pkl
@@ -11,6 +10,7 @@ from functools import partial
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
+EMBEDDING_SIZE = 300
 
 
 def generate_dictionary(voc_indx_map, w_emb_map):

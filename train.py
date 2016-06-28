@@ -40,8 +40,8 @@ if __name__ == "__main__":
         Q_token_num = len(voc_dict[0].keys())
         A_token_num = len(voc_dict[1].keys())
         # R^ pair num x token num
-        Qs = csr_matrix(pair_num, Q_token_num)
-        As = csr_matrix(pair_num, A_token_num)
+        Qs = csr_matrix((pair_num, Q_token_num), dtype=np.float64)
+        As = csr_matrix((pair_num, A_token_num), dtype=np.float64)
     elif isinstance(feats, WordEmbedding):
         # R^ pair num x embedding size
         Qs = csr_matrix(pair_num, EMBEDDING_SIZE)
