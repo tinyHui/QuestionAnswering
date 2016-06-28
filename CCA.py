@@ -13,21 +13,18 @@ def train(Qs, As, sample_num=0, diag_only=False, full_svd=True, k=0):
     params a: sentence embedding for answer set
     '''
 
-    if diag_only:
-        logging.info("keep only diagonal")
-        logging.info("calculating C_AA")
-        c_qq = np.diag(np.einsum('ij,ij->i', Qs.T, Qs))
-        logging.info("calculating C_BB")
-        c_aa = np.diag(np.einsum('ij,ij->i', As.T, As))
-    else:
-        logging.info("calculating C_AA")
-        c_qq = Qs.T.dot(Qs)
-        logging.info("calculating C_BB")
-        c_aa = As.T.dot(As)
-
+    logging.info("calculating C_AA")
+    c_qq = Qs.T.dot(Qs)
+    logging.info("calculating C_BB")
+    c_aa = As.T.dot(As)
     logging.info("calculating C_AB")
     c_qa = Qs.T.dot(As) / sample_num
     del Qs, As
+
+    if diag_only:
+        logging.info("keep only diagonal")
+        c_qq = np.diag(np.diag(c_qq))
+        c_aa = np.diag(np.diag(c_aa))
 
     logging.info("doing square root and invert for C_AA")
     c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
