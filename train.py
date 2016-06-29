@@ -48,13 +48,13 @@ if __name__ == "__main__":
 
         if i % INF_FREQ == 0 or i == length:
             logging.info("loading: %d/%d" % (i, length))
-            del Qs_temp[:], As_temp[:]
             if Qs is None:
                 Qs = csr_matrix(Qs_temp, dtype='float64')
                 As = csr_matrix(Qs_temp, dtype='float64')
             else:
                 Qs = vstack((Qs, Qs_temp))
                 As = vstack((As, As_temp))
+            del Qs_temp[:], As_temp[:]
 
         Qs_temp.append(feat[0])
         As_temp.append(feat[1])
