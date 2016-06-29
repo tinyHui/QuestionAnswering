@@ -2,6 +2,7 @@ from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
 from scipy.sparse import csr_matrix, vstack
+from collections import UserList
 from CCA import train
 import argparse
 import pickle as pkl
@@ -36,21 +37,28 @@ if __name__ == "__main__":
     pair_num = len(data)
     Qs = None
     As = None
+    Qs_temp = UserList()
+    As_temp = UserList()
 
     logging.info("constructing train data")
     length = len(feats)
     i = 1
     for t in feats:
+        _, feat = t
+
         if i % INF_FREQ == 0 or i == length:
             logging.info("loading: %d/%d" % (i, length))
+            del Qs_temp[:], As_temp[:]
+            if Qs is None:
+                Qs = csr_matrix(Qs_temp, dtype='float64')
+                As = csr_matrix(Qs_temp, dtype='float64')
+            else:
+                Qs = vstack((Qs, Qs_temp))
+                As = vstack((As, As_temp))
 
-        _, feat = t
-        if i == 1:
-            Qs = csr_matrix(feat[0], dtype='float64')
-            As = csr_matrix(feat[1], dtype='float64')
-        else:
-            Qs = vstack((Qs, feat[0]))
-            As = vstack((As, feat[1]))
+        Qs_temp.append(feat[0])
+        As_temp.append(feat[1])
+
         i += 1
 
     if not full_svd:

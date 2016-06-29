@@ -27,15 +27,15 @@ if __name__ == "__main__":
     for i in src_data.sent_indx:
         token_count_group[i] = defaultdict(int)
         for line in src_data:
+            sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
+            sys.stdout.flush()
             for token in line[i]:
-                sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
-                sys.stdout.flush()
                 # check if the token appears count reach requirement
                 if token_count_group[i][token] > LOWEST_FREQ:
                     token_group[i].append(token)
                 else:
                     token_count_group[i][token] += 1
-                line_num += 1
+            line_num += 1
 
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
