@@ -38,7 +38,7 @@ if __name__ == "__main__":
     Qs = None
     As = None
     Qs_temp = UserList([None] * INF_FREQ)
-    As_temp = UserList()
+    As_temp = UserList([None] * INF_FREQ)
 
     logging.info("constructing train data")
     length = len(feats)
