@@ -2,7 +2,6 @@
 
 from word2embedding import WORD_EMBEDDING_FILE, EMBEDDING_SIZE
 from word2index import VOC_DICT_FILE
-from scipy.sparse import csr_matrix
 import numpy as np
 import pickle as pkl
 
@@ -62,10 +61,10 @@ class BoW(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    feat[i] = csr_matrix(np.zeros(voc_num[i]))
+                    feat[i] = np.zeros(voc_num[i])
                     for w in d[i]:
                         # one hot
-                        feat[i][0, w] += 1
+                        feat[i][w] += 1
                 else:
                     # use original data
                     feat[i] = d[i]

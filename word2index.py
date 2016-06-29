@@ -32,15 +32,16 @@ if __name__ == "__main__":
                     token_group[i].append(token)
                 else:
                     token_count_group[i][token] += 1
-        # add unknown token
-        token_group[i].insert(UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN)
 
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
     for i in src_data.sent_indx:
         # unique
-        token_list = set(token_group[i])
-        word_indx_hash_group[i] = zip(token_list, range(1, len(token_list)))
+        token_list = list(set(token_group[i]))
+        # add unknown token
+        token_group[i].insert(UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN)
+        # generate index
+        word_indx_hash_group[i] = dict(zip(token_list, range(len(token_list))))
         logging.info("Found %d tokens" % len(token_list))
 
     logging.info("Saving word index hashing table")

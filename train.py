@@ -1,8 +1,7 @@
 from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
-from preprocess.feats import FEATURE_OPTS, data2feats, BoW, WordEmbedding
-from word2embedding import EMBEDDING_SIZE
-from scipy.sparse import csr_matrix, hstack
+from preprocess.feats import FEATURE_OPTS, data2feats
+from scipy.sparse import csr_matrix, vstack
 from CCA import train
 import argparse
 import pickle as pkl
@@ -47,14 +46,12 @@ if __name__ == "__main__":
 
         _, feat = t
         if i == 1:
-            Qs = feat[0]
-            As = feat[1]
+            Qs = csr_matrix(feat[0], dtype='float64')
+            As = csr_matrix(feat[1], dtype='float64')
         else:
-            Qs = hstack((Qs, feat[0]))
-            As = hstack((Qs, feat[1]))
+            Qs = vstack((Qs, feat[0]))
+            As = vstack((Qs, feat[1]))
         i += 1
-
-    del data, feats, voc_dict
 
     if not full_svd:
         logging.info("running CCA, using SVDs, k=%d" % k)
