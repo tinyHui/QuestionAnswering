@@ -50,7 +50,7 @@ if __name__ == "__main__":
             As = csr_matrix(feat[1], dtype='float64')
         else:
             Qs = vstack((Qs, feat[0]))
-            As = vstack((Qs, feat[1]))
+            As = vstack((As, feat[1]))
         i += 1
 
     if not full_svd:

@@ -23,10 +23,12 @@ if __name__ == "__main__":
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
     token_count_group = {}
     token_group = defaultdict(list)
+    line_num = 0
     for i in src_data.sent_indx:
         token_count_group[i] = defaultdict(int)
         for line in src_data:
             for token in line[i]:
+                sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
                 # check if the token appears count reach requirement
                 if token_count_group[i][token] > LOWEST_FREQ:
                     token_group[i].append(token)
