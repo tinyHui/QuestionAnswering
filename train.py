@@ -37,7 +37,7 @@ if __name__ == "__main__":
     pair_num = len(data)
     Qs = None
     As = None
-    Qs_temp = UserList()
+    Qs_temp = UserList([None] * INF_FREQ)
     As_temp = UserList()
 
     logging.info("constructing train data")
@@ -54,10 +54,9 @@ if __name__ == "__main__":
             else:
                 Qs = vstack((Qs, Qs_temp))
                 As = vstack((As, As_temp))
-            del Qs_temp[:], As_temp[:]
 
-        Qs_temp.append(feat[0])
-        As_temp.append(feat[1])
+        Qs_temp[(i-1) % INF_FREQ] = feat[0]
+        As_temp[(i-1) % INF_FREQ] = feat[1]
 
         i += 1
 
