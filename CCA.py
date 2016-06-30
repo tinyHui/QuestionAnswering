@@ -25,6 +25,9 @@ def train(Qs, As, sample_num=0, diag_only=False, full_svd=True, k=0):
         logging.info("keep only diagonal")
         c_qq = np.diag(c_qq.diagonal())
         c_aa = np.diag(c_aa.diagonal())
+    else:
+        c_qq = c_qq.todense()
+        c_aa = c_aa.todense()
 
     logging.info("doing square root and invert for C_AA")
     c_qq_sqrt = bsr_matrix(inv(sqrtm(c_qq)) / sample_num)

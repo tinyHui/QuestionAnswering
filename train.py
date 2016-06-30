@@ -63,7 +63,6 @@ if __name__ == "__main__":
 
     Qs = None
     As = None
-    pool = []
     temp_qa = Queue()
     for i in range(PROCESS_NUM):
         p = Process(target=generate, args=(feats_list[i], temp_qa))
@@ -71,10 +70,10 @@ if __name__ == "__main__":
 
     count = 0
     while True:
+        if count == length:
+            break
         # pending until have result
         temp = temp_qa.get()
-        if temp is None:
-            break
         Qs_temp, As_temp = temp
         if isinstance(Qs, type(None)):
             Qs = csr_matrix(Qs_temp, dtype='float64')
@@ -85,10 +84,6 @@ if __name__ == "__main__":
 
         count += INF_FREQ
         logging.info("loading: %d/%d" % (count, length))
-
-    for i in range(PROCESS_NUM):
-        p = pool[i]
-        p.join()
 
     # single thread
     # i = 1
