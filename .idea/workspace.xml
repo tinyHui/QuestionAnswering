@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f583a4c8-d098-485a-bfbe-5dca56642d80" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train.py" afterPath="$PROJECT_DIR$/train.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CCA.py" afterPath="$PROJECT_DIR$/CCA.py" />
     </list>
     <ignored path="FYD.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -27,7 +26,7 @@
       <file leaf-file-name="train.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-45">
+            <state relative-caret-position="105">
               <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
                 <element signature="e#0#36#0" expanded="true" />
@@ -39,8 +38,8 @@
       <file leaf-file-name="CCA.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CCA.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+            <state relative-caret-position="300">
+              <caret line="20" column="23" selection-start-line="20" selection-start-column="23" selection-end-line="20" selection-end-column="23" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -93,9 +92,9 @@
         <option value="$PROJECT_DIR$/word2embedding.py" />
         <option value="$PROJECT_DIR$/word2index.py" />
         <option value="$PROJECT_DIR$/preprocess/data.py" />
-        <option value="$PROJECT_DIR$/CCA.py" />
         <option value="$PROJECT_DIR$/preprocess/feats.py" />
         <option value="$PROJECT_DIR$/train.py" />
+        <option value="$PROJECT_DIR$/CCA.py" />
       </list>
     </option>
   </component>
@@ -810,7 +809,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-45">
+        <state relative-caret-position="105">
           <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#0#36#0" expanded="true" />
@@ -820,8 +819,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CCA.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+        <state relative-caret-position="300">
+          <caret line="20" column="23" selection-start-line="20" selection-start-column="23" selection-end-line="20" selection-end-column="23" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

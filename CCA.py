@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.linalg import sqrtm, inv
+from scipy.sparse import diags
 from scipy.sparse.linalg import svds
 from scipy.spatial.distance import cosine
 import logging
@@ -23,8 +24,8 @@ def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
 
     if sparse:
         logging.info("keep only diagonal")
-        c_qq = c_qq.diagonal()
-        c_aa = c_aa.diagonal()
+        c_qq = diags(c_qq.diagonal(), 0)
+        c_aa = diags(c_aa.diagonal(), 0)
 
         logging.info("doing square root and invert for C_AA")
         c_qq_sqrt = inv(c_qq.sqrt()) / sample_num
