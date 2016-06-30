@@ -16,7 +16,7 @@ INF_FREQ = 1000  # information message frequency
 PROCESS_NUM = 30
 
 
-def generate_part_dense(feature_set, q):
+def generate_part_dense(feature_set, qa_queue, count_queue):
     i = 1
     Qs = None
     As = None
@@ -31,14 +31,16 @@ def generate_part_dense(feature_set, q):
             As = np.vstack((As, feat[1]))
 
         if i % INF_FREQ == 0 or i == len(feature_set):
-            q.put((Qs, As))
+            qa_queue.put((Qs, As))
+            count_queue.put(i)
             # reset Qs and As
             Qs = None
             As = None
+            i = 0
         i += 1
 
 
-def generate_part_sparse(feature_set, q):
+def generate_part_sparse(feature_set, qa_queue, count_queue):
     i = 1
     Qs = None
     As = None
@@ -53,14 +55,15 @@ def generate_part_sparse(feature_set, q):
             As = sparse_vstack((As, feat[1]))
 
         if i % INF_FREQ == 0 or i == len(feature_set):
-            q.put((Qs, As))
+            qa_queue.put((Qs, As))
+            count_queue.put(i)
             # reset Qs and As
             Qs = None
             As = None
         i += 1
 
 
-def generate_dense(queue):
+def generate_dense(qa_queue, count_queue):
     Qs = None
     As = None
     count = 0
@@ -68,8 +71,9 @@ def generate_dense(queue):
         if count == length:
             break
         # pending until have result
-        temp = queue.get()
-        Qs_temp, As_temp = temp
+        QA_temp = qa_queue.get()
+        count = count_queue.get()
+        Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
             Qs = np.array(Qs_temp, dtype='float64')
             As = np.array(As_temp, dtype='float64')
@@ -77,13 +81,13 @@ def generate_dense(queue):
             Qs = np.vstack((Qs, Qs_temp))
             As = np.vstack((As, As_temp))
 
-        count += INF_FREQ
+        count += count
         logging.info("loading: %d/%d" % (count, length))
 
     return Qs, As
 
 
-def generate_sparse(queue):
+def generate_sparse(qa_queue, count_queue):
     Qs = None
     As = None
     count = 0
@@ -91,8 +95,9 @@ def generate_sparse(queue):
         if count == length:
             break
         # pending until have result
-        temp = queue.get()
-        Qs_temp, As_temp = temp
+        QA_temp = qa_queue.get()
+        count = count_queue.get()
+        Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
             Qs = csr_matrix(Qs_temp, dtype='float64')
             As = csr_matrix(As_temp, dtype='float64')
@@ -100,7 +105,7 @@ def generate_sparse(queue):
             Qs = sparse_vstack((Qs, Qs_temp))
             As = sparse_vstack((As, As_temp))
 
-        count += INF_FREQ
+        count += count
         logging.info("loading: %d/%d" % (count, length))
 
     return Qs, As
@@ -138,12 +143,13 @@ if __name__ == "__main__":
         generate_part = generate_part_dense
         generate = generate_dense
 
-    temp_qa = Queue()
+    qa_queue = Queue()
+    count_queue = Queue()
     for i in range(PROCESS_NUM):
         p = Process(target=generate_part, args=(feats_list[i], temp_qa))
         p.start()
 
-    Qs, As = generate(temp_qa)
+    Qs, As = generate(qa_queue, count_queue)
 
     if sparse:
         logging.info("using sparse matrix")
