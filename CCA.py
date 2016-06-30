@@ -2,14 +2,14 @@ import numpy as np
 from scipy.linalg import sqrtm, inv
 from scipy.sparse.linalg import svds
 from scipy.spatial.distance import cosine
-from scipy.sparse import bsr_matrix
 import logging
 from multiprocessing import Pool
 from functools import partial
 
 
-def train(Qs, As, sample_num=0, diag_only=False, full_svd=True, k=0):
+def train_sparse(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
     '''
+    train use sparse matrix
     params q: sentence embedding for question set
     params a: sentence embedding for answer set
     '''
@@ -21,20 +21,28 @@ def train(Qs, As, sample_num=0, diag_only=False, full_svd=True, k=0):
     logging.info("calculating C_AB")
     c_qa = Qs.T.dot(As) / sample_num
 
-    if diag_only:
+    if sparse:
         logging.info("keep only diagonal")
-        c_qq = np.diag(c_qq.diagonal())
-        c_aa = np.diag(c_aa.diagonal())
-    else:
-        c_qq = c_qq.todense()
-        c_aa = c_aa.todense()
+        c_qq = c_qq.diagonal()
+        c_aa = c_aa.diagonal()
 
-    logging.info("doing square root and invert for C_AA")
-    c_qq_sqrt = bsr_matrix(inv(sqrtm(c_qq)) / sample_num)
-    logging.info("doing square root and invert for C_BB")
-    c_aa_sqrt = bsr_matrix(inv(sqrtm(c_aa)) / sample_num)
-    logging.info("C_AA * C_AB * C_BB")
-    result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
+        logging.info("doing square root and invert for C_AA")
+        c_qq_sqrt = inv(c_qq.sqrt()) / sample_num
+        logging.info("doing square root and invert for C_BB")
+        c_aa_sqrt = inv(c_aa.sqrt()) / sample_num
+        logging.info("C_AA * C_AB * C_BB")
+        result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
+    else:
+        logging.info("keep only diagonal")
+        c_qq = np.diag(np.diag(c_qq))
+        c_aa = np.diag(np.diag(c_aa))
+
+        logging.info("doing square root and invert for C_AA")
+        c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
+        logging.info("doing square root and invert for C_BB")
+        c_aa_sqrt = inv(sqrtm(c_aa)) / sample_num
+        logging.info("C_AA * C_AB * C_BB")
+        result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
 
     logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
     if full_svd:

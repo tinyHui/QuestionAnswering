@@ -1,9 +1,13 @@
 from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
-from scipy.sparse import csr_matrix, vstack
+from scipy.sparse import csr_matrix
+from scipy.sparse import vstack as sparse_vstack
+import numpy as np
+from numpy import vstack
 from multiprocessing import Queue, Process
-from CCA import train
+from collections import UserList
+from CCA import train_dense, train_sparse
 import argparse
 import pickle as pkl
 import logging
@@ -14,7 +18,25 @@ INF_FREQ = 1000  # information message frequency
 PROCESS_NUM = 20
 
 
-def generate(feature_set, q):
+def generate_part_dense(feature_set, q):
+    i = 1
+    Qs = UserList()
+    As = UserList()
+    for feature in feature_set:
+        _, feat = feature
+
+        Qs = Qs.append(feat[0])
+        As = As.append(feat[1])
+
+        if i % INF_FREQ == 0:
+            q.put((Qs, As))
+            # reset Qs and As
+            del Qs[:]
+            del As[:]
+        i += 1
+
+
+def generate_part_sparse(feature_set, q):
     i = 1
     Qs = None
     As = None
@@ -25,8 +47,8 @@ def generate(feature_set, q):
             Qs = csr_matrix(feat[0], dtype='float64')
             As = csr_matrix(feat[1], dtype='float64')
         else:
-            Qs = vstack((Qs, feat[0]))
-            As = vstack((As, feat[1]))
+            Qs = sparse_vstack((Qs, feat[0]))
+            As = sparse_vstack((As, feat[1]))
 
         if i % INF_FREQ == 0:
             q.put((Qs, As))
@@ -36,20 +58,66 @@ def generate(feature_set, q):
         i += 1
 
 
+def generate_dense(queue):
+    Qs = None
+    As = None
+    count = 0
+    while True:
+        if count == length:
+            break
+        # pending until have result
+        temp = queue.get()
+        Qs_temp, As_temp = temp
+        if isinstance(Qs, type(None)):
+            Qs = np.array(Qs_temp, dtype='float64')
+            As = np.array(As_temp, dtype='float64')
+        else:
+            Qs = vstack((Qs, Qs_temp))
+            As = vstack((As, As_temp))
+
+        count += INF_FREQ
+        logging.info("loading: %d/%d" % (count, length))
+
+    return Qs, As
+
+
+def generate_sparse(queue):
+    Qs = None
+    As = None
+    count = 0
+    while True:
+        if count == length:
+            break
+        # pending until have result
+        temp = queue.get()
+        Qs_temp, As_temp = temp
+        if isinstance(Qs, type(None)):
+            Qs = csr_matrix(Qs_temp, dtype='float64')
+            As = csr_matrix(As_temp, dtype='float64')
+        else:
+            Qs = sparse_vstack((Qs, Qs_temp))
+            As = sparse_vstack((As, As_temp))
+
+        count += INF_FREQ
+        logging.info("loading: %d/%d" % (count, length))
+
+    return Qs, As
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
+    parser.add_argument('--sparse', action='store_true', default=False,
+                        help='Use sparse matrix for C_AA, C_AB and C_BB')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
-    parser.add_argument('--diag_only', action='store_true', default=False,
-                        help='Use only diagonal value for C_AA and C_BB')
 
     args = parser.parse_args()
     feature = args.feature
     INF_FREQ = args.freq
     k = args.svds
+    sparse = args.sparse
     full_svd = k == -1
-    diag_only = args.diag_only
 
     logging.info("loading vocabulary index")
     with open(VOC_DICT_FILE, 'rb') as f:
@@ -61,56 +129,31 @@ if __name__ == "__main__":
     pair_num = sum([len(data) for data in data_list])
     length = sum([len(feats) for feats in feats_list])
 
-    Qs = None
-    As = None
+    if sparse:
+        generate_part = generate_part_dense
+        generate = generate_dense
+    else:
+        generate_part = generate_part_sparse
+        generate = generate_sparse
+
     temp_qa = Queue()
     for i in range(PROCESS_NUM):
-        p = Process(target=generate, args=(feats_list[i], temp_qa))
+        p = Process(target=generate_part, args=(feats_list[i], temp_qa))
         p.start()
 
-    count = 0
-    while True:
-        if count == length:
-            break
-        # pending until have result
-        temp = temp_qa.get()
-        Qs_temp, As_temp = temp
-        if isinstance(Qs, type(None)):
-            Qs = csr_matrix(Qs_temp, dtype='float64')
-            As = csr_matrix(As_temp, dtype='float64')
-        else:
-            Qs = vstack((Qs, Qs_temp))
-            As = vstack((As, As_temp))
+    Qs, As = generate(temp_qa)
 
-        count += INF_FREQ
-        logging.info("loading: %d/%d" % (count, length))
-
-    # single thread
-    # i = 1
-    # for t in feats:
-    #     _, feat = t
-    #
-    #     if i % INF_FREQ == 0 or i == length:
-    #         logging.info("loading: %d/%d" % (i, length))
-    #         if isinstance(Qs, type(None)):
-    #             Qs = csr_matrix(Qs_temp, dtype='float64')
-    #             As = csr_matrix(As_temp, dtype='float64')
-    #         else:
-    #             Qs = vstack((Qs, Qs_temp))
-    #             As = vstack((As, As_temp))
-    #         del Qs_temp[:], As_temp[:]
-    #
-    #     Qs_temp.append(feat[0])
-    #     As_temp.append(feat[1])
-    #
-    #     i += 1
-
-    if not full_svd:
-        logging.info("running CCA, using SVDs, k=%d" % k)
+    if sparse:
+        logging.info("using sparse matrix")
     else:
-        logging.info("running CCA, using full SVD")
+        logging.info("using dense matrix")
 
-    Q_k, A_k = train(Qs, As, sample_num=pair_num, diag_only=diag_only, full_svd=full_svd, k=k)
+    if full_svd:
+        logging.info("running CCA, using full SVD")
+    else:
+        logging.info("running CCA, using SVDs, k=%d" % k)
+
+    Q_k, A_k = train_sparse(Qs, As, sample_num=pair_num, full_svd=full_svd, k=k, sparse=sparse)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
