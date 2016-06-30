@@ -1,5 +1,7 @@
 import numpy as np
-from scipy.linalg import sqrtm, inv
+from scipy.linalg import sqrtm as dense_sqrt
+from scipy.linalg import inv as dense_inv
+from scipy.sparse.linalg import inv as sparse_inv
 from scipy.sparse import diags
 from scipy.sparse.linalg import svds
 from scipy.spatial.distance import cosine
@@ -23,25 +25,27 @@ def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
     c_qa = Qs.T.dot(As) / sample_num
 
     if sparse:
+        # sparse
         logging.info("keep only diagonal")
         c_qq = diags(c_qq.diagonal(), 0)
         c_aa = diags(c_aa.diagonal(), 0)
 
         logging.info("doing square root and invert for C_AA")
-        c_qq_sqrt = inv(c_qq.sqrt()) / sample_num
+        c_qq_sqrt = sparse_inv(c_qq.sqrt()) / sample_num
         logging.info("doing square root and invert for C_BB")
-        c_aa_sqrt = inv(c_aa.sqrt()) / sample_num
+        c_aa_sqrt = sparse_inv(c_aa.sqrt()) / sample_num
         logging.info("C_AA * C_AB * C_BB")
         result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
     else:
+        # dense
         logging.info("keep only diagonal")
         c_qq = np.diag(np.diag(c_qq))
         c_aa = np.diag(np.diag(c_aa))
 
         logging.info("doing square root and invert for C_AA")
-        c_qq_sqrt = inv(sqrtm(c_qq)) / sample_num
+        c_qq_sqrt = dense_inv(dense_sqrt(c_qq)) / sample_num
         logging.info("doing square root and invert for C_BB")
-        c_aa_sqrt = inv(sqrtm(c_aa)) / sample_num
+        c_aa_sqrt = dense_inv(dense_sqrt(c_aa)) / sample_num
         logging.info("C_AA * C_AB * C_BB")
         result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
 
