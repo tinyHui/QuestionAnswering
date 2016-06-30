@@ -13,7 +13,7 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 CCA_FILE = "./bin/CCA_model_%s.pkl"
 INF_FREQ = 1000  # information message frequency
-PROCESS_NUM = 20
+PROCESS_NUM = 30
 
 
 def generate_part_dense(feature_set, q):
