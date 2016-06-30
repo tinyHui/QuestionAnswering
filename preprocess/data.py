@@ -196,7 +196,7 @@ class ReVerbPairs(object):
         if self.usage == 'train':
             # return 117202052
             if self.part == 29:
-                return 3906738
+                return 3906708
             else:
                 return 3906736
         elif self.usage == 'test':

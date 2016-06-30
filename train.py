@@ -17,6 +17,7 @@ PROCESS_NUM = 30
 
 
 def generate_part_dense(feature_set, qa_queue, count_queue):
+    last_i = 0
     i = 1
     Qs = None
     As = None
@@ -32,15 +33,16 @@ def generate_part_dense(feature_set, qa_queue, count_queue):
 
         if i % INF_FREQ == 0 or i == len(feature_set):
             qa_queue.put((Qs, As))
-            count_queue.put(i)
+            count_queue.put(i - last_i)
             # reset Qs and As
             Qs = None
             As = None
-            i = 0
+            last_i = i
         i += 1
 
 
 def generate_part_sparse(feature_set, qa_queue, count_queue):
+    last_i = 0
     i = 1
     Qs = None
     As = None
@@ -56,10 +58,11 @@ def generate_part_sparse(feature_set, qa_queue, count_queue):
 
         if i % INF_FREQ == 0 or i == len(feature_set):
             qa_queue.put((Qs, As))
-            count_queue.put(i)
+            count_queue.put(i - last_i)
             # reset Qs and As
             Qs = None
             As = None
+            last_i = i
         i += 1
 
 
@@ -72,7 +75,7 @@ def generate_dense(qa_queue, count_queue):
             break
         # pending until have result
         QA_temp = qa_queue.get()
-        count = count_queue.get()
+        new_line_num = count_queue.get()
         Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
             Qs = np.array(Qs_temp, dtype='float64')
@@ -81,7 +84,7 @@ def generate_dense(qa_queue, count_queue):
             Qs = np.vstack((Qs, Qs_temp))
             As = np.vstack((As, As_temp))
 
-        count += count
+        count += new_line_num
         logging.info("loading: %d/%d" % (count, length))
 
     return Qs, As
@@ -96,7 +99,7 @@ def generate_sparse(qa_queue, count_queue):
             break
         # pending until have result
         QA_temp = qa_queue.get()
-        count = count_queue.get()
+        new_line_num = count_queue.get()
         Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
             Qs = csr_matrix(Qs_temp, dtype='float64')
@@ -105,7 +108,7 @@ def generate_sparse(qa_queue, count_queue):
             Qs = sparse_vstack((Qs, Qs_temp))
             As = sparse_vstack((As, As_temp))
 
-        count += count
+        count += new_line_num
         logging.info("loading: %d/%d" % (count, length))
 
     return Qs, As
@@ -146,7 +149,7 @@ if __name__ == "__main__":
     qa_queue = Queue()
     count_queue = Queue()
     for i in range(PROCESS_NUM):
-        p = Process(target=generate_part, args=(feats_list[i], temp_qa))
+        p = Process(target=generate_part, args=(feats_list[i], qa_queue, count_queue))
         p.start()
 
     Qs, As = generate(qa_queue, count_queue)
