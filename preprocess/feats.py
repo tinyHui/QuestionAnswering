@@ -61,7 +61,7 @@ class BoW(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    feat[i] = np.zeros(voc_num[i])
+                    feat[i] = np.zeros(voc_num[i], dtype='float64')
                     for w in d[i]:
                         # one hot
                         feat[i][w] += 1

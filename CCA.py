@@ -7,7 +7,7 @@ from multiprocessing import Pool
 from functools import partial
 
 
-def train_sparse(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
+def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
     '''
     train use sparse matrix
     params q: sentence embedding for question set

@@ -7,7 +7,7 @@ import numpy as np
 from numpy import vstack
 from multiprocessing import Queue, Process
 from collections import UserList
-from CCA import train_dense, train_sparse
+from CCA import train
 import argparse
 import pickle as pkl
 import logging
@@ -20,19 +20,23 @@ PROCESS_NUM = 20
 
 def generate_part_dense(feature_set, q):
     i = 1
-    Qs = UserList()
-    As = UserList()
+    Qs = None
+    As = None
     for feature in feature_set:
         _, feat = feature
 
-        Qs = Qs.append(feat[0])
-        As = As.append(feat[1])
+        if isinstance(Qs, type(None)):
+            Qs = feat[0]
+            As = feat[1]
+        else:
+            Qs = sparse_vstack((Qs, feat[0]))
+            As = sparse_vstack((As, feat[1]))
 
         if i % INF_FREQ == 0:
             q.put((Qs, As))
             # reset Qs and As
-            del Qs[:]
-            del As[:]
+            Qs = None
+            As = None
         i += 1
 
 
@@ -153,7 +157,7 @@ if __name__ == "__main__":
     else:
         logging.info("running CCA, using SVDs, k=%d" % k)
 
-    Q_k, A_k = train_sparse(Qs, As, sample_num=pair_num, full_svd=full_svd, k=k, sparse=sparse)
+    Q_k, A_k = train(Qs, As, sample_num=pair_num, full_svd=full_svd, k=k, sparse=sparse)
 
     logging.info("dumping model into binary file")
     # dump to disk for reuse
