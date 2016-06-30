@@ -30,7 +30,7 @@ def generate_part_dense(feature_set, q):
             Qs = np.vstack((Qs, feat[0]))
             As = np.vstack((As, feat[1]))
 
-        if i % INF_FREQ == 0:
+        if i % INF_FREQ == 0 or i == len(feature_set):
             q.put((Qs, As))
             # reset Qs and As
             Qs = None
@@ -52,7 +52,7 @@ def generate_part_sparse(feature_set, q):
             Qs = sparse_vstack((Qs, feat[0]))
             As = sparse_vstack((As, feat[1]))
 
-        if i % INF_FREQ == 0:
+        if i % INF_FREQ == 0 or i == len(feature_set):
             q.put((Qs, As))
             # reset Qs and As
             Qs = None
