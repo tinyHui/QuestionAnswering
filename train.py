@@ -4,9 +4,7 @@ from preprocess.feats import FEATURE_OPTS, data2feats
 from scipy.sparse import csr_matrix
 from scipy.sparse import vstack as sparse_vstack
 import numpy as np
-from numpy import vstack
 from multiprocessing import Queue, Process
-from collections import UserList
 from CCA import train
 import argparse
 import pickle as pkl
@@ -29,8 +27,8 @@ def generate_part_dense(feature_set, q):
             Qs = feat[0]
             As = feat[1]
         else:
-            Qs = sparse_vstack((Qs, feat[0]))
-            As = sparse_vstack((As, feat[1]))
+            Qs = np.vstack((Qs, feat[0]))
+            As = np.vstack((As, feat[1]))
 
         if i % INF_FREQ == 0:
             q.put((Qs, As))
@@ -76,8 +74,8 @@ def generate_dense(queue):
             Qs = np.array(Qs_temp, dtype='float64')
             As = np.array(As_temp, dtype='float64')
         else:
-            Qs = vstack((Qs, Qs_temp))
-            As = vstack((As, As_temp))
+            Qs = np.vstack((Qs, Qs_temp))
+            As = np.vstack((As, As_temp))
 
         count += INF_FREQ
         logging.info("loading: %d/%d" % (count, length))
@@ -134,11 +132,11 @@ if __name__ == "__main__":
     length = sum([len(feats) for feats in feats_list])
 
     if sparse:
-        generate_part = generate_part_dense
-        generate = generate_dense
-    else:
         generate_part = generate_part_sparse
         generate = generate_sparse
+    else:
+        generate_part = generate_part_dense
+        generate = generate_dense
 
     temp_qa = Queue()
     for i in range(PROCESS_NUM):
