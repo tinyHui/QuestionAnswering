@@ -206,10 +206,10 @@ class ReVerbPairs(object):
         return "ReVerb QA pairs"
 
 
-# British National Corpus
-class BNCembedding(object):
+# Word Embedding
+class WordEmbeddingRaw(object):
     def __init__(self):
-        self.file = './data/embeddings.txt'
+        self.file = './data/GoogleNews-vectors-negative300.txt'
 
     def __iter__(self):
         for line in open(self.file, 'r'):
@@ -217,10 +217,10 @@ class BNCembedding(object):
             yield w, emb
 
     def __len__(self):
-        return 100148
+        return 3000000
 
     def __str__(self):
-        return "BNC word embeddings"
+        return "Google News word embeddings"
 
 
 # paraphrased sentences

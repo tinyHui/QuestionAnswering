@@ -1,5 +1,5 @@
 from collections import defaultdict
-from preprocess.data import BNCembedding
+from preprocess.data import WordEmbeddingRaw
 from word2index import VOC_DICT_FILE
 import logging
 import pickle as pkl
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     logging.info("Generating source data")
     # data is a group of sentences
-    src_data = BNCembedding()
+    src_data = WordEmbeddingRaw()
     w_emb_map = {}
     for w, emb in src_data:
         w_emb_map[w] = emb
