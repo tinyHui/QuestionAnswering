@@ -1,4 +1,3 @@
-from word2index import VOC_DICT_FILE
 from preprocess.data import ReVerbPairs
 from preprocess.feats import FEATURE_OPTS, data2feats
 from scipy.sparse import csr_matrix
@@ -129,12 +128,8 @@ if __name__ == "__main__":
     sparse = args.sparse
     full_svd = k == -1
 
-    logging.info("loading vocabulary index")
-    with open(VOC_DICT_FILE, 'rb') as f:
-        voc_dict = pkl.load(f)
-
     logging.info("constructing train data")
-    data_list = [ReVerbPairs(usage='train', part=i, mode='index', voc_dict=voc_dict) for i in range(PROCESS_NUM)]
+    data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
     feats_list = [data2feats(data, feature) for data in data_list]
     pair_num = sum([len(data) for data in data_list])
     length = sum([len(feats) for feats in feats_list])

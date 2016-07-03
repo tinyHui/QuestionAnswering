@@ -1,4 +1,4 @@
-from word2index import VOC_DICT_FILE
+from word2index import UNIGRAM_DICT_FILE
 from preprocess.data import ReVerbPairs
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
@@ -31,17 +31,13 @@ if __name__ == '__main__':
     feature = args.feature
     INF_FREQ = args.freq
 
-    logging.info("loading vocabulary index")
-    with open(VOC_DICT_FILE, 'rb') as f:
-        voc_dict = pkl.load(f)
-
     logging.info("loading CCA model")
     # load CCA model
     with open(CCA_FILE % feature, 'rb') as f:
         Q_k, A_k = pkl.load(f)
 
     logging.info("constructing testing data")
-    data = ReVerbPairs(usage='test', mode='index', voc_dict=voc_dict)
+    data = ReVerbPairs(usage='test', mode='index')
     feats = data2feats(data, feature)
     length = len(feats)
 

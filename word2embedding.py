@@ -1,6 +1,6 @@
 from collections import defaultdict
 from preprocess.data import WordEmbeddingRaw
-from word2index import VOC_DICT_FILE
+from word2index import UNIGRAM_DICT_FILE
 import logging
 import pickle as pkl
 import os
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     logging.info("loading vocabulary index")
-    with open(VOC_DICT_FILE, 'rb') as f:
+    with open(UNIGRAM_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
     logging.info("Generating source data")

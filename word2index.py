@@ -4,16 +4,37 @@ import logging
 import pickle as pkl
 import os
 import sys
+import argparse
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-VOC_DICT_FILE = './bin/word_indx_hash.pkl'
+UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
+BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
+THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
 LOWEST_FREQ = 4
 
 
 if __name__ == "__main__":
-    if os.path.exists(VOC_DICT_FILE):
+    parser = argparse.ArgumentParser(description='Define training process.')
+    parser.add_argument('--gram', type=int, default=1, help='Define N for Ngram')
+    args = parser.parse_args()
+
+    gram = args.grams
+    if gram == 1:
+        DUMP_FILE = UNIGRAM_DICT_FILE
+    elif gram == 2:
+        DUMP_FILE = BIGRAM_DICT_FILE
+    elif gram == 3:
+        DUMP_FILE = THRIGRAM_DICT_FILE
+    else:
+        raise SystemError("Does not support %d-gram" % gram)
+
+    if os.path.exists(DUMP_FILE):
         logging.info("Word index file exists, skip")
         sys.exit(0)
+
+    multi_gram = gram > 1
+    if multi_gram:
+        assert os.path.exists(UNIGRAM_DICT_FILE), "Must train unigram first"
 
     logging.info("Generating source data")
     # data is a group of sentences
@@ -29,7 +50,8 @@ if __name__ == "__main__":
         for line in src_data:
             sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
             sys.stdout.flush()
-            for token in line[i]:
+            tokens = line[i]
+            for token in zip(*[tokens[i:] for i in range(gram)]):
                 # check if the token appears count reach requirement
                 if token_count_group[i][token] > LOWEST_FREQ:
                     token_group[i].append(token)
@@ -49,8 +71,5 @@ if __name__ == "__main__":
         logging.info("Found %d tokens" % len(token_list))
 
     logging.info("Saving word index hashing table")
-    with open(VOC_DICT_FILE, 'wb') as f:
+    with open(DUMP_FILE, 'wb') as f:
         pkl.dump(word_indx_hash_group, f)
-
-    logging.info("Free up memory")
-    del word_indx_hash_group
