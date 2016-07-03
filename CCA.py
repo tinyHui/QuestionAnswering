@@ -6,8 +6,6 @@ from scipy.sparse import diags
 from scipy.sparse.linalg import svds
 from scipy.spatial.distance import cosine
 import logging
-from multiprocessing import Pool
-from functools import partial
 
 
 def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
@@ -60,15 +58,6 @@ def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
 
 
 # get distance between the question and answer, return with the answer index
-def distance(indx_a, proj_q):
-    indx, proj_a = indx_a
+def distance(proj_q, proj_a):
     dist = cosine(proj_q, proj_a)
-    return indx, dist
-
-
-def find_answer(proj_q, proj_As):
-    with Pool(processes=8) as pool:
-        result = pool.map(partial(distance, proj_q=proj_q), enumerate(proj_As))
-    best_indx, _ = min(result, key=lambda x: x[1])
-
-    return best_indx
+    return dist
