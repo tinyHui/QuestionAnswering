@@ -28,16 +28,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
-    parser.add_argument('--full_rank', action='store_true', default=False,
-                        help='Use full rank for selecting answer')
-    parser.add_argument('--rerank', action='store_true', default=False,
-                        help='Use rerank for selecting answer')
+    # parser.add_argument('--full_rank', action='store_true', default=False,
+    #                     help='Use full rank for selecting answer')
+    # parser.add_argument('--rerank', action='store_true', default=False,
+    #                     help='Use rerank for selecting answer')
 
     args = parser.parse_args()
     feature = args.feature
     INF_FREQ = args.freq
-    assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
-    full_rank = args.full_rank
+    # assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
+    # full_rank = args.full_rank
 
     OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP1 % feature
     OUTPUT_FILE_TOP10 = OUTPUT_FILE_TOP10 % feature
@@ -67,8 +67,8 @@ if __name__ == '__main__':
     output_tuple = defaultdict(list)
     for line in open('./data/labels.txt', 'r'):
         _, q, a = line.strip().split('\t')
-        pred = result[line_num]
-        output_tuple[q].append(pred, a)
+        _, pred = result[line_num]
+        output_tuple[q].append((pred, a))
         line_num += 1
 
     f1 = open(OUTPUT_FILE_TOP1, 'a')
@@ -81,14 +81,17 @@ if __name__ == '__main__':
         if len(tmp_set) == 0: continue
 
         # only keep the best one
-        for pred, a in tmp_set[0]:
-            output_line = "{}\t{}\t{}".format(q, pred, a)
+        pred, a = tmp_set[0]
+        output_line = "{}\t{}\t{}".format(q, pred, a)
+        f1.write(output_line)
         # keep top 5
         for pred, a in tmp_set[:5]:
             output_line = "{}\t{}\t{}".format(q, pred, a)
+            f5.write(output_line)
         # keep top 10
         for pred, a in tmp_set[:10]:
             output_line = "{}\t{}\t{}".format(q, pred, a)
+            f10.write(output_line)
 
     f1.close()
     f5.close()
