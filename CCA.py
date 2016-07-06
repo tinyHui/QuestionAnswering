@@ -8,13 +8,14 @@ from scipy.spatial.distance import cosine
 import logging
 
 
-def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
+def xcov(Qs, As, sparse=False):
     '''
     train use sparse matrix
     params q: sentence embedding for question set
     params a: sentence embedding for answer set
     '''
 
+    sample_num = Qs.shape[0]
     logging.info("calculating C_AA")
     c_qq = Qs.T.dot(Qs)
     logging.info("calculating C_BB")
@@ -47,6 +48,10 @@ def train(Qs, As, sample_num=0, full_svd=True, k=0, sparse=False):
         logging.info("C_AA * C_AB * C_BB")
         result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)
 
+    return c_qq_sqrt, c_aa_sqrt, result
+
+
+def decompose(c_qq_sqrt, c_aa_sqrt, result, full_svd=True, k=0):
     logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
     if full_svd:
         U, s, V = np.linalg.svd(result, full_matrices=False)

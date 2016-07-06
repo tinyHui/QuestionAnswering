@@ -4,14 +4,15 @@ from scipy.sparse import csr_matrix
 from scipy.sparse import vstack as sparse_vstack
 import numpy as np
 from multiprocessing import Queue, Process
-from CCA import train
+from CCA import xcov, decompose
 import argparse
 import pickle as pkl
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 QA_PAIR_FILE = "./bin/QsAs.%s.pkl"
-CCA_FILE = "./bin/CCA_model_%s.pkl"
+XCOV_FILE = "./bin/XCOV.%s.pkl"
+CCA_FILE = "./bin/CCA_model.%s.pkl"
 INF_FREQ = 1000  # information message frequency
 PROCESS_NUM = 30
 
@@ -121,7 +122,7 @@ if __name__ == "__main__":
     parser.add_argument('--sparse', action='store_true', default=False,
                         help='Use sparse matrix for C_AA, C_AB and C_BB')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
-    parser.add_argument('--load_QA', type=str, default=None, help='Use pre-constructed QA pairs')
+    parser.add_argument('--reuse', default=[], nargs=2, help='Reuse pre-trained data')
 
     args = parser.parse_args()
     feature = args.feature
@@ -129,13 +130,20 @@ if __name__ == "__main__":
     k = args.svds
     sparse = args.sparse
     full_svd = k == -1
-    qa_pair_file = args.load_QA
 
-    if qa_pair_file is None:
+    reuse_stage = 0
+    file = None
+    reuse_arg = args.reuse
+    reuse_stages = ['features', 'xcov']
+    if reuse_arg:
+        reuse_stage_name, file = reuse_arg
+        reuse_stage = reuse_stages.index(reuse_stage_name) + 1
+
+    print(reuse_stage)
+    if reuse_stage == 0:
         logging.info("constructing train data")
         data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
         feats_list = [data2feats(data, feature) for data in data_list]
-        pair_num = sum([len(data) for data in data_list])
         length = sum([len(feats) for feats in feats_list])
 
         if sparse:
@@ -155,27 +163,38 @@ if __name__ == "__main__":
         with open(QA_PAIR_FILE % feature, 'wb') as f:
             pkl.dump((Qs, As), f, protocol=4)
 
-    else:
+    if reuse_stage == 1:
+        # reuse QA pair data
         logging.info("loading pre-constructed data")
-        assert qa_pair_file is not None
-        with open(qa_pair_file, 'rb') as f:
+        assert file is not None
+        with open(file, 'rb') as f:
             Qs, As = pkl.load(f)
-            pair_num = Qs.shape[0]
 
-    if sparse:
-        logging.info("using sparse matrix")
-    else:
-        logging.info("using dense matrix")
+        if sparse:
+            logging.info("using sparse matrix")
+        else:
+            logging.info("using dense matrix")
+
+    if 0 <= reuse_stage <= 1:
+        c_qq_sqrt, c_aa_sqrt, result = xcov(Qs, As, sparse=sparse)
+        with open(XCOV_FILE % feature, 'wb') as f:
+            pkl.dump((c_qq_sqrt, c_aa_sqrt, result), f, protocol=4)
+
+    if reuse_stage == 2:
+        logging.info("loading pre-trained xcov")
+        assert file is not None
+        with open(file, 'rb') as f:
+            c_qq_sqrt, c_aa_sqrt, result = pkl.load(f)
 
     if full_svd:
         logging.info("running CCA, using full SVD")
     else:
         logging.info("running CCA, using SVDs, k=%d" % k)
 
-    Q_k, A_k = train(Qs, As, sample_num=pair_num, full_svd=full_svd, k=k, sparse=sparse)
+    Q_k, A_k = decompose(c_qq_sqrt, c_aa_sqrt, result, full_svd=full_svd, k=k)
 
-    logging.info("dumping model into binary file")
-    # dump to disk for reuse
     with open(CCA_FILE % feature, 'wb') as f:
         pkl.dump((Q_k, A_k), f, protocol=4)
+
+    logging.info("Done")
 
