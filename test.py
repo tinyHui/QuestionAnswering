@@ -61,6 +61,7 @@ if __name__ == '__main__':
         stdout.write("\rTesting: %d/%d" % (i+1, length))
         stdout.flush()
         result.append(loader((i, feat), Q_k=Q_k, A_k=A_k))
+    stdout.write("\n")
 
     logging.info("combining with text file")
     line_num = 0
@@ -82,15 +83,15 @@ if __name__ == '__main__':
 
         # only keep the best one
         pred, a = tmp_set[0]
-        output_line = "{}\t{}\t{}".format(q, pred, a)
+        output_line = "{}\t{}\t{}\n".format(q, pred, a)
         f1.write(output_line)
         # keep top 5
         for pred, a in tmp_set[:5]:
-            output_line = "{}\t{}\t{}".format(q, pred, a)
+            output_line = "{}\t{}\t{}\n".format(q, pred, a)
             f5.write(output_line)
         # keep top 10
         for pred, a in tmp_set[:10]:
-            output_line = "{}\t{}\t{}".format(q, pred, a)
+            output_line = "{}\t{}\t{}\n".format(q, pred, a)
             f10.write(output_line)
 
     f1.close()
