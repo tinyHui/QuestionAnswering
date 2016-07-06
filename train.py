@@ -10,6 +10,7 @@ import pickle as pkl
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+QA_PAIR_FILE = "./bin/QsAs.%s.pkl"
 CCA_FILE = "./bin/CCA_model_%s.pkl"
 INF_FREQ = 1000  # information message frequency
 PROCESS_NUM = 30
@@ -120,6 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('--sparse', action='store_true', default=False,
                         help='Use sparse matrix for C_AA, C_AB and C_BB')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
+    parser.add_argument('--load_QA', type=str, default=None, help='Use pre-constructed QA pairs')
 
     args = parser.parse_args()
     feature = args.feature
@@ -127,27 +129,38 @@ if __name__ == "__main__":
     k = args.svds
     sparse = args.sparse
     full_svd = k == -1
+    qa_pair_file = args.load_QA
 
-    logging.info("constructing train data")
-    data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
-    feats_list = [data2feats(data, feature) for data in data_list]
-    pair_num = sum([len(data) for data in data_list])
-    length = sum([len(feats) for feats in feats_list])
+    if qa_pair_file:
+        logging.info("constructing train data")
+        data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
+        feats_list = [data2feats(data, feature) for data in data_list]
+        pair_num = sum([len(data) for data in data_list])
+        length = sum([len(feats) for feats in feats_list])
 
-    if sparse:
-        generate_part = generate_part_sparse
-        generate = generate_sparse
+        if sparse:
+            generate_part = generate_part_sparse
+            generate = generate_sparse
+        else:
+            generate_part = generate_part_dense
+            generate = generate_dense
+
+        qa_queue = Queue()
+        count_queue = Queue()
+        for i in range(PROCESS_NUM):
+            p = Process(target=generate_part, args=(feats_list[i], qa_queue, count_queue))
+            p.start()
+
+        Qs, As = generate(qa_queue, count_queue)
+        with open(QA_PAIR_FILE % feature, 'wb') as f:
+            pkl.dump((Qs, As), f, protocol=4)
+
     else:
-        generate_part = generate_part_dense
-        generate = generate_dense
-
-    qa_queue = Queue()
-    count_queue = Queue()
-    for i in range(PROCESS_NUM):
-        p = Process(target=generate_part, args=(feats_list[i], qa_queue, count_queue))
-        p.start()
-
-    Qs, As = generate(qa_queue, count_queue)
+        logging.info("loading pre-constructed data")
+        assert qa_pair_file is not None
+        with open(qa_pair_file, 'rb') as f:
+            Qs, As = pkl.load(f)
+            pair_num = Qs.shape[0]
 
     if sparse:
         logging.info("using sparse matrix")
