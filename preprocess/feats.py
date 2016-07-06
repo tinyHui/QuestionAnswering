@@ -6,7 +6,7 @@ import numpy as np
 import pickle as pkl
 import logging
 
-FEATURE_OPTS = ['unigram', 'bigram', 'we']
+FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'we']
 
 
 def data2feats(data, feat_select):
@@ -31,7 +31,7 @@ def data2feats(data, feat_select):
         feats = Ngram(data, gram=2, voc_dict=voc_dict)
 
     elif feat_select == FEATURE_OPTS[2]:
-        # bag-of-word, bigram
+        # bag-of-word, thrigram
         logging.info("loading thrigram dictionary")
         with open(THRIGRAM_DICT_FILE, 'rb') as f:
             voc_dict = pkl.load(f)

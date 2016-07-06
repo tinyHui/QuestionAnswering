@@ -1,10 +1,10 @@
-from multiprocessing import Pool
-from functools import partial
+from collections import UserList
 from collections import defaultdict
 from preprocess.data import ReVerbPairs
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, data2feats
 from CCA import distance
+from sys import stdout
 import argparse
 import pickle as pkl
 import logging
@@ -26,12 +26,18 @@ def loader(feat, Q_k, A_k):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
+    parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
+    parser.add_argument('--full_rank', action='store_true', default=True,
+                        help='Use full rank for selecting answer')
+    parser.add_argument('--rerank', action='store_true', default=True,
+                        help='Use rerank for selecting answer')
 
     args = parser.parse_args()
     feature = args.feature
     INF_FREQ = args.freq
+    assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
+    full_rank = args.full_rank
 
     OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP1 % feature
     OUTPUT_FILE_TOP10 = OUTPUT_FILE_TOP10 % feature
@@ -49,15 +55,16 @@ if __name__ == '__main__':
     data = ReVerbPairs(usage='test', mode='index')
     feats = data2feats(data, feature)
 
-    with Pool(processes=30) as pool:
-        result = pool.map(partial(distance, Q_k=Q_k, A_k=A_k), enumerate(feats))
-    # sort by index, make sure the result in the same order with the file
-    result = sorted(result, key=lambda x: x[0])
-    del data, feats, Q_k, A_k
+    result = UserList()
+    length = len(feats)
+    for i, feat in enumerate(feats):
+        stdout.write("\rTesting: %d/%d" % (i+1, length))
+        stdout.flush()
+        result.append(loader((i, feat), Q_k=Q_k, A_k=A_k))
 
     logging.info("combining with text file")
     line_num = 0
-    output_tuple = defaultdict(tuple)
+    output_tuple = defaultdict(list)
     for line in open('./data/labels.txt', 'r'):
         _, q, a = line.strip().split('\t')
         pred = result[line_num]

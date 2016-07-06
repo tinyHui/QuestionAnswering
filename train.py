@@ -116,7 +116,7 @@ def generate_sparse(qa_queue, count_queue):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='bow', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
+    parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
     parser.add_argument('--sparse', action='store_true', default=False,
                         help='Use sparse matrix for C_AA, C_AB and C_BB')
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     full_svd = k == -1
     qa_pair_file = args.load_QA
 
-    if qa_pair_file:
+    if qa_pair_file is None:
         logging.info("constructing train data")
         data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
         feats_list = [data2feats(data, feature) for data in data_list]

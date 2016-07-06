@@ -3,7 +3,6 @@ from collections import UserDict
 from word2index import UNIGRAM_DICT_FILE
 import sqlite3
 import re
-import logging
 import pickle as pkl
 
 
@@ -156,7 +155,7 @@ class ReVerbTestRaw(object):
 class ReVerbPairs(object):
     def __init__(self, usage='train', part=None, mode='str'):
         if usage in ['train', 'test']:
-            if part is None:
+            if part:
                 self.file = './data/reverb-%s.part%d.txt' % (usage, part)
             else:
                 assert isinstance(part, int), "must provide a part number"
@@ -166,7 +165,6 @@ class ReVerbPairs(object):
         else:
             raise SystemError("usage can be only train/test")
         if mode == 'index':
-            logging.info("loading vocabulary index")
             with open(UNIGRAM_DICT_FILE, 'rb') as f:
                 self.voc_dict = pkl.load(f)
         self.mode = mode
