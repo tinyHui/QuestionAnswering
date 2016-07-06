@@ -1,10 +1,5 @@
-from collections import defaultdict
-from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
 import logging
-import pickle as pkl
-import os
-import sys
-import argparse
+
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
@@ -14,6 +9,13 @@ LOWEST_FREQ = 4
 
 
 if __name__ == "__main__":
+    from collections import defaultdict
+    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
+    import pickle as pkl
+    import os
+    import sys
+    import argparse
+
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--gram', type=int, default=1, help='Define N for Ngram')
     args = parser.parse_args()
