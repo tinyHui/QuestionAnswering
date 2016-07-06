@@ -156,9 +156,9 @@ class ReVerbPairs(object):
     def __init__(self, usage='train', part=None, mode='str'):
         if usage in ['train', 'test']:
             if part:
+                assert isinstance(part, int), "must provide a part number"
                 self.file = './data/reverb-%s.part%d.txt' % (usage, part)
             else:
-                assert isinstance(part, int), "must provide a part number"
                 self.file = './data/reverb-%s.full.txt' % (usage,)
             self.part = part
             self.usage = usage

@@ -28,9 +28,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
-    parser.add_argument('--full_rank', action='store_true', default=True,
+    parser.add_argument('--full_rank', action='store_true', default=False,
                         help='Use full rank for selecting answer')
-    parser.add_argument('--rerank', action='store_true', default=True,
+    parser.add_argument('--rerank', action='store_true', default=False,
                         help='Use rerank for selecting answer')
 
     args = parser.parse_args()
