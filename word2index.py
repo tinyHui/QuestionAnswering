@@ -67,10 +67,10 @@ if __name__ == "__main__":
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
     for i in src_data.sent_indx:
-        # unique
-        token_list = list(set(token_group[i]))
         # add unknown token
         token_group[i].insert(UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN)
+        # unique
+        token_list = list(set(token_group[i]))
         # generate index
         word_indx_hash_group[i] = dict(zip(token_list, range(len(token_list))))
         logging.info("Found %d tokens" % len(token_list))
