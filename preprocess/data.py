@@ -1,9 +1,7 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
-from word2index import UNIGRAM_DICT_FILE
 import sqlite3
 import re
-import pickle as pkl
 
 
 UNKNOWN_TOKEN = 'UNKNOWN'
