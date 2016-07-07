@@ -139,7 +139,6 @@ if __name__ == "__main__":
         reuse_stage_name, file = reuse_arg
         reuse_stage = reuse_stages.index(reuse_stage_name) + 1
 
-    print(reuse_stage)
     if reuse_stage == 0:
         logging.info("constructing train data")
         data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]

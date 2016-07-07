@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # full_rank = args.full_rank
 
     OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP1 % feature
-    OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP5 % feature
+    OUTPUT_FILE_TOP5 = OUTPUT_FILE_TOP5 % feature
     OUTPUT_FILE_TOP10 = OUTPUT_FILE_TOP10 % feature
 
     for f in [OUTPUT_FILE_TOP1, OUTPUT_FILE_TOP5, OUTPUT_FILE_TOP10]:

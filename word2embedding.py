@@ -47,6 +47,3 @@ if __name__ == "__main__":
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_FILE, 'wb') as f:
         pkl.dump(word_emb_hash_group, f)
-
-    logging.info("Free up memory")
-    del w_emb_map, word_emb_hash_group
