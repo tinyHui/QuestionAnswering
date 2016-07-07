@@ -17,7 +17,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--gram', type=int, default=1, help='Define N for Ngram')
+    parser.add_argument('--grams', type=int, default=1, help='Define N for Ngram')
     args = parser.parse_args()
 
     gram = args.grams
@@ -53,12 +53,13 @@ if __name__ == "__main__":
             sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
             sys.stdout.flush()
             tokens = line[i]
-            for token in zip(*[tokens[i:] for i in range(gram)]):
-                # check if the token appears count reach requirement
-                if token_count_group[i][token] > LOWEST_FREQ:
-                    token_group[i].append(token)
-                else:
-                    token_count_group[i][token] += 1
+            for gram_token in zip(*[tokens[j:] for j in range(gram)]):
+                for token in gram_token:
+                    # check if the token appears count reaches requirement
+                    if token_count_group[i][token] > LOWEST_FREQ:
+                        token_group[i].append(token)
+                    else:
+                        token_count_group[i][token] += 1
             line_num += 1
 
     logging.info("Generating token dictionary")
