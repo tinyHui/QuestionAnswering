@@ -47,11 +47,12 @@ if __name__ == "__main__":
     token_count_group = {}
     token_group = defaultdict(list)
     line_num = 0
-    for i in src_data.sent_indx:
-        token_count_group[i] = defaultdict(int)
-        for line in src_data:
-            sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
-            sys.stdout.flush()
+
+    for line in src_data:
+        sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
+        sys.stdout.flush()
+        for i in src_data.sent_indx:
+            token_count_group[i] = defaultdict(int)
             tokens = line[i]
             for gram_token in zip(*[tokens[j:] for j in range(gram)]):
                 for token in gram_token:
@@ -60,7 +61,7 @@ if __name__ == "__main__":
                         token_group[i].append(token)
                     else:
                         token_count_group[i][token] += 1
-            line_num += 1
+        line_num += 1
 
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
