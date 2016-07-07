@@ -26,10 +26,18 @@ if __name__ == '__main__':
         logging.info("converting part %d" % part)
         data = ReVerbPairs(usage='train', part=part, mode='str')
 
+        line_num = 0
         with open(path, 'a') as f:
+            length = len(data)
             for q, a in data:
+                sys.stdout.write("\rLoad: %.2f" % (float(line_num/length)))
+                sys.stdout.flush()
+
                 q_indx = [str(word2index(token, voc_dict)) for token in q]
                 a_indx = [str(word2index(token, voc_dict)) for token in a]
                 new_q = " ".join(q_indx)
                 new_a = " ".join(q_indx)
                 f.write("%s\t%s\n" % (new_q, new_a))
+
+                line_num += 1
+
