@@ -5,7 +5,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
 THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
-LOWEST_FREQ = 4
+LOWEST_FREQ = 3
 
 
 if __name__ == "__main__":
@@ -56,11 +56,10 @@ if __name__ == "__main__":
             tokens = line[i]
             for gram_token in zip(*[tokens[j:] for j in range(gram)]):
                 for token in gram_token:
+                    token_count_group[i][token] += 1
                     # check if the token appears count reaches requirement
                     if token_count_group[i][token] > LOWEST_FREQ:
                         token_group[i].append(token)
-                    else:
-                        token_count_group[i][token] += 1
         line_num += 1
 
     logging.info("Generating token dictionary")
