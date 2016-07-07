@@ -5,7 +5,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
 THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
-LOWEST_FREQ = 3
+LOWEST_FREQ = 2
 
 
 if __name__ == "__main__":
@@ -48,11 +48,13 @@ if __name__ == "__main__":
     token_group = defaultdict(list)
     line_num = 0
 
+    for i in src_data.sent_indx:
+        token_count_group[i] = defaultdict(int)
+
     for line in src_data:
         sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
         sys.stdout.flush()
         for i in src_data.sent_indx:
-            token_count_group[i] = defaultdict(int)
             tokens = line[i]
             for gram_token in zip(*[tokens[j:] for j in range(gram)]):
                 for token in gram_token:
