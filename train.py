@@ -14,7 +14,7 @@ QA_PAIR_FILE = "./bin/QsAs.%s.pkl"
 XCOV_FILE = "./bin/XCOV.%s.pkl"
 CCA_FILE = "./bin/CCA_model.%s.pkl"
 INF_FREQ = 1000  # information message frequency
-PROCESS_NUM = 30
+PROCESS_NUM = 15
 
 
 def generate_part_dense(feature_set, qa_queue, count_queue):

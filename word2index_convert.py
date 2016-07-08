@@ -30,14 +30,16 @@ if __name__ == '__main__':
         with open(path, 'a') as f:
             length = len(data)
             for q, a in data:
-                sys.stdout.write("\rLoad: %.2f" % (float(line_num/length)))
+                sys.stdout.write("\rLoad: %.2f%%" % (float(line_num / length) * 100))
                 sys.stdout.flush()
+                line_num += 1
 
-                q_indx = [str(word2index(token, voc_dict)) for token in q]
-                a_indx = [str(word2index(token, voc_dict)) for token in a]
+                q_indx = [str(word2index(token, voc_dict[0])) for token in q]
+                a_indx = [str(word2index(token, voc_dict[1])) for token in a]
                 new_q = " ".join(q_indx)
                 new_a = " ".join(q_indx)
                 f.write("%s\t%s\n" % (new_q, new_a))
 
-                line_num += 1
+            sys.stdout.write("\n")
+
 

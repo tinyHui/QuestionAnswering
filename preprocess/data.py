@@ -195,13 +195,18 @@ class ReVerbPairs(object):
 
     def __len__(self):
         if self.usage == 'train':
-            # return 117202052
             if self.part is None:
                 return 117202052
+            # 30 parts
+            # if self.part == 29:
+            #     return 3906708
+            # else:
+            #     return 3906736
             if self.part == 29:
-                return 3906708
+                return 7813458
             else:
-                return 3906736
+                return 7813471
+
         elif self.usage == 'test':
             return 48910
 

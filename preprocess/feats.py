@@ -125,10 +125,12 @@ class WordEmbedding(object):
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
-        with open(embedding_dict_file, 'rb') as f:
-            self.embedding_dict = pkl.load(f)
+        self.embedding_dict = embedding_dict_file
 
     def __iter__(self):
+        with open(self.embedding_dict_file, 'rb') as f:
+            self.embedding_dict = pkl.load(f)
+
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
