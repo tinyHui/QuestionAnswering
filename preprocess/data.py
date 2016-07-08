@@ -158,6 +158,7 @@ class ReVerbPairs(object):
             suf = 'indx'
         else:
             raise AttributeError("Mode can be only 'str' or 'index'")
+        self.mode = mode
 
         if usage in ['train', 'test']:
             if part is not None:
@@ -169,7 +170,6 @@ class ReVerbPairs(object):
             self.usage = usage
         else:
             raise SystemError("usage can be only train/test")
-        self.mode = mode
         # index of return data contains sentence
         self.sent_indx = (0, 1)
 
@@ -185,13 +185,17 @@ class ReVerbPairs(object):
 
             q_tokens, a_tokens = [s.split() for s in [q, a]]
 
+            if self.mode == 'index':
+                q_tokens = [int(i) for i in q_tokens]
+                a_tokens = [int(i) for i in q_tokens]
+
             # produce the token per line
             if self.usage == 'train':
                 # train
                 yield (q_tokens, a_tokens)
             else:
                 # test
-                yield (q_tokens, a_tokens, q_id, l)
+                yield (q_tokens, a_tokens, int(q_id), int(l))
 
     def __len__(self):
         if self.usage == 'train':

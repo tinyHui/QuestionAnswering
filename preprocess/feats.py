@@ -125,11 +125,11 @@ class WordEmbedding(object):
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
-        self.embedding_dict = embedding_dict_file
+        self.embedding_dict_file = embedding_dict_file
 
     def __iter__(self):
         with open(self.embedding_dict_file, 'rb') as f:
-            self.embedding_dict = pkl.load(f)
+            embedding_dict = pkl.load(f)
 
         for d in self.data:
             param_num = len(d)
@@ -140,7 +140,7 @@ class WordEmbedding(object):
                     for w in d[i]:
                         # for each token, find its embedding
                         # unseen token will automatically take 0 x R^300
-                        feat[i] += self.embedding_dict[i][w]
+                        feat[i] += embedding_dict[i][w]
                     # calculate the average of sum of embedding of all words
                     feat[i] /= len(d[i])
 
