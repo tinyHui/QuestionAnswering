@@ -83,7 +83,7 @@ class Ngram(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    feat[i] = np.zeros(voc_num[i], dtype='float64')
+                    feat[i] = np.zeros(voc_num[i], dtype='float32')
                     if self.gram == 1:
                         for w in d[i]:
                             # unigram, just accumulate on the position of word index
@@ -136,7 +136,7 @@ class WordEmbedding(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float64')
+                    feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float32')
                     for w in d[i]:
                         # for each token, find its embedding
                         # unseen token will automatically take 0 x R^300

@@ -51,8 +51,8 @@ def generate_part_sparse(feature_set, qa_queue, count_queue):
         _, feat = feature
 
         if isinstance(Qs, type(None)):
-            Qs = csr_matrix(feat[0], dtype='float64')
-            As = csr_matrix(feat[1], dtype='float64')
+            Qs = csr_matrix(feat[0], dtype='float32')
+            As = csr_matrix(feat[1], dtype='float32')
         else:
             Qs = sparse_vstack((Qs, feat[0]))
             As = sparse_vstack((As, feat[1]))
@@ -79,8 +79,8 @@ def generate_dense(qa_queue, count_queue):
         new_line_num = count_queue.get()
         Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
-            Qs = np.array(Qs_temp, dtype='float64')
-            As = np.array(As_temp, dtype='float64')
+            Qs = np.array(Qs_temp, dtype='float32')
+            As = np.array(As_temp, dtype='float32')
         else:
             Qs = np.vstack((Qs, Qs_temp))
             As = np.vstack((As, As_temp))
@@ -103,8 +103,8 @@ def generate_sparse(qa_queue, count_queue):
         new_line_num = count_queue.get()
         Qs_temp, As_temp = QA_temp
         if isinstance(Qs, type(None)):
-            Qs = csr_matrix(Qs_temp, dtype='float64')
-            As = csr_matrix(As_temp, dtype='float64')
+            Qs = csr_matrix(Qs_temp, dtype='float32')
+            As = csr_matrix(As_temp, dtype='float32')
         else:
             Qs = sparse_vstack((Qs, Qs_temp))
             As = sparse_vstack((As, As_temp))

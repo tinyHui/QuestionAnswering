@@ -17,7 +17,7 @@ def generate_dictionary(voc_indx_map, w_emb_map):
     embedding_dict = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
     for w, indx in voc_indx_map.items():
         try:
-            emb = np.asarray(w_emb_map[w], dtype='float64')
+            emb = np.asarray(w_emb_map[w], dtype='float32')
         except KeyError:
             continue
         embedding_dict[indx] = emb

@@ -89,8 +89,8 @@ def init_params(options):
                                               prefix=options['encoder'])
 
     # classifier
-    params['wcosine'] = numpy.cast['float64'](0.01)
-    params['bcosine'] = numpy.cast['float64'](0.01)
+    params['wcosine'] = numpy.cast['float32'](0.01)
+    params['bcosine'] = numpy.cast['float32'](0.01)
     return params
 
 
@@ -264,7 +264,7 @@ def build_model(tparams, options):
     xp = tensor.matrix('xp', dtype='int64')
     mask_x = tensor.matrix('mask_x', dtype=config.floatX)
     mask_xp = tensor.matrix('mask_xp', dtype=config.floatX)
-    y = tensor.vector('y', dtype='float64')
+    y = tensor.vector('y', dtype='float32')
 
     n_timesteps_x = x.shape[0]
     n_samples_x = x.shape[1]
