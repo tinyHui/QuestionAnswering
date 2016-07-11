@@ -76,7 +76,7 @@ if __name__ == "__main__":
     #####
     word_emb_hash_group = {}
     for w, emb in src_data:
-        word_emb_hash_group[w] = emb
+        word_emb_hash_group[w] = np.asarray(emb, dtype='float32')
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_FILE, 'wb') as f:
         pkl.dump(word_emb_hash_group, f)
