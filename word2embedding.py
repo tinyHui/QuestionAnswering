@@ -1,15 +1,8 @@
-from collections import defaultdict
-from preprocess.data import WordEmbeddingRaw
-from word2index import UNIGRAM_DICT_FILE
 import logging
-import pickle as pkl
-import os
-import sys
-import numpy as np
-from functools import partial
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-WORD_EMBEDDING_FILE = './bin/word_embedding.pkl'
+WORD_EMBEDDING_FILE = './data/embedding.txt'
+WORD_EMBEDDING_BIN_FILE = './bin/word_embedding.pkl'
 EMBEDDING_SIZE = 300
 
 
@@ -25,9 +18,39 @@ def generate_dictionary(voc_indx_map, w_emb_map):
 
 
 if __name__ == "__main__":
-    if os.path.exists(WORD_EMBEDDING_FILE):
+    from collections import defaultdict, UserList
+    from preprocess.data import WordEmbeddingRaw
+    from word2index import UNIGRAM_DICT_FILE
+    from functools import partial
+    from gensim.models import Word2Vec
+    from preprocess.data import ReVerbPairs
+    import pickle as pkl
+    import os
+    import sys
+    import numpy as np
+    import multiprocessing
+
+    if os.path.exists(WORD_EMBEDDING_BIN_FILE):
         logging.info("Word embedding dictionary file exists, skip")
         sys.exit(0)
+
+    if not os.path.exists(WORD_EMBEDDING_FILE):
+        logging.info("Embedding text file does not exist, generate one")
+        sentences = UserList()
+        line_num = 1
+        # load ReVerb QA pairs
+        src_data = ReVerbPairs(usage='train', mode='str')
+        for line in src_data:
+            sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
+            sys.stdout.flush()
+            for i in src_data.sent_indx:
+                sentences.append(' '.join(line[i]))
+        line_num += 1
+        sys.stdout.write("\n")
+        # calculate embedding vector
+        logging.info("Generating embedding vectors")
+        model = Word2Vec(sentences, size=400, window=5, min_count=5, workers=multiprocessing.cpu_count())
+        model.save_word2vec_format(WORD_EMBEDDING_FILE, binary=False)
 
     logging.info("loading vocabulary index")
     with open(UNIGRAM_DICT_FILE, 'rb') as f:
