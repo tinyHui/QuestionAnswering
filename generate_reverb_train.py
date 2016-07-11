@@ -2,7 +2,7 @@ from preprocess.data import ReVerbTrainRaw
 import codecs
 from sys import stdout
 
-FILE = './data/reverb-train.txt'
+FILE = './data/reverb-train.full.txt'
 
 if __name__ == '__main__':
     data = ReVerbTrainRaw()

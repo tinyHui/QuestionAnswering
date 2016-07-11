@@ -1,5 +1,6 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
+from random import sample
 import sqlite3
 import re
 
@@ -70,10 +71,11 @@ class ReVerbTrainRaw(object):
             e2 = e2.replace('.e', '')
 
             # find the suitable pattern
+            # random choose some for training, reduce training size
             if r.endswith('-in') or r.endswith('-on'):
-                pattern_list = self.special_pattern_list
+                pattern_list = sample(self.special_pattern_list, 1)
             else:
-                pattern_list = self.normal_pattern_list
+                pattern_list = sample(self.normal_pattern_list, 3)
 
             # preprocess & replace '-' with space
             r, e1, e2 = [process_raw(w.replace('-', ' ')) for w in [r, e1, e2]]
