@@ -196,8 +196,8 @@ class ReVerbPairs(object):
                     a_tokens = [w1 + " " + w2 for w1, w2 in zip(*[a_tokens[j:] for j in range(self.gram)])]
             else:
                 # mode == 'index
-                q_tokens = [int(i) for i in q_tokens]
-                a_tokens = [int(i) for i in q_tokens]
+                q_tokens = map(int, q_tokens)
+                a_tokens = map(int, a_tokens)
 
             # produce the token per line
             if self.usage == 'train':

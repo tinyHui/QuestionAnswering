@@ -28,7 +28,6 @@ if __name__ == "__main__":
     import os
     import sys
     import numpy as np
-    import multiprocessing
 
     if os.path.exists(WORD_EMBEDDING_BIN_FILE):
         logging.info("Word embedding dictionary file exists, skip")
@@ -44,12 +43,12 @@ if __name__ == "__main__":
             sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
             sys.stdout.flush()
             for i in src_data.sent_indx:
-                sentences.append(' '.join(line[i]))
+                sentences.append(' '.join(map(str, line[i])))
         line_num += 1
         sys.stdout.write("\n")
         # calculate embedding vector
         logging.info("Generating embedding vectors")
-        model = Word2Vec(sentences, size=400, window=5, min_count=5, workers=multiprocessing.cpu_count())
+        model = Word2Vec(sentences, size=300, window=5, min_count=5, workers=25)
         model.save_word2vec_format(WORD_EMBEDDING_FILE, binary=False)
 
     # logging.info("loading vocabulary index")
@@ -78,5 +77,5 @@ if __name__ == "__main__":
     for w, emb in src_data:
         word_emb_hash_group[w] = np.asarray(emb, dtype='float32')
     logging.info("Saving word embedding dictionary")
-    with open(WORD_EMBEDDING_FILE, 'wb') as f:
+    with open(WORD_EMBEDDING_BIN_FILE, 'wb') as f:
         pkl.dump(word_emb_hash_group, f)
