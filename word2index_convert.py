@@ -9,6 +9,8 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 DUMP_FILE = "./data/reverb-train.part%d.indx"
 
 if __name__ == '__main__':
+    from train import PROCESS_NUM
+
     # check if the index version exists
     for part in range(30):
         path = DUMP_FILE % part
@@ -21,7 +23,7 @@ if __name__ == '__main__':
         voc_dict = pkl.load(f)
 
     # convert text to index
-    for part in range(30):
+    for part in range(PROCESS_NUM):
         path = DUMP_FILE % part
         logging.info("converting part %d" % part)
         data = ReVerbPairs(usage='train', part=part, mode='str')

@@ -18,24 +18,18 @@ def data2feats(data, feat_select):
 
     if feat_select == FEATURE_OPTS[0]:
         # bag-of-word, unigram
-        logging.info("loading unigram dictionary")
-        with open(UNIGRAM_DICT_FILE, 'rb') as f:
-            voc_dict = pkl.load(f)
-        feats = Ngram(data, gram=1, voc_dict=voc_dict)
+        data.gram = 1
+        feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
         # bag-of-word, bigram
-        logging.info("loading bigram dictionary")
-        with open(BIGRAM_DICT_FILE, 'rb') as f:
-            voc_dict = pkl.load(f)
-        feats = Ngram(data, gram=2, voc_dict=voc_dict)
+        data.gram = 2
+        feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
         # bag-of-word, thrigram
-        logging.info("loading thrigram dictionary")
-        with open(THRIGRAM_DICT_FILE, 'rb') as f:
-            voc_dict = pkl.load(f)
-        feats = Ngram(data, gram=3, voc_dict=voc_dict)
+        data.gram = 3
+        feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
@@ -63,7 +57,7 @@ def data2feats(data, feat_select):
 
 
 class Ngram(object):
-    def __init__(self, data, voc_dict, gram=1):
+    def __init__(self, data):
         '''
         Represent sentence data using OneHot BoW feature
         :param data: data source, such as PPDB, QAs
@@ -72,26 +66,18 @@ class Ngram(object):
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
-        self.voc_dict = voc_dict
-        self.gram = gram
 
     def __iter__(self):
-        voc_num = [len(self.voc_dict[i].keys()) for i in self.voc_dict.keys()]
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     # convert sentence to One-Hot representation
-                    feat[i] = np.zeros(voc_num[i], dtype='float32')
-                    if self.gram == 1:
-                        for w in d[i]:
-                            # unigram, just accumulate on the position of word index
-                            feat[i][w] += 1
-                    else:
-                        for w in zip(*[d[i][j:] for j in range(self.gram)]):
-                            index = self.voc_dict[w]
-                            feat[i][index] += 1
+                    feat[i] = np.zeros(self.data.get_voc_num(i), dtype='float32')
+                    for w in d[i]:
+                        # just accumulate on the position of word index
+                        feat[i][w] += 1
                 else:
                     # use original data
                     feat[i] = d[i]
