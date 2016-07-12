@@ -86,7 +86,7 @@ def generate_dense(qa_queue, count_queue):
             As = np.vstack((As, As_temp))
 
         count += new_line_num
-        logging.info("loading: %d/%d, %.2f" % (count, length, count/length))
+        logging.info("loading: %d/%d, %.2f%%" % (count, length, count/length*100))
 
     return Qs, As
 
@@ -110,7 +110,7 @@ def generate_sparse(qa_queue, count_queue):
             As = sparse_vstack((As, As_temp))
 
         count += new_line_num
-        logging.info("loading: %d/%d" % (count, length, count/length))
+        logging.info("loading: %d/%d, %.2f%%" % (count, length, count/length*100))
 
     return Qs, As
 
