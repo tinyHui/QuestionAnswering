@@ -23,7 +23,7 @@ class PairSpliter(object):
     def __iter__(self):
         for line in self.data:
             for i in self.data.sent_indx:
-                yield map(str, line[i])
+                yield list(map(str, line[i]))
 
 
 if __name__ == "__main__":
