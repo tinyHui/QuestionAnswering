@@ -10,14 +10,6 @@ DUMP_FILE = "./data/reverb-train.part%d.indx"
 
 if __name__ == '__main__':
     from train import PROCESS_NUM
-
-    # check if the index version exists
-    for part in range(30):
-        path = DUMP_FILE % part
-        if os.path.exists(path):
-            print("Index version data exists")
-            sys.exit(0)
-
     # load vocabulary dictionary
     with open(UNIGRAM_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
@@ -25,6 +17,10 @@ if __name__ == '__main__':
     # convert text to index
     for part in range(PROCESS_NUM):
         path = DUMP_FILE % part
+        if os.path.exists(path):
+            # check if the index version exists
+            print("Index version data %s exists" % path)
+            continue
         logging.info("converting part %d" % part)
         data = ReVerbPairs(usage='train', part=part, mode='str')
 
@@ -39,7 +35,7 @@ if __name__ == '__main__':
                 q_indx = [str(word2index(token, voc_dict[0])) for token in q]
                 a_indx = [str(word2index(token, voc_dict[1])) for token in a]
                 new_q = " ".join(q_indx)
-                new_a = " ".join(q_indx)
+                new_a = " ".join(a_indx)
                 f.write("%s\t%s\n" % (new_q, new_a))
 
             sys.stdout.write("\n")
