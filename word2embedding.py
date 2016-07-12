@@ -46,7 +46,7 @@ if __name__ == "__main__":
         sentences = PairSpliter(ReVerbPairs(usage='train', mode='index'))
         # calculate embedding vector
         logging.info("Generating embedding vectors")
-        model = Word2Vec(sentences, size=EMBEDDING_SIZE, window=3, min_count=0, workers=25)
+        model = Word2Vec(sentences, size=EMBEDDING_SIZE, window=5, min_count=0, workers=25)
         model.save_word2vec_format(WORD_EMBEDDING_FILE, binary=False)
     else:
         logging.info("Embedding text file exists")
