@@ -16,9 +16,17 @@ EMBEDDING_SIZE = 300
 #         embedding_dict[indx] = emb
 #     return embedding_dict
 
+class PairSpliter(object):
+    def __init__(self, data):
+        self.data = data
+
+    def __iter__(self):
+        for line in self.data:
+            for i in self.data.sent_indx:
+                yield map(str, line[i])
+
 
 if __name__ == "__main__":
-    from collections import defaultdict, UserList
     from preprocess.data import WordEmbeddingRaw
     from word2index import UNIGRAM_DICT_FILE
     from functools import partial
@@ -35,33 +43,23 @@ if __name__ == "__main__":
 
     if not os.path.exists(WORD_EMBEDDING_FILE):
         logging.info("Embedding text file does not exist, generate one")
-        sentences = UserList()
-        line_num = 1
-        # load ReVerb QA pairs, use index directly
-        src_data = ReVerbPairs(usage='train', mode='index')
-        for line in src_data:
-            sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
-            sys.stdout.flush()
-            for i in src_data.sent_indx:
-                sentences.append(' '.join(map(str, line[i])))
-        line_num += 1
-        sys.stdout.write("\n")
+        sentences = PairSpliter(ReVerbPairs(usage='train', mode='indx'))
         # calculate embedding vector
         logging.info("Generating embedding vectors")
-        model = Word2Vec(sentences, size=300, window=5, min_count=5, workers=25)
+        model = Word2Vec(sentences, size=300, window=5, min_count=0, workers=25)
         model.save_word2vec_format(WORD_EMBEDDING_FILE, binary=False)
+    else:
+        logging.info("Embedding text file exists")
 
-    # logging.info("loading vocabulary index")
-    # with open(UNIGRAM_DICT_FILE, 'rb') as f:
-    #     voc_dict = pkl.load(f)
-
-    logging.info("Generating source data")
     # data is a group of sentences
     src_data = WordEmbeddingRaw()
 
     #####
     # old code, need to load word index, then map to word
     #####
+    # logging.info("loading vocabulary index")
+    # with open(UNIGRAM_DICT_FILE, 'rb') as f:
+    #     voc_dict = pkl.load(f)
     # w_emb_map = {}
     # for w, emb in src_data:
     #     w_emb_map[w] = emb
