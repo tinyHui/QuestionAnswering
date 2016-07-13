@@ -1,12 +1,10 @@
 # convert all sentences to their representations but keep data in other columns
 
-from word2embedding import WORD_EMBEDDING_FILE, EMBEDDING_SIZE
-from word2index import UNIGRAM_DICT_FILE, BIGRAM_DICT_FILE, THRIGRAM_DICT_FILE
+from word2vec import WORD_EMBEDDING_FILE, EMBEDDING_SIZE
 import numpy as np
 import pickle as pkl
-import logging
 
-FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'we']
+FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
 
 def data2feats(data, feat_select):
@@ -35,11 +33,11 @@ def data2feats(data, feat_select):
         # word embedding
         feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
 
-    # elif feat_select == FEATURE_OPTS[4]:
+    # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
     #     feats = AutoEncoder(data)
 
-    # elif feat_select == FEATURE_OPTS[2]:
+    # elif feat_select == FEATURE_OPTS[]:
     #     # sentence embedding by paraphrased sentences
     #     if not os.path.exists(LSTM_FILE):
     #         train_lstm(

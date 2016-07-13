@@ -1,7 +1,3 @@
-import logging
-
-
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
 THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
@@ -15,6 +11,9 @@ if __name__ == "__main__":
     import os
     import sys
     import argparse
+    import logging
+
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--grams', type=int, default=1, help='Define N for Ngram')

@@ -1,7 +1,7 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
 from random import sample
-from word2embedding import WORD_EMBEDDING_FILE
+from word2vec import WORD_EMBEDDING_FILE
 import sqlite3
 import re
 
@@ -251,6 +251,7 @@ class ReVerbPairs(object):
 class WordEmbeddingRaw(object):
     def __init__(self):
         self.file = WORD_EMBEDDING_FILE
+        self.word_is_index = False
 
     def __iter__(self):
         line_num = 1
@@ -260,7 +261,7 @@ class WordEmbeddingRaw(object):
             if line_num == 1:
                 continue
             w, *emb = line.strip().split()
-            yield w, emb
+            yield w.lower(), emb
             line_num += 1
 
     def __len__(self):
