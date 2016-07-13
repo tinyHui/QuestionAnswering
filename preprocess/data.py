@@ -65,9 +65,12 @@ class ReVerbTrainRaw(object):
                                     ('what is {e2} \'s {r} ?', '{e1} {r} {e2}'),
                                     ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
         # shared by *-in, *-on
-        self.special_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                     ('when was {e1} {r} ?', '{e1} {r} {e2}'),
-                                     ('where was {e1} {r} ?', '{e1} {r} {e2}')]
+        self.special_in_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
+                                        ('when was {e1} {r} ?', '{e1} {r} {e2}'),
+                                        ('where was {e1} {r} ?', '{e1} {r} {e2}'),
+                                        ('where did {e1} {r} ?', '{e1} {r} {e2}')]
+        self.special_on_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
+                                        ('when was {e1} {r} ?', '{e1} {r} {e2}'),
 
     def __iter__(self):
         for r, e1, e2 in self.content:
@@ -77,8 +80,10 @@ class ReVerbTrainRaw(object):
 
             # find the suitable pattern
             # random choose some for training, reduce training size
-            if r.endswith('-in') or r.endswith('-on'):
-                pattern_list = sample(self.special_pattern_list, 1)
+            if r.endswith('-in'):
+                pattern_list = sample(self.special_in_pattern_list, 1)
+            elif r.endswith('-on'):
+                pattern_list = sample(self.special_on_pattern_list, 1)
             else:
                 pattern_list = sample(self.normal_pattern_list, 3)
 
