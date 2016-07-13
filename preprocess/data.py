@@ -60,9 +60,9 @@ class ReVerbTrainRaw(object):
                                     ('what does {e1} {r} ?', '{e1} {r} {e2}'),
                                     ('what is the {r} of {e2} ?', '{e1} {r} {e2}'),
                                     ('who is the {r} of {e2} ?', '{e1} {r} {e2}'),
-                                    ('what is {r} by {e1}', '{e1} {r} {e2}'),
+                                    ('what is {r} by {e1} ?', '{e1} {r} {e2}'),
                                     ('who is {e2} \'s {r} ?', '{e1} {r} {e2}'),
-                                    ('what is {e2} \'s {r}', '{e1} {r} {e2}'),
+                                    ('what is {e2} \'s {r} ?', '{e1} {r} {e2}'),
                                     ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
         # shared by *-in, *-on
         self.special_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
