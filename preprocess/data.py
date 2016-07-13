@@ -19,6 +19,7 @@ def process_raw(raw):
         s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
 
     # define replace pattern
+    GRAMMAR_SYM = r'(\')'
     DATE = r'(([0]?[1-9]|[1][0-2])[\.\/\- ]([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0-9]{4}|[0-9]{2}))|' \
            r'(([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0]?[1-9]|[1][0-2])[\.\/\- ]([0-9]{4}|[0-9]{2}))'
     TIME = r'[0-2]?[1-9]:[0-5][0-9][ \-]?(am|pm)?'
@@ -27,8 +28,11 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
+    SYM = r'(\.|\?|\$|\*|\#|\&)'
+    SPACES = r' +'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (PRESENT, 'PRESENT'), (NUMBER, 'NUM'), (EMAIL, 'EMAIL')]
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (PRESENT, 'PRESENT'),
+              (NUMBER, 'NUM'), (EMAIL, 'EMAIL'), (SYM, ' \\1 '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     return s
@@ -50,15 +54,15 @@ class ReVerbTrainRaw(object):
         c = conn.cursor()
         self.content = c.execute("select * from tuples")
         # define the pattern
-        self.normal_pattern_list = [('who {r} {e2} ?', '{e2} {r} {e1}'),
-                                    ('what {r} {e2} ?', '{e2} {r} {e1}'),
+        self.normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
+                                    ('what {r} {e2} ?', '{e1} {r} {e2}'),
                                     ('who does {e1} {r} ?', '{e1} {r} {e2}'),
                                     ('what does {e1} {r} ?', '{e1} {r} {e2}'),
-                                    ('what is the {r} of {e2} ?', '{e2} {r} {e1}'),
-                                    ('who is the {r} of {e2} ?', '{e2} {r} {e1}'),
+                                    ('what is the {r} of {e2} ?', '{e1} {r} {e2}'),
+                                    ('who is the {r} of {e2} ?', '{e1} {r} {e2}'),
                                     ('what is {r} by {e1}', '{e1} {r} {e2}'),
-                                    ('who is {e2} \'s {r} ?', '{e2} {r} {e1}'),
-                                    ('what is {e2} \'s {r}', '{e2} {r} {e1}'),
+                                    ('who is {e2} \'s {r} ?', '{e1} {r} {e2}'),
+                                    ('what is {e2} \'s {r}', '{e1} {r} {e2}'),
                                     ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
         # shared by *-in, *-on
         self.special_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
@@ -103,36 +107,6 @@ class ReVerbTestRaw(object):
             self.q_id_map[q] = id
 
     def __iter__(self):
-        def to_stem(w):
-            # only work for reverb test
-            if w in ["called", "calls"]:
-                w = "call"
-            elif w == "females":
-                w = "female"
-            elif w in ["spoken", "speaks"]:
-                w = "speak"
-            elif w == "languages":
-                w = "language"
-            elif w == "found":
-                w = "find"
-            elif w in ["uses", "used"]:
-                w = "use"
-            elif w == "marked":
-                w = "mark"
-            elif w == "invented":
-                w = "invent"
-            elif w == "players":
-                w = "player"
-            elif w == "made":
-                w = "make"
-            elif w == "arguments":
-                w = "argument"
-            elif w == "causes":
-                w = "cause"
-            elif w in ["are", "is", "was", "were", "been"]:
-                w = "be"
-            return w
-
         for line in open(self.file, 'r'):
             l, q, a = line.strip().split('\t')
             q_id = self.q_id_map[q]
@@ -141,7 +115,6 @@ class ReVerbTestRaw(object):
             q = re.sub(r'\'s', ' \'s', q)
             q = re.sub(r'\-', ' ', q)
             q = process_raw(q)
-            q = ' '.join([to_stem(w) for w in q.split()])
             # normalize answer
             r, e1, e2 = [process_raw(re.sub(r'\.(r|e)', '', w.replace('-', ' '))) for w in a.split()]
             a = "{e1} {r} {e2}".format(r=r, e1=e1, e2=e2)
@@ -270,6 +243,7 @@ class WordEmbeddingRaw(object):
     def __str__(self):
         return "ReVerb tuples word embeddings"
 
+print(process_raw("I am ok 12. 34,300 ,  $123 $ 123 $ffsfsd fyfghf's?"))
 
 # paraphrased sentences
 # class PPDB(object):

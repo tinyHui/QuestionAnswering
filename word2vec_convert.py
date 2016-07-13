@@ -32,7 +32,7 @@ if __name__ == "__main__":
             word_emb_hash_group[sent_indx] = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
 
         for w, emb in src_data:
-            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)))
+            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
             sys.stdout.flush()
             line_num += 1
             for sent_indx in voc_dict.keys():
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         logging.info("use word as index")
         word_emb_hash_group = {}
         for w, emb in src_data:
-            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)))
+            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
             sys.stdout.flush()
             line_num += 1
             word_emb_hash_group[w] = np.asarray(emb, dtype='float32')
