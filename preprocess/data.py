@@ -243,8 +243,6 @@ class WordEmbeddingRaw(object):
     def __str__(self):
         return "ReVerb tuples word embeddings"
 
-print(process_raw("I am ok 12. 34,300 ,  $123 $ 123 $ffsfsd fyfghf's?"))
-
 # paraphrased sentences
 # class PPDB(object):
 #     def __init__(self, usage='train', mode='str', voc_dict=None):
