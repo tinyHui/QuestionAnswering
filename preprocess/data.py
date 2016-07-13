@@ -70,7 +70,7 @@ class ReVerbTrainRaw(object):
                                         ('where was {e1} {r} ?', '{e1} {r} {e2}'),
                                         ('where did {e1} {r} ?', '{e1} {r} {e2}')]
         self.special_on_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                        ('when was {e1} {r} ?', '{e1} {r} {e2}'),
+                                        ('when was {e1} {r} ?', '{e1} {r} {e2}')]
 
     def __iter__(self):
         for r, e1, e2 in self.content:
