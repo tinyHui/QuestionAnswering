@@ -5,7 +5,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
 THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
-LOWEST_FREQ = 2
+LOWEST_FREQ = 3
 
 
 if __name__ == "__main__":

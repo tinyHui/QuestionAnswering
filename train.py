@@ -169,10 +169,10 @@ if __name__ == "__main__":
         with open(file, 'rb') as f:
             Qs, As = pkl.load(f)
 
-        if sparse:
-            logging.info("using sparse matrix")
-        else:
-            logging.info("using dense matrix")
+    if sparse:
+        logging.info("using sparse matrix")
+    else:
+        logging.info("using dense matrix")
 
     if 0 <= reuse_stage <= 1:
         c_qq_sqrt, c_aa_sqrt, result = xcov(Qs, As, sparse=sparse)
