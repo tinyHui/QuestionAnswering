@@ -187,7 +187,7 @@ class ReVerbPairs(object):
 
     def get_voc_num(self, i):
         if self.gram == 1:
-            voc_num = {0:224147, 1:271520}
+            voc_num = {0:222304, 1:269239}
         elif self.gram == 2:
             voc_num = {0: 0, 1: 0}
         elif self.gram == 3:

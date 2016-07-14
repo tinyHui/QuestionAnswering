@@ -18,40 +18,36 @@ if __name__ == "__main__":
 
     src_data = WordEmbeddingRaw()
 
+    # the word embedding text file use raw word
+    logging.info("loading vocabulary index")
+    with open(UNIGRAM_DICT_FILE, 'rb') as f:
+        voc_dict = pkl.load(f)
+
+    logging.info("converting raw embedding text")
+    word_emb_hash_group = {}
+    for sent_indx in voc_dict.keys():
+        # for unseen words, the embedding is zero \in R^Embedding_size
+        word_emb_hash_group[sent_indx] = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
+
     line_num = 1
-    if not src_data.word_is_index:
-        # the word embedding text file use raw word
-        logging.info("loading vocabulary index")
-        with open(UNIGRAM_DICT_FILE, 'rb') as f:
-            voc_dict = pkl.load(f)
+    for w, emb in src_data:
+        sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
+        sys.stdout.flush()
+        line_num += 1
 
-        logging.info("converting raw embedding text")
-        word_emb_hash_group = {}
+        if w == '0':
+            w = 'NUM'
+        elif w == '</s>':
+            w = '?'
+
         for sent_indx in voc_dict.keys():
-            # for unseen words, the embedding is zero \in R^Embedding_size
-            word_emb_hash_group[sent_indx] = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
-
-        for w, emb in src_data:
-            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
-            sys.stdout.flush()
-            line_num += 1
-            for sent_indx in voc_dict.keys():
-                try:
-                    # find index of the word
-                    indx = voc_dict[sent_indx][w]
-                    # hash word index to word embedding
-                    word_emb_hash_group[sent_indx][indx] = np.asarray(emb, dtype='float32')
-                except KeyError:
-                    continue
-    else:
-        # the word embedding text file use word index directly
-        logging.info("use word as index")
-        word_emb_hash_group = {}
-        for w, emb in src_data:
-            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
-            sys.stdout.flush()
-            line_num += 1
-            word_emb_hash_group[w] = np.asarray(emb, dtype='float32')
+            try:
+                # find index of the word
+                indx = voc_dict[sent_indx][w]
+                # hash word index to word embedding
+                word_emb_hash_group[sent_indx][indx] = np.asarray(emb, dtype='float32')
+            except KeyError:
+                continue
 
     sys.stdout.write("\n")
     logging.info("Saving word embedding dictionary")
