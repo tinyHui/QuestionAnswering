@@ -1,6 +1,6 @@
 # convert all sentences to their representations but keep data in other columns
 
-from word2vec import WORD_EMBEDDING_FILE, EMBEDDING_SIZE
+from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
 import numpy as np
 import pickle as pkl
 
@@ -31,7 +31,7 @@ def data2feats(data, feat_select):
 
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
-        feats = WordEmbedding(data, WORD_EMBEDDING_FILE)
+        feats = WordEmbedding(data, WORD_EMBEDDING_BIN_FILE)
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -121,12 +121,14 @@ class WordEmbedding(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float32')
+                    word_num = 0
                     for w in d[i]:
+                        word_num += 1
                         # for each token, find its embedding
                         # unseen token will automatically take 0 x R^300
                         feat[i] += embedding_dict[i][w]
                     # calculate the average of sum of embedding of all words
-                    feat[i] /= len(d[i])
+                    feat[i] /= word_num
 
                 else:
                     feat[i] = d[i]
