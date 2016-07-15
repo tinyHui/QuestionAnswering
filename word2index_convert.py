@@ -6,15 +6,19 @@ import sys
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-DUMP_FILE = "./data/reverb-train.part%d.indx"
+DUMP_TRAIN_FILE = "./data/reverb-train.part%d.indx"
+DUMP_TEST_FILE = "./data/reverb-test.indx"
 
 if __name__ == '__main__':
     from train import PROCESS_NUM
     # load vocabulary dictionary
+    logging.info("loading vocabulary index")
     with open(UNIGRAM_DICT_FILE, 'rb') as f:
         voc_dict = pkl.load(f)
 
-    # convert text to index
+    data_list = []
+
+    # add train data
     for part in range(PROCESS_NUM):
         path = DUMP_FILE % part
         if os.path.exists(path):
@@ -23,7 +27,13 @@ if __name__ == '__main__':
             continue
         logging.info("converting part %d" % part)
         data = ReVerbPairs(usage='train', part=part, mode='str')
+        data_list.append(path, data)
 
+    # add test data
+    data = ReVerbPairs(usage='test', mode='str')
+    data_list.append(DUMP_TEST_FILE, data})
+
+    for path, data in data_list:
         line_num = 0
         with open(path, 'a') as f:
             length = len(data)
