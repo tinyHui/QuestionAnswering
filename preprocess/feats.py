@@ -1,4 +1,8 @@
 # convert all sentences to their representations but keep data in other columns
+import numpy as np
+import pyximport
+pyximport.install(setup_args={"include_dirs":np.get_include()})
+import utils
 
 from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
 import numpy as np
@@ -32,6 +36,10 @@ def data2feats(data, feat_select):
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
         feats = WordEmbedding(data, WORD_EMBEDDING_BIN_FILE)
+
+    elif feat_select == FEATURE_OPTS[4]:
+        # holographic correlation
+        feats = Holographic(data, WORD_EMBEDDING_BIN_FILE)
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -121,15 +129,37 @@ class WordEmbedding(object):
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float32')
-                    word_num = 0
-                    for w in d[i]:
-                        word_num += 1
-                        # for each token, find its embedding
-                        # unseen token will automatically take 0 x R^300
-                        feat[i] += embedding_dict[i][w]
-                    # calculate the average of sum of embedding of all words
-                    feat[i] /= word_num
+                    feat[i] = utils.avg_emb(list(d[i]), embedding_dict[i])
+                else:
+                    feat[i] = d[i]
 
+            yield d, feat
+
+    def __len__(self):
+        return len(self.data)
+
+
+class Holographic(object):
+    def __init__(self, data, embedding_dict_file):
+        '''
+        Represent sentence data using word embedding trained by British National Corpus
+        :param data: data source, such as PPDB, QAs
+        :param embedding_dict_file: word-embedding dictionary file name
+        '''
+        assert data.mode == 'index', "must use word index in input data"
+        self.data = data
+        self.embedding_dict_file = embedding_dict_file
+
+    def __iter__(self):
+        with open(self.embedding_dict_file, 'rb') as f:
+            embedding_dict = pkl.load(f)
+
+        for d in self.data:
+            param_num = len(d)
+            feat = [None] * param_num
+            for i in range(param_num):
+                if i in self.data.sent_indx:
+                    feat[i] = utils.cc(list(d[i]), embedding_dict[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 

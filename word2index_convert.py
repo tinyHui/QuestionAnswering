@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     # add test data
     data = ReVerbPairs(usage='test', mode='str')
-    data_list.append(DUMP_TEST_FILE, data})
+    data_list.append((DUMP_TEST_FILE, data))
 
     for path, data in data_list:
         line_num = 0
