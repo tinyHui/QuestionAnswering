@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 DUMP_TRAIN_FILE = "./data/reverb-train.part%d.indx"
-DUMP_TEST_FILE = "./data/reverb-test.indx"
+DUMP_TEST_FILE = "./data/reverb-test.full.indx"
 
 if __name__ == '__main__':
     from train import PROCESS_NUM
@@ -37,7 +37,11 @@ if __name__ == '__main__':
         line_num = 0
         with open(path, 'a') as f:
             length = len(data)
-            for q, a in data:
+            for d in data:
+                if data.usage == 'train':
+                    q, a = d
+                else:
+                    q, a, _, _ = d
                 sys.stdout.write("\rLoad: %.2f%%" % (float(line_num / length) * 100))
                 sys.stdout.flush()
                 line_num += 1
