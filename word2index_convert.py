@@ -38,19 +38,23 @@ if __name__ == '__main__':
         with open(path, 'a') as f:
             length = len(data)
             for d in data:
-                if data.usage == 'train':
-                    q, a = d
-                else:
-                    q, a, _, _ = d
                 sys.stdout.write("\rLoad: %.2f%%" % (float(line_num / length) * 100))
                 sys.stdout.flush()
                 line_num += 1
-
-                q_indx = [str(word2index(token, voc_dict[0])) for token in q]
-                a_indx = [str(word2index(token, voc_dict[1])) for token in a]
-                new_q = " ".join(q_indx)
-                new_a = " ".join(a_indx)
-                f.write("%s\t%s\n" % (new_q, new_a))
+                if data.usage == 'train':
+                    q, a = d
+                    q_indx = [str(word2index(token, voc_dict[0])) for token in q]
+                    a_indx = [str(word2index(token, voc_dict[1])) for token in a]
+                    new_q = " ".join(q_indx)
+                    new_a = " ".join(a_indx)
+                    f.write("%s\t%s\n" % (new_q, new_a))
+                else:
+                    q, a, q_id, l = d
+                    q_indx = [str(word2index(token, voc_dict[0])) for token in q]
+                    a_indx = [str(word2index(token, voc_dict[1])) for token in a]
+                    new_q = " ".join(q_indx)
+                    new_a = " ".join(a_indx)
+                    f.write("%s\t%s\t%d\t%d\n" % (new_q, new_a, q_id, l))
 
             sys.stdout.write("\n")
 
