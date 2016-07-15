@@ -54,7 +54,7 @@ if __name__ == '__main__':
                     a_indx = [str(word2index(token, voc_dict[1])) for token in a]
                     new_q = " ".join(q_indx)
                     new_a = " ".join(a_indx)
-                    f.write("%s\t%s\t%d\t%d\n" % (q_id, new_q, new_a, l))
+                    f.write("%d\t%s\t%s\t%d\n" % (q_id, new_q, new_a, l))
 
             sys.stdout.write("\n")
 
