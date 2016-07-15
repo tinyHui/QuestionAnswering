@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # add train data
     for part in range(PROCESS_NUM):
-        path = DUMP_FILE % part
+        path = DUMP_TRAIN_FILE % part
         if os.path.exists(path):
             # check if the index version exists
             print("Index version data %s exists" % path)
