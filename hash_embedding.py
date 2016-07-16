@@ -4,22 +4,15 @@ if __name__ == "__main__":
     import pickle as pkl
     import os
     import sys
-    import argparse
     import logging
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
-    parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--file', type=str)
-
-    args = parser.parse_args()
-    fname = args.file
 
     if os.path.exists(WORD_EMBEDDING_BIN_FILE):
         logging.info("Word embedding dictionary file exists, skip")
         sys.exit(0)
 
     # the word embedding text file use raw word
-    src_data = WordEmbeddingRaw(fname)
+    src_data = WordEmbeddingRaw()
 
     logging.info("converting raw embedding text")
     word_emb_hash_group = {}
