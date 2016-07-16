@@ -18,7 +18,7 @@ if __name__ == "__main__":
     word_emb_hash_group = {}
 
     train_data = ReVerbPairs(usage='train', mode='str')
-    for sent_indx in range(train_data.sent_indx):
+    for sent_indx in train_data.sent_indx:
         word_emb_hash_group[sent_indx] = {}
 
     line_num = 1
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         elif w == '</s>':
             w = '?'
 
-        for sent_indx in range(train_data.sent_indx):
+        for sent_indx in train_data.sent_indx:
             try:
                 # hash word index to word embedding (list)
                 word_emb_hash_group[sent_indx][w] = emb
