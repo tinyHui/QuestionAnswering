@@ -1,4 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
+from preprocess.data import ReVerbPairs
 from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
 import numpy as np
 import pickle as pkl
@@ -7,7 +8,7 @@ from preprocess import utils
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
 
-def data2feats(data, feat_select):
+def feats_loader(feat_select, usage, part=None):
     '''
     :param data:
     :param feat_select: select when execute, in argument
@@ -16,25 +17,27 @@ def data2feats(data, feat_select):
 
     if feat_select == FEATURE_OPTS[0]:
         # bag-of-word, unigram
-        data.gram = 1
+        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=1)
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
         # bag-of-word, bigram
-        data.gram = 2
+        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=2)
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
         # bag-of-word, thrigram
-        data.gram = 3
+        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=3)
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
+        data = ReVerbPairs(usage=usage, part=part, mode='embedding')
         feats = WordEmbedding(data, WORD_EMBEDDING_BIN_FILE)
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
+        data = ReVerbPairs(usage=usage, part=part, mode='embedding')
         feats = Holographic(data, WORD_EMBEDDING_BIN_FILE)
 
     # elif feat_select == FEATURE_OPTS[]:
@@ -147,9 +150,6 @@ class Holographic(object):
         self.embedding_dict_file = embedding_dict_file
 
     def __iter__(self):
-        with open(self.embedding_dict_file, 'rb') as f:
-            embedding_dict = pkl.load(f)
-
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num

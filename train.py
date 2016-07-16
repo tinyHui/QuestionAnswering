@@ -1,5 +1,4 @@
-from preprocess.data import ReVerbPairs
-from preprocess.feats import FEATURE_OPTS, data2feats
+from preprocess.feats import FEATURE_OPTS, feats_loader
 from scipy.sparse import csr_matrix
 from scipy.sparse import vstack as sparse_vstack
 import numpy as np
@@ -141,8 +140,7 @@ if __name__ == "__main__":
 
     if reuse_stage == 0:
         logging.info("constructing train data")
-        data_list = [ReVerbPairs(usage='train', part=i, mode='index') for i in range(PROCESS_NUM)]
-        feats_list = [data2feats(data, feature) for data in data_list]
+        feats_list = [feats_loader(feature, usage='train', part=i) for i in range(PROCESS_NUM)]
         length = sum([len(feats) for feats in feats_list])
 
         if sparse:

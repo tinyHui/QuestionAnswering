@@ -4,6 +4,7 @@ from random import sample
 from word2vec import WORD_EMBEDDING_FILE
 import sqlite3
 import re
+import numpy as np
 
 
 UNKNOWN_TOKEN = 'UNKNOWN'
@@ -129,8 +130,10 @@ class ReVerbPairs(object):
             suf = 'txt'
         elif mode == 'index':
             suf = 'indx'
+        elif mode == 'embedding':
+            suf = 'emb'
         else:
-            raise AttributeError("Mode can be only 'str' or 'index'")
+            raise AttributeError("Mode can be only 'str', 'index' or 'embedding")
         self.mode = mode
 
         if usage in ['train', 'test']:
@@ -164,10 +167,12 @@ class ReVerbPairs(object):
                 if self.gram > 1:
                     q_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q_tokens[j:] for j in range(self.gram)])]
                     a_tokens = [w1 + " " + w2 for w1, w2 in zip(*[a_tokens[j:] for j in range(self.gram)])]
-            else:
-                # mode == 'index
+            elif self.mode == 'index':
                 q_tokens = map(int, q_tokens)
                 a_tokens = map(int, a_tokens)
+            elif self.mode == 'embedding':
+                q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
+                a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
 
             # produce the token per line
             if self.usage == 'train':

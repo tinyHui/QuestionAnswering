@@ -1,8 +1,7 @@
 from collections import UserList
 from collections import defaultdict
-from preprocess.data import ReVerbPairs
 from train import CCA_FILE
-from preprocess.feats import FEATURE_OPTS, data2feats
+from preprocess.feats import FEATURE_OPTS, feats_loader
 from CCA import distance
 from sys import stdout
 import argparse
@@ -53,8 +52,7 @@ if __name__ == '__main__':
         Q_k, A_k = pkl.load(f)
 
     logging.info("calculating distance")
-    data = ReVerbPairs(usage='test', mode='index')
-    feats = data2feats(data, feature)
+    feats = feats_loader(feature, usage='test')
 
     result = UserList()
     length = len(feats)
