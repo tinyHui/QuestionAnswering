@@ -38,14 +38,6 @@ def process_raw(raw):
     return s
 
 
-def word2index(w, voc_dict):
-    try:
-        return voc_dict[w]
-    except KeyError:
-        # unseen token
-        return UNKNOWN_TOKEN_INDX
-
-
 # question answer pairs (train) generate from ReVerb corpus
 class ReVerbTrainRaw(object):
     def __init__(self):
@@ -246,7 +238,7 @@ class WordEmbeddingRaw(object):
         return 3000000
 
     def __str__(self):
-        return "ReVerb tuples word embeddings"
+        return "Word embeddings"
 
 # paraphrased sentences
 # class PPDB(object):

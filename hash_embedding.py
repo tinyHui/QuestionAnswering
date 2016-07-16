@@ -1,33 +1,32 @@
 if __name__ == "__main__":
-    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
-    from word2index import UNIGRAM_DICT_FILE
-    from preprocess.data import WordEmbeddingRaw
-    from functools import partial
-    from collections import defaultdict
+    from word2vec import WORD_EMBEDDING_BIN_FILE
+    from preprocess.data import ReVerbPairs, WordEmbeddingRaw
     import pickle as pkl
-    import numpy as np
     import os
     import sys
-
+    import argparse
     import logging
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+    parser = argparse.ArgumentParser(description='Define training process.')
+    parser.add_argument('--file', type=str)
+
+    args = parser.parse_args()
+    fname = args.file
 
     if os.path.exists(WORD_EMBEDDING_BIN_FILE):
         logging.info("Word embedding dictionary file exists, skip")
         sys.exit(0)
 
-    src_data = WordEmbeddingRaw()
-
     # the word embedding text file use raw word
-    logging.info("loading vocabulary index")
-    with open(UNIGRAM_DICT_FILE, 'rb') as f:
-        voc_dict = pkl.load(f)
+    src_data = WordEmbeddingRaw(fname)
 
     logging.info("converting raw embedding text")
     word_emb_hash_group = {}
-    for sent_indx in voc_dict.keys():
-        # for unseen words, the embedding is zero \in R^Embedding_size
-        word_emb_hash_group[sent_indx] = defaultdict(partial(np.zeros, EMBEDDING_SIZE))
+
+    train_data = ReVerbPairs(usage='train', mode='str')
+    for sent_indx in range(train_data.sent_indx):
+        word_emb_hash_group[sent_indx] = {}
 
     line_num = 1
     for w, emb in src_data:
@@ -40,12 +39,10 @@ if __name__ == "__main__":
         elif w == '</s>':
             w = '?'
 
-        for sent_indx in voc_dict.keys():
+        for sent_indx in range(train_data.sent_indx):
             try:
-                # find index of the word
-                indx = voc_dict[sent_indx][w]
-                # hash word index to word embedding
-                word_emb_hash_group[sent_indx][indx] = np.asarray(emb, dtype='float32')
+                # hash word index to word embedding (list)
+                word_emb_hash_group[sent_indx][w] = emb
             except KeyError:
                 continue
 
