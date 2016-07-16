@@ -17,11 +17,11 @@ def avg_emb(sentence, embedding_dict, result):
 
 def cc(sentence, embedding_dict, d):
     # circular correlation
-    cdef int w;
-    cdef np.ndarray result;
-    cdef np.ndarray crt_result;
-    cdef np.ndarray emb_w;
-    cdef int v;
+    cdef unsigned int w
+    cdef np.ndarray result
+    cdef np.ndarray crt_result
+    cdef np.ndarray emb_w
+    cdef float v
 
     w = sentence[0]
     result = embedding_dict[w] # R^1 x 300

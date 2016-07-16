@@ -1,12 +1,8 @@
-# import numpy as np
-# import pyximport
-# pyximport.install(setup_args={"include_dirs":np.get_include()})
-# import utils
-
 # convert all sentences to their representations but keep data in other columns
 from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
 import numpy as np
 import pickle as pkl
+from preprocess import utils
 
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
