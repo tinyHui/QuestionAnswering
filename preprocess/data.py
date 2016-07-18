@@ -1,3 +1,5 @@
+from calendar import month_name, month_abbr
+from calendar import month_name, month_abbr
 from collections import UserDict
 from random import sample
 from word2vec import WORD_EMBEDDING_FILE
@@ -8,6 +10,34 @@ import numpy as np
 
 UNKNOWN_TOKEN = 'UNKNOWN'
 UNKNOWN_TOKEN_INDX = 0
+
+
+def process_raw(raw):
+    # to lower case
+    s = raw.lower()
+    # replace month name to number
+    MONTH_NAME = zip([name.lower() for name in month_name[1:]], [name.lower() for name in month_abbr[1:]])
+    for i, (name, abbr) in enumerate(MONTH_NAME):
+        s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
+
+    # define replace pattern
+    GRAMMAR_SYM = r'(\')'
+    DATE = r'(([0]?[1-9]|[1][0-2])[\.\/\- ]([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0-9]{4}|[0-9]{2}))|' \
+           r'(([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0]?[1-9]|[1][0-2])[\.\/\- ]([0-9]{4}|[0-9]{2}))'
+    TIME = r'[0-2]?[1-9]:[0-5][0-9][ \-]?(am|pm)?'
+    MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
+    PRESENT = r'[-+]?\d+(\,\d+)?(\.\d+)?[ \-]?\%'
+    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?'
+    EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
+            r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
+    SYM = r'(\.|\?|\$|\*|\#|\&)'
+    SPACES = r' +'
+    # replace all matched phrase to TOKEN name
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (PRESENT, 'PRESENT'),
+              (NUMBER, 'NUM'), (EMAIL, 'EMAIL'), (SYM, ' \\1 '), (SPACES, ' ')]
+    for p, t in RE_SET:
+        s = re.sub(p, t, s)
+    return s
 
 
 # question answer pairs (train) generate from ReVerb corpus
@@ -37,8 +67,8 @@ class ReVerbTrainRaw(object):
                                         ('when was {e1} {r} ?', '{e1} {r} {e2}')]
 
     def __iter__(self):
-        for line in self.content:
-            r, e1, e2 = re.sub(r'\-', ' ', line)
+        for r, e1, e2 in self.content:
+            r, e1, e2 = [re.sub(r'\-', ' ', w) for w in [r, e1, e2]]
 
             # remove ".e", ".r" in token
             r = r.replace('.r', '')
@@ -79,14 +109,16 @@ class ReVerbTestRaw(object):
         for line in open(self.file, 'r'):
             l, q, a = line.strip().split('\t')
             q_id = self.q_id_map[q]
-            # make ? as a token
+            # normalize question
             q = re.sub(r'\?', ' ?', q)
-            a = re.sub(r'\?', ' ?', a)
-            # replace "-" with a space
+            q = re.sub(r'\'s', ' \'s', q)
             q = re.sub(r'\-', ' ', q)
+            q = process_raw(q)
+            # normalize answer
+            a = re.sub(r'\?', ' ?', a)
+            a = re.sub(r'\'s', ' \'s', a)
             a = re.sub(r'\-', ' ', a)
-            # remove ".e", ".r" in answer
-            a = re.sub(r'\.(r|e)', '', a)
+            a = process_raw(a)
             r, e1, e2 = a.split()
             a = "{e1} {r} {e2}".format(r=r, e1=e1, e2=e2)
 
