@@ -13,7 +13,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     with open(UNIGRAM_DICT_FILE, 'rb') as f:
-        word_indx_hash_group = pkl.read(f)
+        word_indx_hash_group = pkl.load(f)
 
     # the word embedding text file use raw word
     src_data = WordEmbeddingRaw()

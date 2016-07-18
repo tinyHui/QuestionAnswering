@@ -62,10 +62,10 @@ if __name__ == '__main__':
 
     for path, data in data_list:
         line_num = 0
-        logging.info("converting part %d" % path)
+        logging.info("converting %s" % path)
         if os.path.exists(path):
             # check if the index version exists
-            print("Index version data %s exists" % path)
+            logging.info("index version data %s exists" % path)
         with open(path, 'a') as f:
             length = len(data)
             for d in data:

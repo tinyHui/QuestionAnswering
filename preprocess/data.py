@@ -211,9 +211,9 @@ class ReVerbPairs(object):
             if self.part is None:
                 return 149993
             if self.part == 14:
-                return
+                return 10000
             else:
-                return
+                return 9993
 
             # 3 patterns, use all triples
             # if self.part is None:

@@ -1,7 +1,7 @@
 from preprocess.data import ReVerbTestRaw
 from sys import stdout
 
-FILE = './data/reverb-test.txt'
+FILE = './data/reverb-test.full.txt'
 
 if __name__ == '__main__':
     qa = ReVerbTestRaw()
