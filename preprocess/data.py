@@ -37,6 +37,7 @@ def process_raw(raw):
               (NUMBER, 'NUM'), (EMAIL, 'EMAIL'), (SYM, ' \\1 '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
+    s = re.sub(r'\-', ' ', s)
     return s
 
 
@@ -85,8 +86,6 @@ class ReVerbTrainRaw(object):
 
     def __iter__(self):
         for r, e1, e2 in self.content:
-            r, e1, e2 = [re.sub(r'\-', ' ', w) for w in [r, e1, e2]]
-
             # remove ".e", ".r" in token
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
@@ -127,14 +126,8 @@ class ReVerbTestRaw(object):
             l, q, a = line.strip().split('\t')
             q_id = self.q_id_map[q]
             # normalize question
-            q = re.sub(r'\?', ' ?', q)
-            q = re.sub(r'\'s', ' \'s', q)
-            q = re.sub(r'\-', ' ', q)
             q = process_raw(q)
             # normalize answer
-            a = re.sub(r'\?', ' ?', a)
-            a = re.sub(r'\'s', ' \'s', a)
-            a = re.sub(r'\-', ' ', a)
             a = process_raw(a)
             r, e1, e2 = a.split()
             a = "{e1} {r} {e2}".format(r=r, e1=e1, e2=e2)
