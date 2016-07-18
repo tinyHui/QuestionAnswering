@@ -78,17 +78,17 @@ if __name__ == '__main__':
                 line_num += 1
                 if data.usage == 'train':
                     q, a = d
-                    q_indx = [str(word_hash(token, voc_dict[0], mode)) for token in q]
-                    a_indx = [str(word_hash(token, voc_dict[1], mode)) for token in a]
-                    new_q = " ".join(q_indx)
-                    new_a = " ".join(a_indx)
+                    q_tokens = [str(word_hash(token, voc_dict[0], mode)) for token in q]
+                    a_tokens = [str(word_hash(token, voc_dict[1], mode)) for token in a]
+                    new_q = " ".join(q_tokens)
+                    new_a = " ".join(a_tokens)
                     f.write("%s\t%s\n" % (new_q, new_a))
                 else:
                     q, a, q_id, l = d
-                    q_indx = [str(word_hash(token, voc_dict[0], mode)) for token in q]
+                    q_tokens = [str(word_hash(token, voc_dict[0], mode)) for token in q]
                     a_indx = [str(word_hash(token, voc_dict[1], mode)) for token in a]
-                    new_q = " ".join(q_indx)
-                    new_a = " ".join(a_indx)
+                    new_q = " ".join(q_tokens)
+                    new_a = " ".join(a_tokens)
                     f.write("%d\t%s\t%s\t%d\n" % (q_id, new_q, new_a, l))
 
             sys.stdout.write("\n")

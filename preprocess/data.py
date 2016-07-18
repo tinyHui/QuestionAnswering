@@ -261,7 +261,7 @@ class WordEmbeddingRaw(object):
             w, *emb = line.strip().split()
             if w == '</s>':
                 w = '?'
-            yield w.lower(), map(float, emb)
+            yield w.lower(), list(map(float, emb))
 
     def __len__(self):
         return 3000000

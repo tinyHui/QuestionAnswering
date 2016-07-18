@@ -108,27 +108,23 @@ class Ngram(object):
 
 
 class WordEmbedding(object):
-    def __init__(self, data, embedding_dict_file):
+    def __init__(self, data):
         '''
         Represent sentence data using word embedding trained by British National Corpus
         :param data: data source, such as PPDB, QAs
         :param embedding_dict_file: word-embedding dictionary file name
         '''
-        assert data.mode == 'index', "must use word index in input data"
+        assert data.mode == 'embedding', "must use word embedding in input data"
         self.data = data
-        self.embedding_dict_file = embedding_dict_file
 
     def __iter__(self):
-        with open(self.embedding_dict_file, 'rb') as f:
-            embedding_dict = pkl.load(f)
-
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
                     feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float32')
-                    feat[i] = utils.avg_emb(list(d[i]), embedding_dict[i])
+                    feat[i] = utils.avg_emb(d[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 
@@ -155,7 +151,7 @@ class Holographic(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = utils.cc(list(d[i]), embedding_dict[i], EMBEDDING_SIZE)
+                    feat[i] = utils.cc(d[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 

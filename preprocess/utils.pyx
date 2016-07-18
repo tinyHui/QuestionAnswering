@@ -5,17 +5,18 @@ DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
 
 
-def avg_emb(sentence, embedding_dict, result):
+def avg_emb(sentence, EMBEDDING_SIZE):
+    result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
     # average of embedding of the words
     for w in sentence:
         # for each token, find its embedding
         # unseen token will automatically take 0 x R^300
-        result += embedding_dict[w]
+        result += w
     result /= len(sentence)
     return result
 
 
-def cc(sentence, embedding_dict, d):
+def cc(sentence, EMBEDDING_SIZE):
     # circular correlation
     cdef unsigned int w
     cdef np.ndarray result
@@ -23,15 +24,13 @@ def cc(sentence, embedding_dict, d):
     cdef np.ndarray emb_w
     cdef float v
 
-    w = sentence[0]
-    result = embedding_dict[w] # R^1 x 300
-    for w in sentence[1:]:
-        emb_w = embedding_dict[w]     # R^1 x 300
-        crt_result = np.zeros(d, dtype=DTYPE)
-        for k in range(d):
+    result = sentence[0] # R^1 x EMBEDDING_SIZE
+    for emb_w in sentence[1:]:
+        crt_result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
+        for k in range(EMBEDDING_SIZE):
             v = 0
-            for i in range(d):
-                v += result[i] * emb_w[(k+i) % d]
+            for i in range(EMBEDDING_SIZE):
+                v += result[i] * emb_w[(k+i) % EMBEDDING_SIZE]
             crt_result[k] = v
         result = crt_result
     return result
