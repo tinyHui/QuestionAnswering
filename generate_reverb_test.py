@@ -12,3 +12,4 @@ if __name__ == '__main__':
             stdout.flush()
             f.write("{}\t{}\t{}\t{}\n".format(q_id, q, a, l))
             i += 1
+    stdout.write("\nTotal: %d\n" % i)

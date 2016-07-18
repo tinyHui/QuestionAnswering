@@ -27,11 +27,6 @@ if __name__ == "__main__":
         sys.stdout.flush()
         line_num += 1
 
-        if w == '0':
-            w = 'NUM'
-        elif w == '</s>':
-            w = '?'
-
         for sent_indx in train_data.sent_indx:
             try:
                 # hash word index to word embedding (list)
