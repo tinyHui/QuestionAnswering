@@ -5,7 +5,7 @@ DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
 
 
-def avg_emb(list sentence, np.ndarray EMBEDDING_SIZE):
+def avg_emb(list sentence, unsigned int EMBEDDING_SIZE):
     cdef unsigned int w
     cdef np.ndarray result
 
@@ -19,7 +19,7 @@ def avg_emb(list sentence, np.ndarray EMBEDDING_SIZE):
     return result
 
 
-def cc(list sentence, np.ndarray EMBEDDING_SIZE):
+def cc(list sentence, unsigned int EMBEDDING_SIZE):
     # circular correlation
     cdef np.ndarray result
     cdef np.ndarray crt_result
