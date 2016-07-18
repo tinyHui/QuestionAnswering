@@ -33,12 +33,12 @@ def feats_loader(feat_select, usage, part=None):
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
         data = ReVerbPairs(usage=usage, part=part, mode='embedding')
-        feats = WordEmbedding(data, WORD_EMBEDDING_BIN_FILE)
+        feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
         data = ReVerbPairs(usage=usage, part=part, mode='embedding')
-        feats = Holographic(data, WORD_EMBEDDING_BIN_FILE)
+        feats = Holographic(data)
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -135,7 +135,7 @@ class WordEmbedding(object):
 
 
 class Holographic(object):
-    def __init__(self, data, embedding_dict_file):
+    def __init__(self, data):
         '''
         Represent sentence data using word embedding trained by British National Corpus
         :param data: data source, such as PPDB, QAs
@@ -143,7 +143,6 @@ class Holographic(object):
         '''
         assert data.mode == 'index', "must use word index in input data"
         self.data = data
-        self.embedding_dict_file = embedding_dict_file
 
     def __iter__(self):
         for d in self.data:
