@@ -5,7 +5,10 @@ DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
 
 
-def avg_emb(sentence, EMBEDDING_SIZE):
+def avg_emb(list sentence, np.ndarray EMBEDDING_SIZE):
+    cdef unsigned int w
+    cdef np.ndarray result
+
     result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
     # average of embedding of the words
     for w in sentence:
@@ -16,13 +19,14 @@ def avg_emb(sentence, EMBEDDING_SIZE):
     return result
 
 
-def cc(sentence, EMBEDDING_SIZE):
+def cc(list sentence, np.ndarray EMBEDDING_SIZE):
     # circular correlation
-    cdef unsigned int w
     cdef np.ndarray result
     cdef np.ndarray crt_result
     cdef np.ndarray emb_w
     cdef float v
+    cdef unsigned int k
+    cdef unsigned int i
 
     result = sentence[0] # R^1 x EMBEDDING_SIZE
     for emb_w in sentence[1:]:
