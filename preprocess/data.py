@@ -55,14 +55,14 @@ class ReVerbTrainRaw(object):
                 FROM    (   SELECT  *
                             FROM    tuples
                             WHERE   rel not like '%-in.r' and rel not like '%-on.r'
-                            LIMIT 10000
+                            LIMIT 30000
                         )
                 UNION
                 SELECT  *
                 FROM    (   SELECT  *
                             FROM    tuples
                             WHERE   rel like '%-in.r' or rel like '%-on.r'
-                            LIMIT 20000
+                            LIMIT 60000
                         );
         """)
         # define the pattern
@@ -128,8 +128,8 @@ class ReVerbTestRaw(object):
             # normalize question
             q = process_raw(q)
             # normalize answer
-            a = process_raw(a)
             r, e1, e2 = a.split()
+            r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
             a = "{e1} {r} {e2}".format(r=r, e1=e1, e2=e2)
 
             yield q_id, q, a, l
