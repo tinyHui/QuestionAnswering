@@ -3,7 +3,6 @@ DUMP_TEST_FILE = "./data/reverb-test.full.%s"
 
 
 if __name__ == '__main__':
-    from train import PROCESS_NUM
     from hash_index import UNIGRAM_DICT_FILE
     from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN_INDX
     from word2vec import EMBEDDING_SIZE
@@ -27,7 +26,7 @@ if __name__ == '__main__':
                 # for unseen words, the embedding is zero \in R^Embedding_size
                 value = [0] * EMBEDDING_SIZE
 
-            return '|'.join(value)
+            return '|'.join(map(str, value))
 
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
