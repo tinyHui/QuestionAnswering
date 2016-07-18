@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 else:
                     q, a, q_id, l = d
                     q_tokens = [str(word_hash(token, voc_dict[0], mode)) for token in q]
-                    a_indx = [str(word_hash(token, voc_dict[1], mode)) for token in a]
+                    a_tokens = [str(word_hash(token, voc_dict[1], mode)) for token in a]
                     new_q = " ".join(q_tokens)
                     new_a = " ".join(a_tokens)
                     f.write("%d\t%s\t%s\t%d\n" % (q_id, new_q, new_a, l))

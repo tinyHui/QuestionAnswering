@@ -10,7 +10,6 @@ import logging
 import os
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-INF_FREQ = 1000
 OUTPUT_FILE_TOP1 = './data/reverb-test-with_dist.top1.%s.txt'
 OUTPUT_FILE_TOP5 = './data/reverb-test-with_dist.top5.%s.txt'
 OUTPUT_FILE_TOP10 = './data/reverb-test-with_dist.top10.%s.txt'
@@ -26,7 +25,6 @@ def loader(feat, Q_k, A_k):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
-    parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
     # parser.add_argument('--full_rank', action='store_true', default=False,
     #                     help='Use full rank for selecting answer')
     # parser.add_argument('--rerank', action='store_true', default=False,
@@ -34,7 +32,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     feature = args.feature
-    INF_FREQ = args.freq
     # assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
     # full_rank = args.full_rank
 
@@ -46,6 +43,7 @@ if __name__ == '__main__':
         if os.path.exists(f):
             os.remove(f)
 
+    logging.info("using feature: %s" % feature)
     logging.info("loading CCA model")
     # load CCA model
     with open(CCA_FILE % feature, 'rb') as f:

@@ -152,13 +152,18 @@ if __name__ == "__main__":
 
         qa_queue = Queue()
         count_queue = Queue()
+        p_list = []
         for i in range(PROCESS_NUM):
             p = Process(target=generate_part, args=(feats_list[i], qa_queue, count_queue))
             p.start()
+            p_list.append(p)
 
         Qs, As = generate(qa_queue, count_queue)
         with open(QA_PAIR_FILE % feature, 'wb') as f:
             pkl.dump((Qs, As), f, protocol=4)
+
+        for p in p_list:
+            p.terminate()
 
     if reuse_stage == 1:
         # reuse QA pair data

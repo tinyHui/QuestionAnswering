@@ -259,8 +259,6 @@ class WordEmbeddingRaw(object):
             if line_num == 1:
                 continue
             w, *emb = line.strip().split()
-            if w == '</s>':
-                w = '?'
             yield w.lower(), list(map(float, emb))
 
     def __len__(self):

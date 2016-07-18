@@ -1,8 +1,7 @@
 # convert all sentences to their representations but keep data in other columns
 from preprocess.data import ReVerbPairs
-from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
+from word2vec import EMBEDDING_SIZE
 import numpy as np
-import pickle as pkl
 from preprocess import utils
 
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
@@ -123,7 +122,6 @@ class WordEmbedding(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = np.zeros(EMBEDDING_SIZE, dtype='float32')
                     feat[i] = utils.avg_emb(d[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
@@ -141,7 +139,7 @@ class Holographic(object):
         :param data: data source, such as PPDB, QAs
         :param embedding_dict_file: word-embedding dictionary file name
         '''
-        assert data.mode == 'index', "must use word index in input data"
+        assert data.mode == 'embedding', "must use word index in input data"
         self.data = data
 
     def __iter__(self):
