@@ -9,8 +9,8 @@ if __name__ == '__main__':
     i = 1
     with codecs.open(FILE, 'a', 'utf-8') as f:
         for q, a in data:
+            i += 1
             stdout.write("\rgenerated: %d" % i)
             stdout.flush()
             f.write("{}\t{}\n".format(q, a))
-            i += 1
     stdout.write("\nTotal: %d\n" % i)

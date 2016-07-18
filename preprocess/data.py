@@ -199,7 +199,7 @@ class ReVerbPairs(object):
 
     def get_voc_num(self, i):
         if self.gram == 1:
-            voc_num = {0:222304, 1:269239}
+            voc_num = {0:10674, 1:15546}
         elif self.gram == 2:
             voc_num = {0: 0, 1: 0}
         elif self.gram == 3:
@@ -208,13 +208,20 @@ class ReVerbPairs(object):
 
     def __len__(self):
         if self.usage == 'train':
-            # part patterns
             if self.part is None:
-                return 35540263
+                return 149993
             if self.part == 14:
-                return 2369349
+                return
             else:
-                return 2369351
+                return
+
+            # 3 patterns, use all triples
+            # if self.part is None:
+            #     return 35540263
+            # if self.part == 14:
+            #     return 2369349
+            # else:
+            #     return 2369351
 
             # full patterns
             # if self.part is None:
