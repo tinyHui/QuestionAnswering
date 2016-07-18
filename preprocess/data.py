@@ -102,9 +102,9 @@ class ReVerbTrainRaw(object):
                 pattern_list = sample(self.normal_pattern_list, 3)
 
             # generate the question
-            for s, p in pattern_list:
-                q = s.format(r=r, e1=e1, e2=e2)
-                a = p.format(r=r, e1=e1, e2=e2)
+            for s, t in pattern_list:
+                q = process_raw(s.format(r=r, e1=e1, e2=e2))
+                a = process_raw(t.format(r=r, e1=e1, e2=e2))
 
                 yield (q, a)
 
