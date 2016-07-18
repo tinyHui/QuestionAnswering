@@ -46,7 +46,8 @@ class ReVerbTrainRaw(object):
         self.file = './data/reverb-tuples.db'
         conn = sqlite3.connect(self.file)
         c = conn.cursor()
-        self.content = c.execute("select * from tuples")
+        # 14377737 triples in total
+        self.content = c.execute("SELECT * FROM tuples ORDER BY RAND() LIMIT 50000")
         # define the pattern
         self.normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
                                     ('what {r} {e2} ?', '{e1} {r} {e2}'),
