@@ -4,6 +4,7 @@ DUMP_TEST_FILE = "./data/reverb-test.full.%s"
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
+    from hash_embedding import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN_INDX
     from word2vec import EMBEDDING_SIZE
     import pickle as pkl
@@ -40,14 +41,16 @@ if __name__ == '__main__':
         raise SystemError("mode only supports %s" % ",".join(mode_support))
 
     if mode == mode_support[0]:
+        with open(UNIGRAM_DICT_FILE, 'rb') as f:
+            voc_dict = pkl.load(f)
         suf = 'indx'
     elif mode == mode_support[1]:
+        with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
+            voc_dict = pkl.load(f)
         suf = 'emb'
 
     # load vocabulary dictionary
     logging.info("loading vocabulary index")
-    with open(UNIGRAM_DICT_FILE, 'rb') as f:
-        voc_dict = pkl.load(f)
 
     data_list = []
     # add train data
@@ -66,6 +69,7 @@ if __name__ == '__main__':
         if os.path.exists(path):
             # check if the index version exists
             logging.info("index version data %s exists" % path)
+            continue
         with open(path, 'a') as f:
             length = len(data)
             for d in data:
