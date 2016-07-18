@@ -1,4 +1,5 @@
 if __name__ == "__main__":
+    from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, WordEmbeddingRaw
     import pickle as pkl
@@ -10,6 +11,9 @@ if __name__ == "__main__":
     if os.path.exists(WORD_EMBEDDING_BIN_FILE):
         logging.info("Word embedding dictionary file exists, skip")
         sys.exit(0)
+
+    with open(UNIGRAM_DICT_FILE, 'rb') as f:
+        word_indx_hash_group = pkl.read(f)
 
     # the word embedding text file use raw word
     src_data = WordEmbeddingRaw()
@@ -28,6 +32,8 @@ if __name__ == "__main__":
         line_num += 1
 
         for sent_indx in train_data.sent_indx:
+            if w not in word_indx_hash_group[sent_indx].keys():
+                continue
             try:
                 # hash word index to word embedding (list)
                 word_emb_hash_group[sent_indx][w] = emb
@@ -37,4 +43,4 @@ if __name__ == "__main__":
     sys.stdout.write("\n")
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_BIN_FILE, 'wb') as f:
-        pkl.dump(word_emb_hash_group, f)
+        pkl.dump(word_emb_hash_group, f, protocol=4)
