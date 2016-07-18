@@ -47,7 +47,30 @@ class ReVerbTrainRaw(object):
         conn = sqlite3.connect(self.file)
         c = conn.cursor()
         # 14377737 triples in total
-        self.content = c.execute("SELECT * FROM tuples ORDER BY RAND() LIMIT 50000")
+        # 2697790 triples, relation ends with -in
+        # 1098684 triples, relation ends with -on
+        self.content = c.execute("""
+            SELECT  *
+                FROM    (   SELECT  *
+                            FROM    tuples
+                            WHERE   rel not like '%-in.r' or not like '%-on.r'
+                            LIMIT 10000
+                        )
+                UNION
+                SELECT  *
+                FROM    (   SELECT  *
+                            FROM    tuples
+                            WHERE   rel like '%-in.r'
+                            LIMIT 10000
+                        )
+                UNION
+                SELECT  *
+                FROM    (   SELECT  *
+                            FROM    tuples
+                            WHERE   rel like '%-on.r'
+                            LIMIT 10000
+                        )
+        """)
         # define the pattern
         self.normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
                                     ('what {r} {e2} ?', '{e1} {r} {e2}'),
