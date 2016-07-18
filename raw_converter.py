@@ -4,7 +4,7 @@ DUMP_TEST_FILE = "./data/reverb-test.full.%s"
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
-    from hash_embedding import WORD_EMBEDDING_BIN_FILE
+    from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN_INDX
     from word2vec import EMBEDDING_SIZE
     import pickle as pkl
