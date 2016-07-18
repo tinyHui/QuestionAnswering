@@ -1,4 +1,4 @@
-DUMP_TRAIN_FILE = "./data/reverb-train.part%d.%s"
+DUMP_TRAIN_FILE = "./data/reverb-train.full.%s"
 DUMP_TEST_FILE = "./data/reverb-test.full.%s"
 
 
@@ -52,15 +52,9 @@ if __name__ == '__main__':
 
     data_list = []
     # add train data
-    for part in range(PROCESS_NUM):
-        path = DUMP_TRAIN_FILE % (part, suf)
-        if os.path.exists(path):
-            # check if the index version exists
-            print("Index version data %s exists" % path)
-            continue
-        logging.info("converting part %d" % part)
-        data = ReVerbPairs(usage='train', part=part, mode='str')
-        data_list.append((path, data))
+    data = ReVerbPairs(usage='train', mode='str')
+    path = DUMP_TRAIN_FILE % suf
+    data_list.append((path, data))
 
     # add test data
     data = ReVerbPairs(usage='test', mode='str')
@@ -69,6 +63,10 @@ if __name__ == '__main__':
 
     for path, data in data_list:
         line_num = 0
+        logging.info("converting part %d" % path)
+        if os.path.exists(path):
+            # check if the index version exists
+            print("Index version data %s exists" % path)
         with open(path, 'a') as f:
             length = len(data)
             for d in data:
