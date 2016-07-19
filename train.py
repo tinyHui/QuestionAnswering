@@ -19,24 +19,24 @@ PROCESS_NUM = 15
 def generate_part_dense(feature_set, qa_queue, count_queue):
     last_i = 0
     i = 1
-    Qs = []
-    As = []
+    Qs = None
+    As = None
     for feature in feature_set:
         _, feat = feature
 
         if isinstance(Qs, type(None)):
-            Qs = [feat[0]]
-            As = [feat[1]]
+            Qs = feat[0]
+            As = feat[1]
         else:
-            Qs.append(feat[0])
-            As.append(feat[1])
+            Qs = np.vstack((Qs, feat[0]))
+            As = np.vstack((As, feat[1]))
 
         if i % INF_FREQ == 0 or i == len(feature_set):
             qa_queue.put((Qs, As))
             count_queue.put(i - last_i)
             # reset Qs and As
-            del Qs[:]
-            del As[:]
+            Qs = None
+            As = None
             last_i = i
         i += 1
 
