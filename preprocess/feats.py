@@ -2,7 +2,7 @@
 from preprocess.data import ReVerbPairs
 from word2vec import EMBEDDING_SIZE
 import numpy as np
-from preprocess import utils
+from preprocess.utils import Utils
 
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
@@ -117,6 +117,7 @@ class WordEmbedding(object):
         self.data = data
 
     def __iter__(self):
+        utils = Utils()
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
@@ -143,6 +144,7 @@ class Holographic(object):
         self.data = data
 
     def __iter__(self):
+        utils = Utils()
         for d in self.data:
             param_num = len(d)
             feat = [None] * param_num
