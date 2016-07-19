@@ -35,8 +35,8 @@ def generate_part_dense(feature_set, qa_queue, count_queue):
             qa_queue.put((np.asarray(Qs), np.asarray(As)))
             count_queue.put(i - last_i)
             # reset Qs and As
-            del Qs[:]
-            del As[:]
+            Qs = []
+            As = []
             last_i = i
         i += 1
 
