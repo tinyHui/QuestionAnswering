@@ -1,11 +1,12 @@
 DUMP_TRAIN_FILE = "./data/reverb-train.full.%s"
 DUMP_TEST_FILE = "./data/reverb-test.full.%s"
+DUMP_PARA_FILE = "./data/paraphrases.%s"
 
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
-    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX
     from word2vec import EMBEDDING_SIZE
     import pickle as pkl
     import os
@@ -63,6 +64,11 @@ if __name__ == '__main__':
     path = DUMP_TEST_FILE % suf
     data_list.append((path, data))
 
+    # add paraphrase questions data
+    data = ParaphraseQuestionRaw(mode='str')
+    path = DUMP_PARA_FILE % suf
+    data_list.append((path, data))
+
     for path, data in data_list:
         line_num = 0
         logging.info("converting %s" % path)
@@ -72,25 +78,30 @@ if __name__ == '__main__':
             continue
         with open(path, 'a') as f:
             length = len(data)
+
+            if isinstance(data, ReVerbPairs):
+                if data.usage == 'test':
+                    voc_dict[2] = voc_dict[1]
+                    voc_dict[1] = voc_dict[0]
+            if isinstance(data, ParaphraseQuestionRaw):
+                # paraphrase question data use question tokens
+                voc_dict[1] = voc_dict[0]
+
             for d in data:
                 sys.stdout.write("\rLoad: %.2f%%" % (float(line_num / length) * 100))
                 sys.stdout.flush()
                 line_num += 1
-                if data.usage == 'train':
-                    q, a = d
-                    q_tokens = [str(word_hash(token, voc_dict[0], mode)) for token in q]
-                    a_tokens = [str(word_hash(token, voc_dict[1], mode)) for token in a]
-                    new_q = " ".join(q_tokens)
-                    new_a = " ".join(a_tokens)
-                    f.write("%s\t%s\n" % (new_q, new_a))
-                else:
-                    q, a, q_id, l = d
-                    q_tokens = [str(word_hash(token, voc_dict[0], mode)) for token in q]
-                    a_tokens = [str(word_hash(token, voc_dict[1], mode)) for token in a]
-                    new_q = " ".join(q_tokens)
-                    new_a = " ".join(a_tokens)
-                    f.write("%d\t%s\t%s\t%d\n" % (q_id, new_q, new_a, l))
+                param_num = len(d)
+                for i in range(param_num):
+                    if i in data.sent_indx:
+                        tokens = [str(word_hash(token, voc_dict[i], mode)) for token in d[i]]
+                        sentence = " ".join(tokens)
+                    else:
+                        sentence = d[i]
+                    if i+1 != param_num:
+                        f.write("%s\t" % sentence)
+                    else:
+                        f.write("%s" % sentence)
+                f.write("\n")
 
-            sys.stdout.write("\n")
-
-
+        sys.stdout.write("\n")
