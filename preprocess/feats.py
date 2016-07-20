@@ -1,5 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
-from preprocess.data import ReVerbPairs
+from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw
 from word2vec import EMBEDDING_SIZE
 import numpy as np
 from preprocess.utils import Utils
@@ -7,7 +7,7 @@ from preprocess.utils import Utils
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
 
-def feats_loader(feat_select, usage, part=None):
+def feats_loader(feat_select, usage, train_two_stage_cca=False):
     '''
     :param data:
     :param feat_select: select when execute, in argument
@@ -16,27 +16,36 @@ def feats_loader(feat_select, usage, part=None):
 
     if feat_select == FEATURE_OPTS[0]:
         # bag-of-word, unigram
-        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=1)
+        if not train_two_stage_cca:
+            data = ReVerbPairs(usage=usage, mode='index', gram=1)
+        else:
+            data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
         # bag-of-word, bigram
-        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=2)
+        if not train_two_stage_cca:
+            data = ReVerbPairs(usage=usage, mode='index', gram=2)
+        else:
+            data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
         # bag-of-word, thrigram
-        data = ReVerbPairs(usage=usage, part=part, mode='index', gram=3)
+        if not train_two_stage_cca:
+            data = ReVerbPairs(usage=usage, mode='index', gram=3)
+        else:
+            data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
-        data = ReVerbPairs(usage=usage, part=part, mode='embedding')
+        data = ReVerbPairs(usage=usage, mode='embedding')
         feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
-        data = ReVerbPairs(usage=usage, part=part, mode='embedding')
+        data = ReVerbPairs(usage=usage, mode='embedding')
         feats = Holographic(data)
 
     # elif feat_select == FEATURE_OPTS[]:

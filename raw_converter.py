@@ -1,6 +1,6 @@
 DUMP_TRAIN_FILE = "./data/reverb-train.full.%s"
 DUMP_TEST_FILE = "./data/reverb-test.full.%s"
-DUMP_PARA_FILE = "./data/paraphrases.%s"
+DUMP_PARA_FILE = "./data/paraphrases.full.%s"
 
 
 if __name__ == '__main__':

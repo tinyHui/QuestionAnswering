@@ -1,37 +1,49 @@
-from collections import UserList
 from collections import defaultdict
-from train import CCA_FILE
+from collections import UserList
+from sys import stdout
+from multiprocessing import Process, Manager,Queue
+from queue import Empty
+from itertools import islice
 from preprocess.feats import FEATURE_OPTS, feats_loader
 from CCA import distance
-from sys import stdout
+from functools import partial
 import argparse
 import pickle as pkl
 import logging
 import os
+from time import sleep
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 OUTPUT_FILE_TOP1 = './data/reverb-test-with_dist.top1.%s.txt'
 OUTPUT_FILE_TOP5 = './data/reverb-test-with_dist.top5.%s.txt'
 OUTPUT_FILE_TOP10 = './data/reverb-test-with_dist.top10.%s.txt'
+PROCESS_NUM = 20
 
 
-def loader(feat, Q_k, A_k):
-    _, (_, crt_q_v, crt_a_v, _) = feat
-    proj_q = crt_q_v.dot(Q_k)
-    proj_a = crt_a_v.dot(A_k)
-    return distance(proj_q, proj_a)
-
+def loader(feats_queue, Q_k, A_k, results):
+    while True:
+        try:
+            indx, feat = feats_queue.get(timeout=5)
+            _, (_, crt_q_v, crt_a_v, _) = feat
+            proj_q = crt_q_v.dot(Q_k)
+            proj_a = crt_a_v.dot(A_k)
+            dist = distance(proj_q, proj_a)
+            results[indx] = dist
+        except Empty:
+            break
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
+    parser.add_argument('--feature', nargs=2, default=[],
+                        help="Take 2 args, feature and model file. Feature option: %s" % (", ".join(FEATURE_OPTS)))
     # parser.add_argument('--full_rank', action='store_true', default=False,
     #                     help='Use full rank for selecting answer')
     # parser.add_argument('--rerank', action='store_true', default=False,
     #                     help='Use rerank for selecting answer')
 
     args = parser.parse_args()
-    feature = args.feature
+    feature = args.feature[0]
+    model_file = args.feature[1]
     # assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
     # full_rank = args.full_rank
 
@@ -46,19 +58,34 @@ if __name__ == '__main__':
     logging.info("using feature: %s" % feature)
     logging.info("loading CCA model")
     # load CCA model
-    with open(CCA_FILE % feature, 'rb') as f:
+    with open(model_file, 'rb') as f:
         Q_k, A_k = pkl.load(f)
 
     logging.info("calculating distance")
     feats = feats_loader(feature, usage='test')
 
-    result = UserList()
-    length = len(feats)
+    # multiprocess to calculate the distance
+    manager = Manager()
+    feats_queue = Queue(maxsize=len(feats))
+    result_list_share = manager.dict()
+
+    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share))
+              for _ in range(PROCESS_NUM)]
+
     for i, feat in enumerate(feats):
-        stdout.write("\rTesting: %d/%d" % (i+1, length))
-        stdout.flush()
-        result.append(loader(feat, Q_k=Q_k, A_k=A_k))
-    stdout.write("\n")
+        feats_queue.put((i, feat))
+
+    for p in p_list:
+        p.daemon = True
+        p.start()
+
+    for p in p_list:
+        p.join()
+
+    # sort by index, low to high
+    result = []
+    for i in range(len(feats)):
+        result.append(result_list_share[i])
 
     logging.info("combining with text file")
     line_num = 0
