@@ -1,5 +1,6 @@
 from preprocess.feats import FEATURE_OPTS, feats_loader
 from scipy.sparse import csr_matrix
+from scipy.sparse import vstack as sparse_vstack
 import numpy as np
 from multiprocessing import Queue, Process
 from queue import Empty
@@ -14,9 +15,9 @@ QA_PAIR_FILE = "./bin/Raw.%s.pkl"
 XCOV_FILE = "./bin/XCOV.%s.pkl"
 CCA_FILE = "./bin/CCA.%s.%s.pkl"
 PARA_MAP_FILE = "./bin/ParaMap.pkl"
-INF_FREQ = 5000  # information message frequency
+INF_FREQ = 6000  # information message frequency
 PROCESS_NUM = 15
-MAX_HOLD = 5000
+MAX_HOLD = 1000
 
 
 def generate_part_dense(feats_queue, qa_queue):
@@ -66,45 +67,55 @@ def generate_part_sparse(feats_queue, qa_queue):
 
 
 def generate_dense(qa_queue, length):
-    Qs = []
-    As = []
+    Qs = None
+    As = None
     count = 0
     while True:
         try:
             Qs_temp, As_temp = qa_queue.get()
             count += Qs_temp.shape[0]
-            Qs.append(Qs_temp)
-            As.append(As_temp)
+            if Qs is None:
+                Qs = Qs_temp
+                As = As_temp
+            else:
+                Qs = np.vstack((Qs, Qs_temp))
+                As = np.vstack((As, As_temp))
             if count == length:
                 raise Empty
             if count % INF_FREQ == 0:
                 logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
         except Empty:
-            pass
+            logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+            break
 
     logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
     return np.asarray(Qs), np.asarray(As)
 
 
 def generate_sparse(qa_queue, length):
-    Qs = []
-    As = []
+    Qs = None
+    As = None
     count = 0
     while True:
         try:
             Qs_temp, As_temp = qa_queue.get()
             count += Qs_temp.shape[0]
-            Qs.append(Qs_temp)
-            As.append(As_temp)
+            if Qs is None:
+                Qs = Qs_temp
+                As = As_temp
+            else:
+                Qs = sparse_vstack((Qs, Qs_temp))
+                As = sparse_vstack((As, As_temp))
             if count == length:
                 raise Empty
             if count % INF_FREQ == 0:
                 logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
         except Empty:
-            pass
+            logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+            break
 
     logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-    return csr_matrix(Qs, dtype='float32'), csr_matrix(Qs, dtype='float32')
+    return Qs, As
 
 
 if __name__ == "__main__":
@@ -126,6 +137,7 @@ if __name__ == "__main__":
     sparse = args.sparse
     full_svd = k == -1
     PROCESS_NUM = args.worker
+    MAX_HOLD = INF_FREQ // 4
 
     # middle-fix for dump binary file name
     mid_fix = feature

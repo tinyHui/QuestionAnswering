@@ -14,9 +14,9 @@ import os
 from time import sleep
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-OUTPUT_FILE_TOP1 = './data/reverb-test-with_dist.top1.%s.txt'
-OUTPUT_FILE_TOP5 = './data/reverb-test-with_dist.top5.%s.txt'
-OUTPUT_FILE_TOP10 = './data/reverb-test-with_dist.top10.%s.txt'
+OUTPUT_FILE_TOP1 = './result/reverb-test-with_dist.top1.%s.txt'
+OUTPUT_FILE_TOP5 = './result/reverb-test-with_dist.top5.%s.txt'
+OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
@@ -24,7 +24,7 @@ def loader(feats_queue, Q_k, A_k, results, length):
     while True:
         try:
             indx, feat = feats_queue.get(timeout=5)
-            stdout.write("\rTesting: %d/%d" % (indx, length))
+            stdout.write("\rTesting: %d/%d" % (indx+1, length))
             stdout.flush()
             _, (_, crt_q_v, crt_a_v, _) = feat
             proj_q = crt_q_v.dot(Q_k)
@@ -86,6 +86,8 @@ if __name__ == '__main__':
         p.join()
 
     # sort by index, low to high
+    stdout.write("\n")
+    logging.info("sort result in order")
     result = []
     for i in range(len(feats)):
         result.append(result_list_share[i])
