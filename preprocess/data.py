@@ -256,26 +256,10 @@ class ReVerbPairs(object):
             return 149993
 
             # 3 patterns, use all triples
-            # if self.part is None:
-            #     return 35540263
-            # if self.part == 14:
-            #     return 2369349
-            # else:
-            #     return 2369351
+            # return 35540263
 
             # full patterns
-            # if self.part is None:
-            #     return 117202052
-            # 15 parts
-            # if self.part == 29:
-            #     return 3906708
-            # else:
-            #     return 3906736
-            # 30 parts
-            # if self.part == 14:
-            #     return 7813458
-            # else:
-            #     return 7813471
+            # return 117202052
 
         elif self.usage == 'test':
             return 48910

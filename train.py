@@ -1,6 +1,5 @@
 from preprocess.feats import FEATURE_OPTS, feats_loader
 from scipy.sparse import csr_matrix
-from scipy.sparse import vstack as sparse_vstack
 import numpy as np
 from multiprocessing import Queue, Process
 from queue import Empty
@@ -15,83 +14,97 @@ QA_PAIR_FILE = "./bin/Raw.%s.pkl"
 XCOV_FILE = "./bin/XCOV.%s.pkl"
 CCA_FILE = "./bin/CCA.%s.%s.pkl"
 PARA_MAP_FILE = "./bin/ParaMap.pkl"
-INF_FREQ = 1000  # information message frequency
+INF_FREQ = 5000  # information message frequency
 PROCESS_NUM = 15
+MAX_HOLD = 5000
 
 
 def generate_part_dense(feats_queue, qa_queue):
+    Qs = []
+    As = []
+    hold = 0
     while True:
         try:
             data_feat = feats_queue.get(timeout=5)
             _, feat = data_feat
 
-            Qs = feat[0]
-            As = feat[1]
-            qa_queue.put((Qs, As))
+            Qs.append(feat[0])
+            As.append(feat[1])
+            hold += 1
+            if hold == MAX_HOLD:
+                qa_queue.put((np.asarray(Qs), np.asarray(As)))
+                hold = 0
+                Qs = []
+                As = []
         except Empty:
+            if Qs:
+                qa_queue.put((np.asarray(Qs), np.asarray(As)))
             break
 
 
 def generate_part_sparse(feats_queue, qa_queue):
+    Qs = []
+    As = []
+    hold = 0
     while True:
         try:
             data_feat = feats_queue.get(timeout=5)
             _, feat = data_feat
 
-            Qs = csr_matrix(feat[0], dtype='float32')
-            As = csr_matrix(feat[1], dtype='float32')
-            qa_queue.put((Qs, As))
+            Qs.append(feat[0])
+            As.append(feat[1])
+            hold += 1
+            if hold == MAX_HOLD:
+                qa_queue.put((csr_matrix(Qs, dtype='float32'), csr_matrix(As, dtype='float32')))
+                hold = 0
+                Qs = []
+                As = []
         except Empty:
+            if Qs:
+                qa_queue.put((np.asarray(Qs), np.asarray(As)))
             break
 
 
 def generate_dense(qa_queue, length):
-    Qs = None
-    As = None
-    count = 0
-    while True:
-        try:
-            Qs_temp, As_temp = qa_queue.get(timeout=5)
-            if isinstance(Qs, type(None)):
-                Qs = np.array(Qs_temp, dtype='float32')
-                As = np.array(As_temp, dtype='float32')
-            else:
-                Qs = np.vstack((Qs, Qs_temp))
-                As = np.vstack((As, As_temp))
-            count += 1
-            if count == INF_FREQ:
-                logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-        except Empty:
-            pass
-        finally:
-            logging.info("loading: %d/%d, %.2f%%" % (count, length, count/length*100))
-
-    return Qs, As
-
-
-def generate_sparse(qa_queue, length):
-    Qs = None
-    As = None
+    Qs = []
+    As = []
     count = 0
     while True:
         try:
             Qs_temp, As_temp = qa_queue.get()
-            if isinstance(Qs, type(None)):
-                Qs = csr_matrix(Qs_temp, dtype='float32')
-                As = csr_matrix(As_temp, dtype='float32')
-            else:
-                Qs = sparse_vstack((Qs, Qs_temp))
-                As = sparse_vstack((As, As_temp))
-
-            count += 1
-            if count == INF_FREQ:
+            count += Qs_temp.shape[0]
+            Qs.append(Qs_temp)
+            As.append(As_temp)
+            if count == length:
+                raise Empty
+            if count % INF_FREQ == 0:
                 logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
         except Empty:
             pass
-        finally:
-            logging.info("loading: %d/%d, %.2f%%" % (count, length, count/length*100))
 
-    return Qs, As
+    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+    return np.asarray(Qs), np.asarray(As)
+
+
+def generate_sparse(qa_queue, length):
+    Qs = []
+    As = []
+    count = 0
+    while True:
+        try:
+            Qs_temp, As_temp = qa_queue.get()
+            count += Qs_temp.shape[0]
+            Qs.append(Qs_temp)
+            As.append(As_temp)
+            if count == length:
+                raise Empty
+            if count % INF_FREQ == 0:
+                logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+        except Empty:
+            pass
+
+    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+    return csr_matrix(Qs, dtype='float32'), csr_matrix(Qs, dtype='float32')
 
 
 if __name__ == "__main__":
@@ -101,9 +114,10 @@ if __name__ == "__main__":
     parser.add_argument('--sparse', action='store_true', default=False,
                         help='Use sparse matrix for C_AA, C_AB and C_BB')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
-    parser.add_argument('--CCA_stage', type=int, default=None,
+    parser.add_argument('--CCA_stage', type=int, default=1,
                         help='Use 2 stage CCA, set as -1 for train paraphrase CCA')
     parser.add_argument('--reuse', default=[], nargs=2, help='Reuse pre-trained data, two arguments: stage file')
+    parser.add_argument('--worker', type=int, default=PROCESS_NUM, help='Process number')
 
     args = parser.parse_args()
     feature = args.feature
@@ -111,12 +125,13 @@ if __name__ == "__main__":
     k = args.svds
     sparse = args.sparse
     full_svd = k == -1
+    PROCESS_NUM = args.worker
 
     # middle-fix for dump binary file name
     mid_fix = feature
 
     # 1/2 stage CCA
-    cca_stage = int(args.CCA_stage)
+    cca_stage = args.CCA_stage
     assert cca_stage in [1, 2, -1], "can only use 1 stage CCA or 2 stage CCA"
     use_paraphrase_map = False
     if cca_stage == -1:
@@ -162,8 +177,6 @@ if __name__ == "__main__":
         qa_queue = Queue()
         feats = feats_loader(feature, usage='train', train_two_stage_cca=train_two_stage_cca)
         length = len(feats)
-        for _, feat in enumerate(feats):
-            feats_queue.put(feat)
 
         p_list = [Process(target=generate_part, args=(feats_queue, qa_queue))
                   for i in range(PROCESS_NUM)]
@@ -171,7 +184,9 @@ if __name__ == "__main__":
         for p in p_list:
             p.daemon = True
             p.start()
-            p_list.append(p)
+
+        for _, feat in enumerate(feats):
+            feats_queue.put(feat)
 
         Qs, As = generate(qa_queue, length)
         with open(QA_PAIR_FILE, 'wb') as f:

@@ -20,10 +20,12 @@ OUTPUT_FILE_TOP10 = './data/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
-def loader(feats_queue, Q_k, A_k, results):
+def loader(feats_queue, Q_k, A_k, results, length):
     while True:
         try:
             indx, feat = feats_queue.get(timeout=5)
+            stdout.write("\rTesting: %d/%d" % (indx, length))
+            stdout.flush()
             _, (_, crt_q_v, crt_a_v, _) = feat
             proj_q = crt_q_v.dot(Q_k)
             proj_a = crt_a_v.dot(A_k)
@@ -63,13 +65,14 @@ if __name__ == '__main__':
 
     logging.info("calculating distance")
     feats = feats_loader(feature, usage='test')
+    length = len(feats)
 
     # multiprocess to calculate the distance
     manager = Manager()
-    feats_queue = Queue(maxsize=len(feats))
+    feats_queue = Queue(maxsize=length)
     result_list_share = manager.dict()
 
-    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share))
+    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length))
               for _ in range(PROCESS_NUM)]
 
     for i, feat in enumerate(feats):
