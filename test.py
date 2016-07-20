@@ -1,9 +1,9 @@
-from collections import UserList
 from collections import defaultdict
 from train import CCA_FILE
 from preprocess.feats import FEATURE_OPTS, feats_loader
+from multiprocessing import Pool
+from functools import partial
 from CCA import distance
-from sys import stdout
 import argparse
 import pickle as pkl
 import logging
@@ -52,13 +52,10 @@ if __name__ == '__main__':
     logging.info("calculating distance")
     feats = feats_loader(feature, usage='test')
 
-    result = UserList()
-    length = len(feats)
-    for i, feat in enumerate(feats):
-        stdout.write("\rTesting: %d/%d" % (i+1, length))
-        stdout.flush()
-        result.append(loader((i, feat), Q_k=Q_k, A_k=A_k))
-    stdout.write("\n")
+    pool = Pool(processes=40)
+    partial_loader = partial(loader, Q_k=Q_k, A_k=A_k)
+    result = pool.map(partial_loader, enumerate(feats))
+    result = sorted(result, keys=lambda x: x[0])
 
     logging.info("combining with text file")
     line_num = 0

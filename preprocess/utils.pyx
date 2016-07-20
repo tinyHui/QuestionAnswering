@@ -6,16 +6,22 @@ ctypedef np.float32_t DTYPE_t
 
 cdef class Utils(object):
     cdef np.ndarray avg_emb_cdef(self, list sentence, unsigned int EMBEDDING_SIZE):
-        cdef unsigned int w
+        cdef np.ndarray emb_w
         cdef np.ndarray result
 
+        word_num = 0
         result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
         # average of embedding of the words
-        for w in sentence:
+        for emb_w in sentence:
+            if np.sum(emb_w) == 0:
+                continue
             # for each token, find its embedding
             # unseen token will automatically take 0 x R^300
-            result += w
-        result /= len(sentence)
+            result += emb_w
+            word_num += 1
+        # all words in answer sentence might not seen
+        if word_num > 0:
+            result /= word_num
         return result
 
 
@@ -28,8 +34,11 @@ cdef class Utils(object):
         cdef unsigned int k
         cdef unsigned int i
 
-        result = sentence[0] # R^1 x EMBEDDING_SIZE
-        for emb_w in sentence[1:]:
+        result = np.ones(EMBEDDING_SIZE) # R^1 x EMBEDDING_SIZE
+        for emb_w in sentence[0:]:
+            if np.sum(emb_w) == 0:
+                continue
+
             crt_result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
             for k in range(EMBEDDING_SIZE):
                 v = 0
@@ -39,8 +48,8 @@ cdef class Utils(object):
             result = crt_result
         return result
 
-    def avg_emb(self, sentence, EMBEDDING_SIZE):
+    def avg_emb(self, list sentence, unsigned int EMBEDDING_SIZE):
         return self.avg_emb_cdef(sentence, EMBEDDING_SIZE)
 
-    def cc(self, sentence, EMBEDDING_SIZE):
+    def cc(self, list sentence, unsigned int EMBEDDING_SIZE):
         return self.cc_cdef(sentence, EMBEDDING_SIZE)
