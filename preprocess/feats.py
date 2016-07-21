@@ -97,7 +97,7 @@ class Ngram(object):
                 else:
                     # use original data
                     feat[i] = d[i]
-            return d, feat
+            return feat
 
     def __len__(self):
         return len(self.data)
@@ -142,7 +142,7 @@ class WordEmbedding(object):
                 else:
                     feat[i] = d[i]
 
-            return d, feat
+            return feat
 
     def __len__(self):
         return len(self.data)
@@ -172,7 +172,7 @@ class Holographic(object):
                 else:
                     feat[i] = d[i]
 
-            return d, feat
+            return feat
 
     def __len__(self):
         return len(self.data)

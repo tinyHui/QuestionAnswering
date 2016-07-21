@@ -27,7 +27,7 @@ def loader(feats_queue, Q_k, A_k, results, length):
             stdout.write("\rTesting: %d/%d" % (indx+1, length))
             stdout.flush()
             feat = f(d)
-            _, (_, crt_q_v, crt_a_v, _) = feat
+            _, crt_q_v, crt_a_v, _ = feat
             proj_q = crt_q_v.dot(Q_k)
             proj_a = crt_a_v.dot(A_k)
             dist = distance(proj_q, proj_a)

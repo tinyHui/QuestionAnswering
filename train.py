@@ -27,8 +27,7 @@ def generate_part_dense(feats_queue, qa_queue):
     while True:
         try:
             d, f = feats_queue.get(timeout=5)
-            data_feat = f(d)
-            _, feat = data_feat()
+            feat = f(d)
 
             Qs.append(feat[0])
             As.append(feat[1])
@@ -51,7 +50,7 @@ def generate_part_sparse(feats_queue, qa_queue):
     while True:
         try:
             d, f = feats_queue.get(timeout=5)
-            _, feat = f(d)
+            feat = f(d)
 
             Qs.append(feat[0])
             As.append(feat[1])

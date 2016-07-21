@@ -41,6 +41,8 @@ if __name__ == '__main__':
     if mode not in mode_support:
         raise SystemError("mode only supports %s" % ",".join(mode_support))
 
+    # load vocabulary dictionary
+    logging.info("loading vocabulary index")
     if mode == mode_support[0]:
         with open(UNIGRAM_DICT_FILE, 'rb') as f:
             voc_dict = pkl.load(f)
@@ -49,9 +51,6 @@ if __name__ == '__main__':
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             voc_dict = pkl.load(f)
         suf = 'emb'
-
-    # load vocabulary dictionary
-    logging.info("loading vocabulary index")
 
     data_list = []
     # add train data
