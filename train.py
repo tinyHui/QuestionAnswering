@@ -50,8 +50,8 @@ def generate_part_sparse(feats_queue, qa_queue):
     hold = 0
     while True:
         try:
-            data_feat = feats_queue.get(timeout=5)
-            _, feat = data_feat()
+            d, f = feats_queue.get(timeout=5)
+            _, feat = f(d)
 
             Qs.append(feat[0])
             As.append(feat[1])
