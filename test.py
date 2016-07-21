@@ -23,9 +23,10 @@ PROCESS_NUM = 20
 def loader(feats_queue, Q_k, A_k, results, length):
     while True:
         try:
-            indx, feat = feats_queue.get(timeout=5)
+            indx, (d, f) = feats_queue.get(timeout=5)
             stdout.write("\rTesting: %d/%d" % (indx+1, length))
             stdout.flush()
+            feat = f(d)
             _, (_, crt_q_v, crt_a_v, _) = feat
             proj_q = crt_q_v.dot(Q_k)
             proj_a = crt_a_v.dot(A_k)
@@ -42,12 +43,14 @@ if __name__ == '__main__':
     #                     help='Use full rank for selecting answer')
     # parser.add_argument('--rerank', action='store_true', default=False,
     #                     help='Use rerank for selecting answer')
+    parser.add_argument('--worker', type=int, default=PROCESS_NUM, help='Process number')
 
     args = parser.parse_args()
     feature = args.feature[0]
     model_file = args.feature[1]
     # assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
     # full_rank = args.full_rank
+    PROCESS_NUM = args.worker
 
     OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP1 % feature
     OUTPUT_FILE_TOP5 = OUTPUT_FILE_TOP5 % feature
@@ -75,12 +78,12 @@ if __name__ == '__main__':
     p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length))
               for _ in range(PROCESS_NUM)]
 
-    for i, feat in enumerate(feats):
-        feats_queue.put((i, feat))
-
     for p in p_list:
         p.daemon = True
         p.start()
+
+    for i, feat in enumerate(feats):
+        feats_queue.put((i, feat))
 
     for p in p_list:
         p.join()

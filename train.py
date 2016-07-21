@@ -26,8 +26,9 @@ def generate_part_dense(feats_queue, qa_queue):
     hold = 0
     while True:
         try:
-            data_feat = feats_queue.get(timeout=5)
-            _, feat = data_feat
+            d, f = feats_queue.get(timeout=5)
+            data_feat = f(d)
+            _, feat = data_feat()
 
             Qs.append(feat[0])
             As.append(feat[1])
@@ -50,7 +51,7 @@ def generate_part_sparse(feats_queue, qa_queue):
     while True:
         try:
             data_feat = feats_queue.get(timeout=5)
-            _, feat = data_feat
+            _, feat = data_feat()
 
             Qs.append(feat[0])
             As.append(feat[1])
@@ -197,7 +198,7 @@ if __name__ == "__main__":
             p.daemon = True
             p.start()
 
-        for _, feat in enumerate(feats):
+        for feat in feats:
             feats_queue.put(feat)
 
         Qs, As = generate(qa_queue, length)

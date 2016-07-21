@@ -82,6 +82,9 @@ class Ngram(object):
 
     def __iter__(self):
         for d in self.data:
+            yield d, self.__generate__
+
+    def __generate__(self, d):
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
@@ -94,7 +97,7 @@ class Ngram(object):
                 else:
                     # use original data
                     feat[i] = d[i]
-            yield d, feat
+            return d, feat
 
     def __len__(self):
         return len(self.data)
@@ -124,19 +127,22 @@ class WordEmbedding(object):
         '''
         assert data.mode == 'embedding', "must use word embedding in input data"
         self.data = data
+        self.utils = Utils()
 
     def __iter__(self):
-        utils = Utils()
         for d in self.data:
+            yield d, self.__generate__
+
+    def __generate__(self, d):
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = utils.avg_emb(d[i], EMBEDDING_SIZE)
+                    feat[i] = self.utils.avg_emb(d[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 
-            yield d, feat
+            return d, feat
 
     def __len__(self):
         return len(self.data)
@@ -151,19 +157,22 @@ class Holographic(object):
         '''
         assert data.mode == 'embedding', "must use word index in input data"
         self.data = data
+        self.utils = Utils()
 
     def __iter__(self):
-        utils = Utils()
         for d in self.data:
+            yield d, self.__generate__
+
+    def __generate__(self, d):
             param_num = len(d)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = utils.cc(d[i], EMBEDDING_SIZE)
+                    feat[i] = self.utils.cc(d[i], EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 
-            yield d, feat
+            return d, feat
 
     def __len__(self):
         return len(self.data)
