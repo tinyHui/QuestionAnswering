@@ -198,8 +198,10 @@ class ReVerbPairs(object):
             raise SystemError("usage can be only train/test")
         # index of return data contains sentence
         if self.usage == 'train':
+            self.question_index = 0
             self.sent_indx = (0, 1)
         elif self.usage == 'test':
+            self.question_index = 1
             self.sent_indx = (1, 2)
         # n-gram
         self.gram = gram

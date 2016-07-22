@@ -45,8 +45,9 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
+        data_raw = ReVerbPairs(usage=usage, mode='str')
         data = ReVerbPairs(usage=usage, mode='embedding')
-        feats = Holographic(data)
+        feats = Holographic(zip(data_raw, data))
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -73,7 +74,7 @@ class Ngram(object):
     def __init__(self, data):
         '''
         Represent sentence data using OneHot BoW feature
-        :param data: data source, such as PPDB, QAs
+        :param data: data source
         :param voc_dict: word-index dictionary
         :param gram: default is unigram
         '''
@@ -122,7 +123,7 @@ class WordEmbedding(object):
     def __init__(self, data):
         '''
         Represent sentence data using word embedding trained by British National Corpus
-        :param data: data source, such as PPDB, QAs
+        :param data: data source
         :param embedding_dict_file: word-embedding dictionary file name
         '''
         assert data.mode == 'embedding', "must use word embedding in input data"
@@ -152,7 +153,7 @@ class Holographic(object):
     def __init__(self, data):
         '''
         Represent sentence data using word embedding trained by British National Corpus
-        :param data: data source, such as PPDB, QAs
+        :param data: data source, include raw string and embedding vector
         :param embedding_dict_file: word-embedding dictionary file name
         '''
         assert data.mode == 'embedding', "must use word index in input data"
