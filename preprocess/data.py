@@ -1,7 +1,5 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
-from raw_converter import TOKEN_STRUCT_SPLITTER
-# from ParseTree import ParseTree
 from random import sample
 from word2vec import WORD_EMBEDDING_FILE
 import sqlite3
@@ -23,22 +21,25 @@ def process_raw(raw):
 
     # define replace pattern
     GRAMMAR_SYM = r'(\')'
-    DATE = r'(([0]?[1-9]|[1][0-2])[\.\/\- ]([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0-9]{4}|[0-9]{2}))|' \
-           r'(([0]?[1-9]|[1|2][0-9]|[3][0|1])[\.\/\- ]([0]?[1-9]|[1][0-2])[\.\/\- ]([0-9]{4}|[0-9]{2}))'
-    TIME = r'[0-2]?[1-9]:[0-5][0-9][ \-]?(am|pm)?'
+    DATE = r'([0-9]{1,2})?[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ][0-9]{4}|' \
+           r'[0-9]{4}[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ]([0-9]{1,2})?|' \
+           '[0-9]{1,2}(st|nd|rd|th)?[\/\- ][0-9]{1,2}|' \
+           '[0-9]{1,2}[\/\- ][0-9]{1,2}(st|nd|rd|th)?'
+    YEAR = r'(19|20)\d{2}'
+    TIME = r'[0-2]?[0-9]:[0-5][0-9][ \-]?(am|pm)?'
     MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
     PRESENT = r'[-+]?\d+(\,\d+)?(\.\d+)?[ \-]?\%'
-    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?'
+    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     SYM = r'(\.|\?|\$|\*|\#|\&)'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, 'DATE'), (TIME, 'TIME'), (MONEY, 'MONEY'), (PRESENT, 'PRESENT'),
-              (NUMBER, 'NUM'), (EMAIL, 'EMAIL'), (SYM, ' \\1 '), (SPACES, ' ')]
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' \\1 '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
-    s = re.sub(r'\-', ' ', s)
+    s = re.sub(r'\-', ' ', s).strip()
     return s
 
 
@@ -67,23 +68,26 @@ class ReVerbTrainRaw(object):
                         );
         """)
         # define the pattern
-        self.__normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
-                                      ('what {r} {e2} ?', '{e1} {r} {e2}'),
-                                      ('who does {e1} {r} ?', '{e1} {r} {e2}'),
-                                      ('what does {e1} {r} ?', '{e1} {r} {e2}'),
-                                      ('what is the {r} of {e2} ?', '{e1} {r} {e2}'),
-                                      ('who is the {r} of {e2} ?', '{e1} {r} {e2}'),
-                                      ('what is {r} by {e1} ?', '{e1} {r} {e2}'),
-                                      ('who is {e2} \'s {r} ?', '{e1} {r} {e2}'),
-                                      ('what is {e2} \'s {r} ?', '{e1} {r} {e2}'),
-                                      ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
+        self.__normal_q_pattern_list = ['who {r} {e2} ?',
+                                        'what {r} {e2} ?',
+                                        'who does {e1} {r} ?',
+                                        'what does {e1} {r} ?',
+                                        'what is the {r} of {e2} ?',
+                                        'who is the {r} of {e2} ?',
+                                        'what is {r} by {e1} ?',
+                                        'who is {e2} \'s {r} ?',
+                                        'what is {e2} \'s {r} ?',
+                                        'who is {r} by {e1} ?']
         # shared by *-in, *-on
-        self.__special_in_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                          ('when was {e1} {r} ?', '{e1} {r} {e2}'),
-                                          ('where was {e1} {r} ?', '{e1} {r} {e2}'),
-                                          ('where did {e1} {r} ?', '{e1} {r} {e2}')]
-        self.__special_on_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                          ('when was {e1} {r} ?', '{e1} {r} {e2}')]
+        self.__special_in_q_pattern_list = ['when did {e1} {r} ?',
+                                            'when was {e1} {r} ?',
+                                            'where was {e1} {r} ?',
+                                            'where did {e1} {r} ?']
+        self.__special_on_q_pattern_list = ['when did {e1} {r} ?',
+                                            'when was {e1} {r} ?']
+
+        # answer pattern
+        self.__normal_a_pattern = '{e1}|{r}|{e2}'
 
     def __iter__(self):
         for r, e1, e2 in self.__content:
@@ -95,17 +99,18 @@ class ReVerbTrainRaw(object):
             # find the suitable pattern
             # random choose some for training, reduce training size
             if r.endswith('-in'):
-                pattern_list = sample(self.__special_in_pattern_list, 1)
+                q_pattern_list = sample(self.__special_in_q_pattern_list, 1)
             elif r.endswith('-on'):
-                pattern_list = sample(self.__special_on_pattern_list, 1)
+                q_pattern_list = sample(self.__special_on_q_pattern_list, 1)
             else:
-                pattern_list = sample(self.__normal_pattern_list, 3)
-
+                q_pattern_list = sample(self.__normal_q_pattern_list, 3)
+            a_pattern = self.__normal_a_pattern
             # generate the question
-            for s, t in pattern_list:
-                q = process_raw(s.format(r=r, e1=e1, e2=e2))
-                a = process_raw(t.format(r=r, e1=e1, e2=e2))
-
+            for q_pattern in q_pattern_list:
+                q = q_pattern.format(r=r, e1=e1, e2=e2)
+                a = a_pattern.format(r=r, e1=e1, e2=e2)
+                q = process_raw(q)
+                a = process_raw(a)
                 yield (q, a)
 
     def __str__(self):
@@ -114,6 +119,9 @@ class ReVerbTrainRaw(object):
 
 # question answer pairs (test) generate from ReVerb corpus
 class ReVerbTestRaw(object):
+    # example:
+    # q: name of female octopus ?
+    # a: (human)(be call)(social animal)
     def __init__(self):
         self.__file = './data/labels.txt'
         # load question cluster id
@@ -131,7 +139,7 @@ class ReVerbTestRaw(object):
             # normalize answer
             r, e1, e2 = a.split()
             r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
-            a = "{e1} {r} {e2}".format(r=r, e1=e1, e2=e2)
+            a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
             yield q_id, q, a, l
 
@@ -182,6 +190,9 @@ class ParaphraseQuestionRaw(object):
         voc_num = {0: 6711, 1: 6671}
         return voc_num[i]
 
+    def is_q_indx(self, i):
+        return True
+
     def __str__(self):
         return "ReVerb Paraphrase Questions raw"
 
@@ -198,6 +209,7 @@ class ReVerbPairs(object):
     def __init__(self, usage='train', mode='str', grams=1):
         if mode == 'str':
             suf = 'txt'
+            self.__origin_answer = ""
         elif mode == 'index':
             suf = 'indx'
         elif mode == 'embedding':
@@ -231,33 +243,46 @@ class ReVerbPairs(object):
                 q_id, q, a, l = line.strip().split('\t')
                 l = int(l)
 
-            q_tokens, a_tokens = [s.split() for s in [q, a]]
+            q_tokens = q.split()
+            a_tokens = a.split()
 
             if self.__mode == 'str':
-                if self.__grams > 1:
+                self.__origin_answer = a
+                e1_tokens, r_tokens, e2_tokens = [t.split() for t in a.split('|')]
+                a_tokens = e1_tokens + r_tokens + e2_tokens
+            if self.__grams > 1:
                     q_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q_tokens[j:] for j in range(self.__grams)])]
-                    a_tokens = [w1 + " " + w2 for w1, w2 in zip(*[a_tokens[j:] for j in range(self.__grams)])]
             elif self.__mode == 'index':
                 q_tokens = list(map(int, q_tokens))
                 a_tokens = list(map(int, a_tokens))
             elif self.__mode == 'embedding':
-                q_tokens, self.__q_struct_str = q_tokens.split(TOKEN_STRUCT_SPLITTER)
-                a_tokens, self.__a_struct_str = a_tokens.split(TOKEN_STRUCT_SPLITTER)
+                # these splitter are from raw_converter.py
+                q_tokens, self.__q_struct_str = q.split('@')
+                a_tokens, self.__a_struct_str = a.split('@')
                 q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                 a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
 
             # produce the token per line
             if self.__usage == 'train':
-                # train
                 yield (q_tokens, a_tokens)
             else:
                 # test
                 yield (int(q_id), q_tokens, a_tokens, int(l))
 
-
     def get_qa_struct(self):
-        # mode must be 'embedding'
+        assert self.__mode == 'embedding'
+        # TODO: parse struct string
         return self.__q_struct_str, self.__a_struct_str
+
+    def get_origin_answer(self):
+        assert self.__mode == 'str'
+        return self.__origin_answer
+
+    def is_q_indx(self, i):
+        if self.__usage == 'train':
+            return i == 0
+        elif self.__usage == 'test':
+            return i == 1
 
     def get_voc_num(self, i):
         if self.__usage == 'train':

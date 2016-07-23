@@ -1,4 +1,3 @@
-TOKEN_STRUCT_SPLITTER = "@"
 DUMP_TRAIN_FILE = "./data/reverb-train.%s"
 DUMP_TEST_FILE = "./data/reverb-test.%s"
 DUMP_PARA_FILE = "./data/paraphrases.%s"
@@ -91,25 +90,28 @@ if __name__ == '__main__':
                     param_num = len(d)
                     for i in range(param_num):
                         if i in data.sent_indx:
+                            # for the reverb test data, each iteration return 4 items,
+                            # q, a are located in index 1 and 2
                             if is_reverb_test:
                                 if i == 1:
                                     voc_hash = voc_dict[0]
                                 else:
                                     # i == 2
                                     voc_hash = voc_dict[1]
-
                             else:
                                 voc_hash = voc_dict[i]
 
                             tokens = [str(word_hash(token, voc_hash, mode)) for token in d[i]]
                             sentence = " ".join(tokens)
                             if mode == 'embedding':
-                                parsetree = get_parse_tree(" ".join(d[i]), parse_text_job_id)
-                                print(parsetree)
+                                if data.is_q_indx(i):
+                                    parsetree = get_parse_tree(" ".join(d[i]), parse_text_job_id)
+                                else:
+                                    parsetree = data.get_origin_answer()
                                 parse_text_job_id += 1
                                 # concatenate token senteence and parsetree
                                 # split by @
-                                sentence = "%s%s%s" % (sentence, TOKEN_STRUCT_SPLITTER, parsetree)
+                                sentence = "%s%s" % (sentence, parsetree)
                         else:
                             sentence = d[i]
                         if i+1 != param_num:
