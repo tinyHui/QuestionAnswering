@@ -1,6 +1,7 @@
 from calendar import month_name, month_abbr
-from calendar import month_name, month_abbr
 from collections import UserDict
+from raw_converter import TOKEN_STRUCT_SPLITTER
+from ParseTree import ParseTree
 from random import sample
 from word2vec import WORD_EMBEDDING_FILE
 import sqlite3
@@ -44,13 +45,13 @@ def process_raw(raw):
 # question answer pairs (train) generate from ReVerb corpus
 class ReVerbTrainRaw(object):
     def __init__(self):
-        self.file = './data/reverb-tuples.db'
-        conn = sqlite3.connect(self.file)
+        self.__file = './data/reverb-tuples.db'
+        conn = sqlite3.connect(self.__file)
         c = conn.cursor()
         # 14377737 triples in total
         # 2697790 triples, relation ends with -in
         # 1098684 triples, relation ends with -on
-        self.content = c.execute("""
+        self.__content = c.execute("""
             SELECT  *
                 FROM    (   SELECT  *
                             FROM    tuples
@@ -66,26 +67,26 @@ class ReVerbTrainRaw(object):
                         );
         """)
         # define the pattern
-        self.normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
-                                    ('what {r} {e2} ?', '{e1} {r} {e2}'),
-                                    ('who does {e1} {r} ?', '{e1} {r} {e2}'),
-                                    ('what does {e1} {r} ?', '{e1} {r} {e2}'),
-                                    ('what is the {r} of {e2} ?', '{e1} {r} {e2}'),
-                                    ('who is the {r} of {e2} ?', '{e1} {r} {e2}'),
-                                    ('what is {r} by {e1} ?', '{e1} {r} {e2}'),
-                                    ('who is {e2} \'s {r} ?', '{e1} {r} {e2}'),
-                                    ('what is {e2} \'s {r} ?', '{e1} {r} {e2}'),
-                                    ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
+        self.__normal_pattern_list = [('who {r} {e2} ?', '{e1} {r} {e2}'),
+                                      ('what {r} {e2} ?', '{e1} {r} {e2}'),
+                                      ('who does {e1} {r} ?', '{e1} {r} {e2}'),
+                                      ('what does {e1} {r} ?', '{e1} {r} {e2}'),
+                                      ('what is the {r} of {e2} ?', '{e1} {r} {e2}'),
+                                      ('who is the {r} of {e2} ?', '{e1} {r} {e2}'),
+                                      ('what is {r} by {e1} ?', '{e1} {r} {e2}'),
+                                      ('who is {e2} \'s {r} ?', '{e1} {r} {e2}'),
+                                      ('what is {e2} \'s {r} ?', '{e1} {r} {e2}'),
+                                      ('who is {r} by {e1} ?', '{e1} {r} {e2}')]
         # shared by *-in, *-on
-        self.special_in_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                        ('when was {e1} {r} ?', '{e1} {r} {e2}'),
-                                        ('where was {e1} {r} ?', '{e1} {r} {e2}'),
-                                        ('where did {e1} {r} ?', '{e1} {r} {e2}')]
-        self.special_on_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
-                                        ('when was {e1} {r} ?', '{e1} {r} {e2}')]
+        self.__special_in_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
+                                          ('when was {e1} {r} ?', '{e1} {r} {e2}'),
+                                          ('where was {e1} {r} ?', '{e1} {r} {e2}'),
+                                          ('where did {e1} {r} ?', '{e1} {r} {e2}')]
+        self.__special_on_pattern_list = [('when did {e1} {r} ?', '{e1} {r} {e2}'),
+                                          ('when was {e1} {r} ?', '{e1} {r} {e2}')]
 
     def __iter__(self):
-        for r, e1, e2 in self.content:
+        for r, e1, e2 in self.__content:
             # remove ".e", ".r" in token
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
@@ -94,11 +95,11 @@ class ReVerbTrainRaw(object):
             # find the suitable pattern
             # random choose some for training, reduce training size
             if r.endswith('-in'):
-                pattern_list = sample(self.special_in_pattern_list, 1)
+                pattern_list = sample(self.__special_in_pattern_list, 1)
             elif r.endswith('-on'):
-                pattern_list = sample(self.special_on_pattern_list, 1)
+                pattern_list = sample(self.__special_on_pattern_list, 1)
             else:
-                pattern_list = sample(self.normal_pattern_list, 3)
+                pattern_list = sample(self.__normal_pattern_list, 3)
 
             # generate the question
             for s, t in pattern_list:
@@ -114,17 +115,17 @@ class ReVerbTrainRaw(object):
 # question answer pairs (test) generate from ReVerb corpus
 class ReVerbTestRaw(object):
     def __init__(self):
-        self.file = './data/labels.txt'
+        self.__file = './data/labels.txt'
         # load question cluster id
-        self.q_id_map = UserDict()
+        self.__q_id_map = UserDict()
         for line in open('./data/clusterid_questions.txt'):
             id, q = line.strip().split('\t')
-            self.q_id_map[q] = id
+            self.__q_id_map[q] = id
 
     def __iter__(self):
-        for line in open(self.file, 'r'):
+        for line in open(self.__file, 'r'):
             l, q, a = line.strip().split('\t')
-            q_id = self.q_id_map[q]
+            q_id = self.__q_id_map[q]
             # normalize question
             q = process_raw(q)
             # normalize answer
@@ -149,29 +150,29 @@ class ParaphraseQuestionRaw(object):
             suf = 'emb'
         else:
             raise AttributeError("Mode can be only 'str', 'index' or 'embedding")
-        self.mode = mode
-        self.grams = grams
+        self.__mode = mode
+        self.__grams = grams
 
-        self.file = './data/paraphrases.%s' % suf
+        self.__file = './data/paraphrases.%s' % suf
         # index of return data contains sentence
         self.sent_indx = (0, 1)
 
     def __iter__(self):
-        for line in open(self.file, 'r'):
+        for line in open(self.__file, 'r'):
             q1, q2, align = line.strip().split('\t')
             # word generalise
             q1 = process_raw(q1)
             q2 = process_raw(q2)
             # to token
             q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-            if self.mode == 'str':
-                if self.grams > 1:
-                    q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.grams)])]
-                    q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.grams)])]
-            elif self.mode == 'index':
+            if self.__mode == 'str':
+                if self.__grams > 1:
+                    q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
+                    q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
+            elif self.__mode == 'index':
                 q1_tokens = list(map(int, q1_tokens))
                 q2_tokens = list(map(int, q2_tokens))
-            elif self.mode == 'embedding':
+            elif self.__mode == 'embedding':
                 q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                 q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
             yield q1_tokens, q2_tokens, align
@@ -196,28 +197,28 @@ class ReVerbPairs(object):
             suf = 'indx'
         elif mode == 'embedding':
             suf = 'emb'
+            self.__q_struct_str = ""
+            self.__a_struct_str = ""
         else:
             raise AttributeError("Mode can be only 'str', 'index' or 'embedding")
-        self.mode = mode
+        self.__mode = mode
 
         if usage in ['train', 'test']:
-            self.file = './data/reverb-%s.%s' % (usage, suf)
-            self.usage = usage
+            self.__file = './data/reverb-%s.%s' % (usage, suf)
+            self.__usage = usage
         else:
             raise SystemError("usage can be only train/test")
         # index of return data contains sentence
-        if self.usage == 'train':
-            self.question_index = 0
+        if self.__usage == 'train':
             self.sent_indx = (0, 1)
-        elif self.usage == 'test':
-            self.question_index = 1
+        elif self.__usage == 'test':
             self.sent_indx = (1, 2)
         # n-gram
-        self.grams = grams
+        self.__grams = grams
 
     def __iter__(self):
-        for line in open(self.file, 'r'):
-            if self.usage == 'train':
+        for line in open(self.__file, 'r'):
+            if self.__usage == 'train':
                 # train
                 q, a = line.strip().split('\t')
             else:
@@ -227,30 +228,37 @@ class ReVerbPairs(object):
 
             q_tokens, a_tokens = [s.split() for s in [q, a]]
 
-            if self.mode == 'str':
-                if self.grams > 1:
-                    q_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q_tokens[j:] for j in range(self.grams)])]
-                    a_tokens = [w1 + " " + w2 for w1, w2 in zip(*[a_tokens[j:] for j in range(self.grams)])]
-            elif self.mode == 'index':
+            if self.__mode == 'str':
+                if self.__grams > 1:
+                    q_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q_tokens[j:] for j in range(self.__grams)])]
+                    a_tokens = [w1 + " " + w2 for w1, w2 in zip(*[a_tokens[j:] for j in range(self.__grams)])]
+            elif self.__mode == 'index':
                 q_tokens = list(map(int, q_tokens))
                 a_tokens = list(map(int, a_tokens))
-            elif self.mode == 'embedding':
+            elif self.__mode == 'embedding':
+                q_tokens, self.__q_struct_str = q_tokens.split(TOKEN_STRUCT_SPLITTER)
+                a_tokens, self.__a_struct_str = a_tokens.split(TOKEN_STRUCT_SPLITTER)
                 q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                 a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
 
             # produce the token per line
-            if self.usage == 'train':
+            if self.__usage == 'train':
                 # train
                 yield (q_tokens, a_tokens)
             else:
                 # test
                 yield (int(q_id), q_tokens, a_tokens, int(l))
 
+
+    def get_qa_struct(self):
+        # mode must be 'embedding'
+        return self.__q_struct_str, self.__a_struct_str
+
     def get_voc_num(self, i):
-        if self.usage == 'train':
+        if self.__usage == 'train':
             q_indx = 0
             a_indx = 1
-        elif self.usage == 'test':
+        elif self.__usage == 'test':
             q_indx = 1
             a_indx = 2
 
@@ -262,8 +270,11 @@ class ReVerbPairs(object):
             voc_num = {q_indx:0, a_indx:0}
         return voc_num[i]
 
+    def get_usage(self):
+        return self.__usage
+
     def __len__(self):
-        if self.usage == 'train':
+        if self.__usage == 'train':
             return 149993
 
             # 3 patterns, use all triples
@@ -272,7 +283,7 @@ class ReVerbPairs(object):
             # full patterns
             # return 117202052
 
-        elif self.usage == 'test':
+        elif self.__usage == 'test':
             return 48910
 
     def __str__(self):
@@ -282,12 +293,11 @@ class ReVerbPairs(object):
 # Word Embedding
 class WordEmbeddingRaw(object):
     def __init__(self):
-        self.file = WORD_EMBEDDING_FILE
-        self.word_is_index = False
+        self.__file = WORD_EMBEDDING_FILE
 
     def __iter__(self):
         line_num = 0
-        for line in open(self.file, 'r'):
+        for line in open(self.__file, 'r'):
             # skip the first line
             # embedding files generated by gensim always have a size indicator in the first line
             line_num += 1

@@ -1,3 +1,4 @@
+TOKEN_STRUCT_SPLITTER = "@"
 DUMP_TRAIN_FILE = "./data/reverb-train.%s"
 DUMP_TEST_FILE = "./data/reverb-test.%s"
 DUMP_PARA_FILE = "./data/paraphrases.%s"
@@ -74,7 +75,7 @@ if __name__ == '__main__':
                 length = len(data)
 
                 if isinstance(data, ReVerbPairs):
-                    if data.usage == 'test':
+                    if data.get_usage() == 'test':
                         voc_dict[2] = voc_dict[1]
                         voc_dict[1] = voc_dict[0]
                 if isinstance(data, ParaphraseQuestionRaw):
@@ -96,7 +97,7 @@ if __name__ == '__main__':
                                 parse_text_job_id += 1
                                 # concatenate token senteence and parsetree
                                 # split by @
-                                sentence = "%s@%s" % (sentence, parsetree)
+                                sentence = "%s%s%s" % (sentence, TOKEN_STRUCT_SPLITTER, parsetree)
                         else:
                             sentence = d[i]
                         if i+1 != param_num:
