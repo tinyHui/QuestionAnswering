@@ -47,8 +47,8 @@ def process_raw(raw):
 class ReVerbTrainRaw(object):
     def __init__(self):
         self.__file = './data/reverb-tuples.db'
-        conn = sqlite3.connect(self.__file)
-        c = conn.cursor()
+        self.__conn = sqlite3.connect(self.__file)
+        c = self.__conn.cursor()
         # 14377737 triples in total
         # 2697790 triples, relation ends with -in
         # 1098684 triples, relation ends with -on
@@ -112,6 +112,7 @@ class ReVerbTrainRaw(object):
                 q = process_raw(q)
                 a = process_raw(a)
                 yield (q, a)
+        self.__conn.close()
 
     def __str__(self):
         return "ReVerb train tuples"
