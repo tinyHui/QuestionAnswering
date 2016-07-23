@@ -13,7 +13,7 @@ import os
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 QA_PAIR_FILE = "./bin/Raw.%s.pkl"
 XCOV_FILE = "./bin/XCOV.%s.pkl"
-CCA_FILE = "./bin/CCA.%s.%s.pkl"
+CCA_FILE = "./bin/CCA.%s.pkl"
 PARA_MAP_FILE = "./bin/ParaMap.pkl"
 INF_FREQ = 6000  # information message frequency
 PROCESS_NUM = 15
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     assert cca_stage in [1, 2, -1], "can only use 1 stage CCA or 2 stage CCA"
     use_paraphrase_map = False
     if cca_stage == -1:
-        mid_fix = '2stage'
+        mid_fix = 'paramap'
         train_two_stage_cca = True
     else:
         train_two_stage_cca = False
@@ -162,7 +162,10 @@ if __name__ == "__main__":
     reuse_stages = ['features', 'xcov']
     if reuse_arg:
         reuse_stage_name, file = reuse_arg
-        reuse_stage = reuse_stages.index(reuse_stage_name) + 1
+        try:
+            reuse_stage = reuse_stages.index(reuse_stage_name) + 1
+        except ValueError:
+            raise AssertionError("reuse can only be set as %s" % " ".join(reuse_stages))
 
     # dump file name
     QA_PAIR_FILE = QA_PAIR_FILE % mid_fix
@@ -171,9 +174,9 @@ if __name__ == "__main__":
         MODULE_FILE = PARA_MAP_FILE
     else:
         if use_paraphrase_map:
-            MODULE_FILE = CCA_FILE % ("with_para", mid_fix)
+            MODULE_FILE = CCA_FILE % mid_fix
         else:
-            MODULE_FILE = CCA_FILE % ("no_para", mid_fix)
+            MODULE_FILE = CCA_FILE % mid_fix
 
     if reuse_stage == 0:
         # not reuse half-finished pretrained model

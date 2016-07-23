@@ -36,34 +36,39 @@ if __name__ == '__main__':
     for mode in mode_support:
         print("converting raw string file into %s" % mode)
 
-        # load vocabulary dictionary
-        print("loading vocabulary index")
         if mode == mode_support[0]:
-            with open(UNIGRAM_DICT_FILE, 'rb') as f:
-                voc_dict = pkl.load(f)
             suf = 'indx'
-        elif mode == mode_support[1]:
-            with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
-                voc_dict = pkl.load(f)
+            with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
+                qa_voc_dict = pkl.load(f)
+            with open(UNIGRAM_DICT_FILE % "para", 'rb') as f:
+                para_voc_dict = pkl.load(f)
+        else:
             suf = 'emb'
+            with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
+                emb_voc_dict = pkl.load(f)
+            qa_voc_dict = emb_voc_dict
+            para_voc_dict = emb_voc_dict
 
         data_list = []
         # add train data
         data = ReVerbPairs(usage='train', mode='str')
         path = DUMP_TRAIN_FILE % suf
-        data_list.append((path, data))
+        data_list.append((path, data, qa_voc_dict))
 
         # add test data
         data = ReVerbPairs(usage='test', mode='str')
         path = DUMP_TEST_FILE % suf
-        data_list.append((path, data))
+        data_list.append((path, data, qa_voc_dict))
 
         # add paraphrase questions data
         data = ParaphraseQuestionRaw(mode='str')
         path = DUMP_PARA_FILE % suf
-        data_list.append((path, data))
+        data_list.append((path, data, para_voc_dict))
 
-        for path, data in data_list:
+        # load vocabulary dictionary
+        print("loading vocabulary index")
+
+        for path, data, voc_dict in data_list:
             line_num = 0
             print("converting %s" % path)
             if os.path.exists(path):
@@ -71,16 +76,13 @@ if __name__ == '__main__':
                 print("index version data %s exists" % path)
                 continue
 
+            is_reverb_test = False
+            if isinstance(data, ReVerbPairs):
+                if data.get_usage() == 'test':
+                    is_reverb_test = True
+
             with open(path, 'a') as f:
                 length = len(data)
-
-                if isinstance(data, ReVerbPairs):
-                    if data.get_usage() == 'test':
-                        voc_dict[2] = voc_dict[1]
-                        voc_dict[1] = voc_dict[0]
-                if isinstance(data, ParaphraseQuestionRaw):
-                    # paraphrase question data use question tokens
-                    voc_dict[1] = voc_dict[0]
 
                 for d in data:
                     sys.stdout.write("\rLoad: %.2f%%" % (float(line_num / length) * 100))
@@ -89,7 +91,17 @@ if __name__ == '__main__':
                     param_num = len(d)
                     for i in range(param_num):
                         if i in data.sent_indx:
-                            tokens = [str(word_hash(token, voc_dict[i], mode)) for token in d[i]]
+                            if is_reverb_test:
+                                if i == 1:
+                                    voc_hash = voc_dict[0]
+                                else:
+                                    # i == 2
+                                    voc_hash = voc_dict[1]
+
+                            else:
+                                voc_hash = voc_dict[i]
+
+                            tokens = [str(word_hash(token, voc_hash, mode)) for token in d[i]]
                             sentence = " ".join(tokens)
                             if mode == 'embedding':
                                 parsetree = get_parse_tree(" ".join(d[i]), parse_text_job_id)

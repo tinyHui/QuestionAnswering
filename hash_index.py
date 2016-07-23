@@ -1,12 +1,12 @@
-UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.pkl'
-BIGRAM_DICT_FILE = './bin/bigram_indx_hash.pkl'
-THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.pkl'
+UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.%s.pkl'
+BIGRAM_DICT_FILE = './bin/bigram_indx_hash.%s.pkl'
+THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.%s.pkl'
 LOWEST_FREQ = 3
 
 
 if __name__ == "__main__":
     from collections import defaultdict
-    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
     import pickle as pkl
     import os
     import sys
@@ -17,15 +17,21 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--grams', type=int, default=1, help='Define N for Ngram')
+    parser.add_argument('--source', type=str,
+                        help='Vocabulary for qa pairs/paraphrase questions, optional values are qa, para')
     args = parser.parse_args()
+
+    source = args.source
+    source_option = ['qa', 'para']
+    assert source in source_option, "source can be only %s" % " ".join(source_option)
 
     gram = args.grams
     if gram == 1:
-        DUMP_FILE = UNIGRAM_DICT_FILE
+        DUMP_FILE = UNIGRAM_DICT_FILE % source
     elif gram == 2:
-        DUMP_FILE = BIGRAM_DICT_FILE
+        DUMP_FILE = BIGRAM_DICT_FILE % source
     elif gram == 3:
-        DUMP_FILE = THRIGRAM_DICT_FILE
+        DUMP_FILE = THRIGRAM_DICT_FILE % source
     else:
         raise SystemError("Does not support %d-gram" % gram)
 
@@ -35,27 +41,30 @@ if __name__ == "__main__":
 
     multi_gram = gram > 1
     if multi_gram:
-        assert os.path.exists(UNIGRAM_DICT_FILE), "Must train unigram first"
+        assert os.path.exists(UNIGRAM_DICT_FILE), "must train unigram first"
 
     logging.info("Generating source data")
     # data is a group of sentences
-    train_data = ReVerbPairs(usage='train', mode='str', grams=gram)
+    if source == source_option[0]:
+        src_data = ReVerbPairs(usage='train', mode='str', grams=gram)
+    else:
+        src_data = ParaphraseQuestionRaw(mode='str', grams=gram)
 
     logging.info("Extracting tokens")
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
     token_count_group = {}
     token_group = defaultdict(list)
 
-    for i in train_data.sent_indx:
+    for i in src_data.sent_indx:
         token_count_group[i] = defaultdict(int)
 
-    length = len(train_data)
+    length = len(src_data)
     # extract tokens in train data
     line_num = 1
-    for line in train_data:
+    for line in src_data:
         sys.stdout.write("\rLoad: %d/%d" % (line_num, length))
         sys.stdout.flush()
-        for i in train_data.sent_indx:
+        for i in src_data.sent_indx:
             tokens = line[i]
             for token in tokens:
                 token_count_group[i][token] += 1
@@ -67,7 +76,7 @@ if __name__ == "__main__":
     sys.stdout.write("\n")
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
-    for i in train_data.sent_indx:
+    for i in src_data.sent_indx:
         # unique
         token_list = list(set(token_group[i]))
         # add unknown token

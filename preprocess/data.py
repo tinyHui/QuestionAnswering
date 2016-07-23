@@ -1,7 +1,7 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
 from raw_converter import TOKEN_STRUCT_SPLITTER
-from ParseTree import ParseTree
+# from ParseTree import ParseTree
 from random import sample
 from word2vec import WORD_EMBEDDING_FILE
 import sqlite3
@@ -161,8 +161,9 @@ class ParaphraseQuestionRaw(object):
         for line in open(self.__file, 'r'):
             q1, q2, align = line.strip().split('\t')
             # word generalise
-            q1 = process_raw(q1)
-            q2 = process_raw(q2)
+            if self.__mode == 'str':
+                q1 = process_raw(q1)
+                q2 = process_raw(q2)
             # to token
             q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
             if self.__mode == 'str':
@@ -176,6 +177,10 @@ class ParaphraseQuestionRaw(object):
                 q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                 q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
             yield q1_tokens, q2_tokens, align
+
+    def get_voc_num(self, i):
+        voc_num = {0: 6711, 1: 6671}
+        return voc_num[i]
 
     def __str__(self):
         return "ReVerb Paraphrase Questions raw"
@@ -262,16 +267,19 @@ class ReVerbPairs(object):
             q_indx = 1
             a_indx = 2
 
-        if self.gram == 1:
+        if self.__grams == 1:
             voc_num = {q_indx:10674, a_indx:15546}
-        elif self.gram == 2:
+        elif self.__grams == 2:
             voc_num = {q_indx:0, a_indx:0}
-        elif self.gram == 3:
+        elif self.__grams == 3:
             voc_num = {q_indx:0, a_indx:0}
         return voc_num[i]
 
     def get_usage(self):
         return self.__usage
+
+    def get_mode(self):
+        return self.__mode
 
     def __len__(self):
         if self.__usage == 'train':

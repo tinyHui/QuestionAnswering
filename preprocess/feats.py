@@ -19,7 +19,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
     if feat_select == FEATURE_OPTS[0]:
         # bag-of-word, unigram
         if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', gram=1)
+            data = ReVerbPairs(usage=usage, mode='index', grams=1)
         else:
             data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
@@ -27,7 +27,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
     elif feat_select == FEATURE_OPTS[1]:
         # bag-of-word, bigram
         if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', gram=2)
+            data = ReVerbPairs(usage=usage, mode='index', grams=2)
         else:
             data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
@@ -35,7 +35,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
     elif feat_select == FEATURE_OPTS[2]:
         # bag-of-word, thrigram
         if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', gram=3)
+            data = ReVerbPairs(usage=usage, mode='index', grams=3)
         else:
             data = ParaphraseQuestionRaw(mode='index')
         feats = Ngram(data)
@@ -94,7 +94,7 @@ class Ngram(object):
         :param voc_dict: word-index dictionary
         :param gram: default is unigram
         '''
-        assert data.mode == 'index', "must use word index in input data"
+        # assert data.get_mode() == 'index', "must use word index in input data"
         self.data = data
 
     def __iter__(self):
@@ -142,7 +142,7 @@ class WordEmbedding(object):
         :param data: data source
         :param embedding_dict_file: word-embedding dictionary file name
         '''
-        assert data.mode == 'embedding', "must use word embedding in input data"
+        # assert data.get_mode() == 'embedding', "must use word embedding in input data"
         self.data = data
         self.utils = Utils()
 
@@ -172,7 +172,8 @@ class Holographic(object):
         :param data: data source, include raw string and embedding vector
         :param embedding_dict_file: word-embedding dictionary file name
         '''
-        assert data.mode == 'embedding', "must use word index in input data"
+        # assert data[0].get_mode() == 'str', "must use word embedding in input data"
+        # assert data[1].get_mode() == 'embedding', "must use word embedding in input data"
         self.data = data
         self.utils = Utils()
 
