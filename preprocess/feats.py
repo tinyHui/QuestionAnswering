@@ -1,8 +1,10 @@
 # convert all sentences to their representations but keep data in other columns
 from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw
 from word2vec import EMBEDDING_SIZE
-import numpy as np
 from preprocess.utils import Utils
+import numpy as np
+import requests
+import json
 
 FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
 
@@ -68,6 +70,20 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         raise SystemError("%s is not an available feature" % feat_select)
 
     return feats
+
+
+def get_parse_tree(sentence, job_id):
+    URL = "http://localhost:8080/jsonrpc"
+    HEADERS = {'content-type': 'application/json'}
+
+    payload = {
+        "method": "parse",
+        "params": [sentence],
+        "jsonrpc": "2.0",
+        "id": job_id,
+    }
+    response = requests.post(URL, data=json.dumps(payload), headers=HEADERS).json()
+    return response['result']['parsetree']
 
 
 class Ngram(object):

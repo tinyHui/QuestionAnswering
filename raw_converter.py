@@ -7,11 +7,11 @@ if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX
+    from preprocess.feats import get_parse_tree
     from word2vec import EMBEDDING_SIZE
     import pickle as pkl
     import os
     import sys
-    import logging
 
     def word_hash(w, hash_map, mode):
         if mode == 'index':
@@ -29,15 +29,14 @@ if __name__ == '__main__':
 
             return '|'.join(map(str, value))
 
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
     mode_support = ['index', 'embedding']
 
+    parse_text_job_id = 0
     for mode in mode_support:
-        logging.info("converting raw string file into %s" % mode)
+        print("converting raw string file into %s" % mode)
 
         # load vocabulary dictionary
-        logging.info("loading vocabulary index")
+        print("loading vocabulary index")
         if mode == mode_support[0]:
             with open(UNIGRAM_DICT_FILE, 'rb') as f:
                 voc_dict = pkl.load(f)
@@ -65,10 +64,10 @@ if __name__ == '__main__':
 
         for path, data in data_list:
             line_num = 0
-            logging.info("converting %s" % path)
+            print("converting %s" % path)
             if os.path.exists(path):
                 # check if the index version exists
-                logging.info("index version data %s exists" % path)
+                print("index version data %s exists" % path)
                 continue
 
             with open(path, 'a') as f:
@@ -91,6 +90,13 @@ if __name__ == '__main__':
                         if i in data.sent_indx:
                             tokens = [str(word_hash(token, voc_dict[i], mode)) for token in d[i]]
                             sentence = " ".join(tokens)
+                            if mode == 'embedding':
+                                parsetree = get_parse_tree(" ".join(d[i]), parse_text_job_id)
+                                print(parsetree)
+                                parse_text_job_id += 1
+                                # concatenate token senteence and parsetree
+                                # split by @
+                                sentence = "%s@%s" % (sentence, parsetree)
                         else:
                             sentence = d[i]
                         if i+1 != param_num:
