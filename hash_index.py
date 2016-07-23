@@ -6,7 +6,7 @@ LOWEST_FREQ = 3
 
 if __name__ == "__main__":
     from collections import defaultdict
-    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
     import pickle as pkl
     import os
     import sys
@@ -39,34 +39,46 @@ if __name__ == "__main__":
 
     logging.info("Generating source data")
     # data is a group of sentences
-    src_data = ReVerbPairs(usage='train', mode='str')
+    train_data = ReVerbPairs(usage='train', mode='str', grams=gram)
+    para_data = ParaphraseQuestionRaw(mode='str', grams=gram)
 
     logging.info("Extracting tokens")
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
     token_count_group = {}
     token_group = defaultdict(list)
 
-    for i in src_data.sent_indx:
+    for i in train_data.sent_indx:
         token_count_group[i] = defaultdict(int)
 
+    length = len(train_data) + len(para_data)
+    # extract tokens in train data
     line_num = 1
-    for line in src_data:
-        sys.stdout.write("\rLoad: %d/%d" % (line_num, len(src_data)))
+    for line in train_data:
+        sys.stdout.write("\rLoad: %d/%d" % (line_num, length))
         sys.stdout.flush()
-        for i in src_data.sent_indx:
+        for i in train_data.sent_indx:
             tokens = line[i]
-            for gram_token in zip(*[tokens[j:] for j in range(gram)]):
-                for token in gram_token:
-                    token_count_group[i][token] += 1
-                    # check if the token appears count reaches requirement
-                    if token_count_group[i][token] > LOWEST_FREQ:
-                        token_group[i].append(token)
+            for token in tokens:
+                token_count_group[i][token] += 1
+                # check if the token appears count reaches requirement
+                if token_count_group[i][token] > LOWEST_FREQ:
+                    token_group[i].append(token)
         line_num += 1
+
+    # extract tokens in paraphrase data, add into question
+    for q1_tokens, q2_tokens, _ in para_data:
+        sys.stdout.write("\rLoad: %d/%d" % (line_num, length))
+        sys.stdout.flush()
+        i = train_data.question_index
+        for token in q1_tokens + q2_tokens:
+            token_count_group[i][token] += 1
+            if token_count_group[i][token] > LOWEST_FREQ:
+                token_group[i].append(token)
 
     sys.stdout.write("\n")
     logging.info("Generating token dictionary")
     word_indx_hash_group = {}
-    for i in src_data.sent_indx:
+    for i in train_data.sent_indx:
         # unique
         token_list = list(set(token_group[i]))
         # add unknown token
