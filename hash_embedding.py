@@ -25,7 +25,6 @@ if __name__ == "__main__":
 
         word_emb_hash[w] = emb
 
-
     sys.stdout.write("\n")
     logging.info("Saving word embedding dictionary")
     with open(WORD_EMBEDDING_BIN_FILE, 'wb') as f:

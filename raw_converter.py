@@ -34,14 +34,16 @@ if __name__ == '__main__':
     parse_text_job_id = 0
     for mode in mode_support:
         print("converting raw string file into %s" % mode)
-
+        # load dictionary
         if mode == mode_support[0]:
+            print("loading vocabulary index")
             suf = 'indx'
             with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
                 qa_voc_dict = pkl.load(f)
             with open(UNIGRAM_DICT_FILE % "para", 'rb') as f:
                 para_voc_dict = pkl.load(f)
         else:
+            print("loading embedding hash")
             suf = 'emb'
             with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
                 emb_voc_dict = pkl.load(f)
@@ -63,9 +65,6 @@ if __name__ == '__main__':
         data = ParaphraseQuestionRaw(mode='str')
         path = DUMP_PARA_FILE % suf
         data_list.append((path, data, para_voc_dict))
-
-        # load vocabulary dictionary
-        print("loading vocabulary index")
 
         for path, data, voc_dict in data_list:
             line_num = 0
@@ -90,18 +89,21 @@ if __name__ == '__main__':
                     param_num = len(d)
                     for i in range(param_num):
                         if i in data.sent_indx:
-                            # for the reverb test data, each iteration return 4 items,
-                            # q, a are located in index 1 and 2
-                            if is_reverb_test:
-                                if i == 1:
-                                    voc_hash = voc_dict[0]
-                                else:
-                                    # i == 2
-                                    voc_hash = voc_dict[1]
+                            if mode == 'embedding':
+                                tokens = [str(word_hash(token, voc_dict, mode)) for token in d[i]]
                             else:
-                                voc_hash = voc_dict[i]
+                                # for the reverb test data, each iteration return 4 items,
+                                # q, a are located in index 1 and 2
+                                if is_reverb_test:
+                                    if i == 1:
+                                        voc_hash = voc_dict[0]
+                                    else:
+                                        # i == 2
+                                        voc_hash = voc_dict[1]
+                                else:
+                                    voc_hash = voc_dict[i]
+                                tokens = [str(word_hash(token, voc_hash, mode)) for token in d[i]]
 
-                            tokens = [str(word_hash(token, voc_hash, mode)) for token in d[i]]
                             sentence = " ".join(tokens)
                             if mode == 'embedding':
                                 if data.is_q_indx(i):
@@ -111,7 +113,7 @@ if __name__ == '__main__':
                                 parse_text_job_id += 1
                                 # concatenate token senteence and parsetree
                                 # split by @
-                                sentence = "%s%s" % (sentence, parsetree)
+                                sentence = "%s@%s" % (sentence, parsetree)
                         else:
                             sentence = d[i]
                         if i+1 != param_num:

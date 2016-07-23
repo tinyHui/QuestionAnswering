@@ -132,13 +132,20 @@ class ReVerbTestRaw(object):
             self.__q_id_map[q] = id
 
     def __iter__(self):
-        for line in open(self.__file, 'r'):
+        for raw in open(self.__file, 'r'):
+            # remove ".e", ".r" in token
+            line = raw.replace('.r', '').replace('.e', '')
             l, q, a = line.strip().split('\t')
+
             q_id = self.__q_id_map[q]
             # normalize question
             q = process_raw(q)
             # normalize answer
-            r, e1, e2 = a.split()
+            try:
+                r, e1, e2 = a.split()
+            except ValueError:
+                r, e1 = a.split()
+                e2 = "PLACEHOLDER"
             r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
@@ -294,7 +301,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx:10674, a_indx:15546}
+            voc_num = {q_indx:10519, a_indx:15316}
         elif self.__grams == 2:
             voc_num = {q_indx:0, a_indx:0}
         elif self.__grams == 3:
