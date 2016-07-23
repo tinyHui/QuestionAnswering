@@ -6,7 +6,7 @@ LOWEST_FREQ = 3
 
 if __name__ == "__main__":
     from collections import defaultdict
-    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
     import pickle as pkl
     import os
     import sys
@@ -40,7 +40,6 @@ if __name__ == "__main__":
     logging.info("Generating source data")
     # data is a group of sentences
     train_data = ReVerbPairs(usage='train', mode='str', grams=gram)
-    para_data = ParaphraseQuestionRaw(mode='str', grams=gram)
 
     logging.info("Extracting tokens")
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
@@ -50,7 +49,7 @@ if __name__ == "__main__":
     for i in train_data.sent_indx:
         token_count_group[i] = defaultdict(int)
 
-    length = len(train_data) + len(para_data)
+    length = len(train_data)
     # extract tokens in train data
     line_num = 1
     for line in train_data:
@@ -64,16 +63,6 @@ if __name__ == "__main__":
                 if token_count_group[i][token] > LOWEST_FREQ:
                     token_group[i].append(token)
         line_num += 1
-
-    # extract tokens in paraphrase data, add into question
-    for q1_tokens, q2_tokens, _ in para_data:
-        sys.stdout.write("\rLoad: %d/%d" % (line_num, length))
-        sys.stdout.flush()
-        i = train_data.question_index
-        for token in q1_tokens + q2_tokens:
-            token_count_group[i][token] += 1
-            if token_count_group[i][token] > LOWEST_FREQ:
-                token_group[i].append(token)
 
     sys.stdout.write("\n")
     logging.info("Generating token dictionary")
