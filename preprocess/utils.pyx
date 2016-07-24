@@ -65,6 +65,6 @@ cdef class Utils(object):
                 part_result = self.cc(emb_w, EMBEDDING_SIZE)
                 result = self.cc_calc_cdef(result, part_result, EMBEDDING_SIZE)
             else:
-                result = self.cc_calc_cdef(result, part_result, EMBEDDING_SIZE)
+                result = self.cc_calc_cdef(result, emb_w, EMBEDDING_SIZE)
 
         return result

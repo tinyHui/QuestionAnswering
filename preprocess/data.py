@@ -34,10 +34,12 @@ def process_raw(raw):
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     SYM = r'(\.|\?|\$|\*|\#|\&)'
+    SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
     RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' \\1 '), (SPACES, ' ')]
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' \\1 '),
+              (SYM_AT, ' at '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = re.sub(r'\-', ' ', s).strip()
@@ -51,7 +53,7 @@ def parse_parser_tree(tree, vecs, result):
         leave_num = len(leaves)
         if leave_num > 1:
             crt_result = []
-            parse_parser_tree(subtree, crt_result)
+            parse_parser_tree(subtree, vecs, crt_result)
             result.append(crt_result)
         else:
             vec = vecs.pop(0)
@@ -279,8 +281,10 @@ class ReVerbPairs(object):
                 a_tokens = list(map(int, a_tokens))
             elif self.__mode == 'embedding':
                 # these splitter are from raw_converter.py
-                q_tokens, self.__q_struct_str = q.split('@')
-                a_tokens, self.__a_struct_str = a.split('@')
+                q_tokens_str, self.__q_struct_str = q.split('@', 1)
+                a_tokens_str, self.__a_struct_str = a.split('@', 1)
+                q_tokens = q_tokens_str.split(' ')
+                a_tokens = a_tokens_str.split(' ')
                 q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                 a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
 

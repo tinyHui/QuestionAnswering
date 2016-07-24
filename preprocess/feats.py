@@ -47,9 +47,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
-        data_raw = ReVerbPairs(usage=usage, mode='str')
         data = ReVerbPairs(usage=usage, mode='embedding')
-        feats = Holographic(zip(data_raw, data))
+        feats = Holographic(data)
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
