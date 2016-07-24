@@ -33,7 +33,7 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\?|\$|\*|\#|\&\,\!\;\`\~\'\")'
+    SYM = r'(\.|\$|\*|\#|\&\,\!\;\`\~\'\")'
     SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
@@ -211,7 +211,7 @@ class ParaphraseQuestionRaw(object):
             yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
-        voc_num = {0: 6670, 1: 6625}
+        voc_num = {0: 6668, 1: 6623}
         return voc_num[i]
 
     def is_q_indx(self, _):
@@ -341,7 +341,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx:10516, a_indx:15316}
+            voc_num = {q_indx:10529, a_indx:15314}
         elif self.__grams == 2:
             voc_num = {q_indx:0, a_indx:0}
         elif self.__grams == 3:
