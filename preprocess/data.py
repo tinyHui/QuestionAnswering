@@ -33,12 +33,12 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\?|\$|\*|\#|\&)'
+    SYM = r'(\.|\?|\$|\*|\#|\&\,\!\;\`\~\'\")'
     SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
     RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' \\1 '),
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' '),
               (SYM_AT, ' at '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
