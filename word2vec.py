@@ -1,5 +1,5 @@
 WORD_EMBEDDING_FILE = './data/embedding.txt'
-WORD_EMBEDDING_BIN_FILE = './bin/word_embedding.pkl'
+WORD_EMBEDDING_BIN_FILE = './bin/unigram_embedding.pkl'
 EMBEDDING_SIZE = 300
 
 

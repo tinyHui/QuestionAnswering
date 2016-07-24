@@ -186,7 +186,8 @@ class Holographic(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    feat[i] = self.utils.cc(d[i], EMBEDDING_SIZE)
+                    struct = self.data.get_struct(i, d[i])
+                    feat[i] = self.utils.cc(struct, EMBEDDING_SIZE)
                 else:
                     feat[i] = d[i]
 
