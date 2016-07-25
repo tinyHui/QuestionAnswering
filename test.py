@@ -20,7 +20,7 @@ OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
-def loader(feats_queue, Q_k, A_k, results, length):
+def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
     while True:
         try:
             indx, (d, f) = feats_queue.get(timeout=5)
@@ -28,6 +28,8 @@ def loader(feats_queue, Q_k, A_k, results, length):
             stdout.flush()
             feat = f(d)
             _, crt_q_v, crt_a_v, _ = feat
+            if use_paraphrase_map:
+                crt_q_v = (crt_q_v.dot(Q1_k) + crt_q_v.dot(Q2_k)) / 2
             proj_q = crt_q_v.dot(Q_k)
             proj_a = crt_a_v.dot(A_k)
             dist = distance(proj_q, proj_a)
@@ -37,6 +39,10 @@ def loader(feats_queue, Q_k, A_k, results, length):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define test process.')
+    parser.add_argument('--CCA_stage', type=int,
+                        help='Use 2 stage CCA, set as -1 for train paraphrase CCA')
+    parser.add_argument('--para_map_file', type=str,
+                        help='Define location for CCA model trained by paraphrase question')
     parser.add_argument('--feature', nargs=2, default=[],
                         help="Take 2 args, feature and model file. Feature option: %s" % (", ".join(FEATURE_OPTS)))
     # parser.add_argument('--full_rank', action='store_true', default=False,
@@ -47,7 +53,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     feature = args.feature[0]
-    model_file = args.feature[1]
+    qa_model_file = args.feature[1]
+
+    # 1/2 stage CCA
+    cca_stage = args.CCA_stage
+    assert cca_stage in [1, 2], "can only use 1 stage CCA or 2 stage CCA"
+    use_paraphrase_map = False
+    if cca_stage == 2:
+        use_paraphrase_map = True
+        para_map_file = args.para_map_file
+        assert feature in ['avg', 'holographic'], "%s is not supported by 2 stage CCA"
+
     # assert args.full_rank ^ args.rerank, 'must specify full rank or rerank'
     # full_rank = args.full_rank
     PROCESS_NUM = args.worker
@@ -63,8 +79,14 @@ if __name__ == '__main__':
     logging.info("using feature: %s" % feature)
     logging.info("loading CCA model")
     # load CCA model
-    with open(model_file, 'rb') as f:
+    with open(qa_model_file, 'rb') as f:
         Q_k, A_k = pkl.load(f)
+
+    Q1_k = None
+    Q2_k = None
+    if cca_stage == 2:
+        with open(para_map_file, 'rb') as f:
+            Q1_k, Q2_k = pkl.load(f)
 
     logging.info("calculating distance")
     feats = feats_loader(feature, usage='test')
@@ -75,7 +97,8 @@ if __name__ == '__main__':
     feats_queue = Queue(maxsize=length)
     result_list_share = manager.dict()
 
-    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length))
+    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length,
+                                           use_paraphrase_map, Q1_k, Q2_k))
               for _ in range(PROCESS_NUM)]
 
     for p in p_list:
