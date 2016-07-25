@@ -263,7 +263,7 @@ class ParaphraseQuestionRaw(object):
                 yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
-        voc_num = {0: 6667, 1: 6621}
+        voc_num = {0: 6667, 1: 6622}
         return voc_num[i]
 
     def is_q_indx(self, _):
@@ -368,7 +368,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx: 10510, a_indx: 15296}
+            voc_num = {q_indx: 10538, a_indx: 15301}
         elif self.__grams == 2:
             voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 3:

@@ -49,7 +49,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         # holographic correlation
         data_emb = ReVerbPairs(usage=usage, mode='embedding')
         data_struct = ReVerbPairs(usage=usage, mode='structure')
-        feats = Holographic(zip(data_emb, data_struct))
+        feats = Holographic(data_emb=data_emb, data_struct=data_struct)
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -166,7 +166,7 @@ class WordEmbedding(object):
 
 
 class Holographic(object):
-    def __init__(self, data):
+    def __init__(self, data_emb, data_struct):
         '''
         Represent sentence data using word embedding trained by British National Corpus
         :param data: data source, include raw string and embedding vector
@@ -174,11 +174,12 @@ class Holographic(object):
         '''
         # assert data[0].get_mode() == 'str', "must use word embedding in input data"
         # assert data[1].get_mode() == 'embedding', "must use word embedding in input data"
-        self.data = data
+        self.data_emb = data_emb
+        self.data_struct = data_struct
         self.utils = Utils()
 
     def __iter__(self):
-        for d_emb, d_struct in self.data:
+        for d_emb, d_struct in zip(self.data_emb, self.data_struct):
             yield (d_emb, d_struct), self.__generate__
 
     def __generate__(self, d):
@@ -187,8 +188,8 @@ class Holographic(object):
             param_num = len(d_emb)
             feat = [None] * param_num
             for i in range(param_num):
-                if i in self.data.sent_indx:
-                    struct = get_struct(self.data.is_q_indx(), d_emb[i], d_struct[i])
+                if i in self.data_emb.sent_indx:
+                    struct = get_struct(self.data_emb.is_q_indx(), d_emb[i], d_struct[i])
                     feat[i] = self.utils.cc(struct, EMBEDDING_SIZE)
                 else:
                     feat[i] = d_emb[i]
@@ -196,7 +197,7 @@ class Holographic(object):
             return feat
 
     def __len__(self):
-        return len(self.data)
+        return len(self.data_emb)
 
 
 # class LSTM(object):
