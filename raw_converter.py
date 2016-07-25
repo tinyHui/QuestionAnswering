@@ -26,47 +26,49 @@ if __name__ == '__main__':
             except KeyError:
                 # for unseen words, the embedding is zero \in R^Embedding_size
                 value = [0] * EMBEDDING_SIZE
-
             return '|'.join(map(str, value))
 
-    mode_support = ['index', 'embedding']
+    mode_support = ['index', 'embedding', 'structure']
 
-    parse_text_job_id = 0
     for mode in mode_support:
         print("converting raw string file into %s" % mode)
         # load dictionary
         if mode == mode_support[0]:
             print("loading vocabulary index")
+            data_mode = 'str'
             suf = 'indx'
             with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
                 qa_voc_dict = pkl.load(f)
             with open(UNIGRAM_DICT_FILE % "para", 'rb') as f:
                 para_voc_dict = pkl.load(f)
-        else:
+        elif mode == mode_support[1]:
             print("loading embedding hash")
+            data_mode = 'str'
             suf = 'emb'
             with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
                 emb_voc_dict = pkl.load(f)
-            qa_voc_dict = emb_voc_dict
-            para_voc_dict = emb_voc_dict
+        else:
+            data_mode = 'raw'
+            suf = 'struct'
 
         data_list = []
         # add train data
-        data = ReVerbPairs(usage='train', mode='str')
+        data = ReVerbPairs(usage='train', mode=data_mode)
         path = DUMP_TRAIN_FILE % suf
-        data_list.append((path, data, qa_voc_dict))
+        data_list.append((data, path))
 
         # add test data
-        data = ReVerbPairs(usage='test', mode='str')
+        data = ReVerbPairs(usage='test', mode=data_mode)
         path = DUMP_TEST_FILE % suf
-        data_list.append((path, data, qa_voc_dict))
+        data_list.append((data, path))
 
         # add paraphrase questions data
-        data = ParaphraseQuestionRaw(mode='str')
+        data = ParaphraseQuestionRaw(mode=data_mode)
         path = DUMP_PARA_FILE % suf
-        data_list.append((path, data, para_voc_dict))
+        data_list.append((data, path))
 
-        for path, data, voc_dict in data_list:
+        job_id = 0
+        for data, path in data_list:
             line_num = 0
             print("converting %s" % path)
             if os.path.exists(path):
@@ -74,10 +76,21 @@ if __name__ == '__main__':
                 print("index version data %s exists" % path)
                 continue
 
-            is_reverb_test = False
+            is_reverb_test = isinstance(data, ReVerbPairs) and data.get_usage() == 'test'
+
+            voc_hash = {}
             if isinstance(data, ReVerbPairs):
-                if data.get_usage() == 'test':
-                    is_reverb_test = True
+                voc_dict = qa_voc_dict
+            elif isinstance(data, ParaphraseQuestionRaw):
+                voc_dict = para_voc_dict
+
+            if data.get_usage() == 'train':
+                voc_hash = qa_voc_dict
+            elif data.get_usage() == 'test':
+                # for the reverb test data, each iteration return 4 items,
+                # q, a are located in index 1 and 2
+                voc_hash[1] = qa_voc_dict[0]
+                voc_hash[2] = qa_voc_dict[1]
 
             with open(path, 'a') as f:
                 length = len(data)
@@ -87,33 +100,18 @@ if __name__ == '__main__':
                     sys.stdout.flush()
                     line_num += 1
                     param_num = len(d)
+
                     for i in range(param_num):
                         if i in data.sent_indx:
-                            if mode == 'embedding':
-                                tokens = [str(word_hash(token, voc_dict, mode)) for token in d[i]]
-                            else:
-                                # for the reverb test data, each iteration return 4 items,
-                                # q, a are located in index 1 and 2
-                                if is_reverb_test:
-                                    if i == 1:
-                                        voc_hash = voc_dict[0]
-                                    else:
-                                        # i == 2
-                                        voc_hash = voc_dict[1]
-                                else:
-                                    voc_hash = voc_dict[i]
-                                tokens = [str(word_hash(token, voc_hash, mode)) for token in d[i]]
-
-                            sentence = " ".join(tokens)
-                            if mode == 'embedding':
+                            if mode == mode_support[2]:
                                 if data.is_q_indx(i):
-                                    parsetree = get_parse_tree(" ".join(d[i]), parse_text_job_id)
+                                    sentence = get_parse_tree(d[i], job_id)
+                                    job_id += 1
                                 else:
-                                    parsetree = data.get_origin_answer()
-                                parse_text_job_id += 1
-                                # concatenate token senteence and parsetree
-                                # split by @
-                                sentence = "%s@%s" % (sentence, parsetree)
+                                    sentence = d[i]
+                            else:
+                                tokens = [str(word_hash(token, voc_hash[i], mode)) for token in d[i]]
+                                sentence = " ".join(tokens)
                         else:
                             sentence = d[i]
                         if i+1 != param_num:

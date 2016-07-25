@@ -1,5 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
-from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw
+from preprocess.data import get_struct, ReVerbPairs, ParaphraseQuestionRaw
 from word2vec import EMBEDDING_SIZE
 from preprocess.utils import Utils
 import numpy as np
@@ -47,8 +47,9 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
-        data = ReVerbPairs(usage=usage, mode='embedding')
-        feats = Holographic(data)
+        data_emb = ReVerbPairs(usage=usage, mode='embedding')
+        data_struct = ReVerbPairs(usage=usage, mode='structure')
+        feats = Holographic(zip(data_emb, data_struct))
 
     # elif feat_select == FEATURE_OPTS[]:
     #     # word embedding
@@ -177,18 +178,20 @@ class Holographic(object):
         self.utils = Utils()
 
     def __iter__(self):
-        for d in self.data:
-            yield d, self.__generate__
+        for d_emb, d_struct in self.data:
+            yield (d_emb, d_struct), self.__generate__
 
     def __generate__(self, d):
-            param_num = len(d)
+            d_emb, d_struct = d
+            # assert len(d_emb) == len(d_struct)
+            param_num = len(d_emb)
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data.sent_indx:
-                    struct = self.data.get_struct(i, d[i])
+                    struct = get_struct(self.data.is_q_indx(), d_emb[i], d_struct[i])
                     feat[i] = self.utils.cc(struct, EMBEDDING_SIZE)
                 else:
-                    feat[i] = d[i]
+                    feat[i] = d_emb[i]
 
             return feat
 
