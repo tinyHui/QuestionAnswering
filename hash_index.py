@@ -88,3 +88,4 @@ if __name__ == "__main__":
     logging.info("Saving word index hashing table")
     with open(DUMP_FILE, 'wb') as f:
         pkl.dump(word_indx_hash_group, f, protocol=4)
+

@@ -33,7 +33,7 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\$|\*|\#|\&\,\!\;\`\~\'\")'
+    SYM = r'(\.|\?|\$|\*|\#|\&|\,|\!|\;|\`|\~|\'|\")'
     SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
@@ -155,7 +155,8 @@ class ReVerbTestRaw(object):
 
             q_id = self.__q_id_map[q]
             # normalize question
-            q = process_raw(q)
+            # the question mark is been replaced
+            q = process_raw(q) + " ?"
             # normalize answer
             try:
                 r, e1, e2 = a.split()
