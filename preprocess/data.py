@@ -33,7 +33,7 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\?|\$|\*|\#|\&|\,|\!|\;|\`|\~|\'|\")'
+    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\'|\"|\\|\:|\+|\-|\*|\/)'
     SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
@@ -284,8 +284,8 @@ class ReVerbPairs(object):
                 # these splitter are from raw_converter.py
                 q_tokens_str, self.__q_struct_str = q.split('@', 1)
                 a_tokens_str, self.__a_struct_str = a.split('@', 1)
-                q_tokens = q_tokens_str.split(' ')
-                a_tokens = a_tokens_str.split(' ')
+                q_tokens = q_tokens_str.split()
+                a_tokens = a_tokens_str.split()
                 q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                 a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
 
@@ -324,7 +324,7 @@ class ReVerbPairs(object):
             # split tokens in struct string
             for part in self.__a_struct_str.split("|"):
                 crt_result = []
-                for _ in part.split(" "):
+                for _ in part.split():
                     vec = vecs.pop(0)
                     crt_result.append(vec)
                 struct.append(crt_result)
