@@ -36,7 +36,7 @@ def loader(feats_queue, Q_k, A_k, results, length):
             break
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Define training process.')
+    parser = argparse.ArgumentParser(description='Define test process.')
     parser.add_argument('--feature', nargs=2, default=[],
                         help="Take 2 args, feature and model file. Feature option: %s" % (", ".join(FEATURE_OPTS)))
     # parser.add_argument('--full_rank', action='store_true', default=False,

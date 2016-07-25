@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description='Define training process.')
+    parser = argparse.ArgumentParser(description='Define source file to build index dictionary.')
     parser.add_argument('--grams', type=int, default=1, help='Define N for Ngram')
     parser.add_argument('--source', type=str,
                         help='Vocabulary for qa pairs/paraphrase questions, optional values are qa, para')

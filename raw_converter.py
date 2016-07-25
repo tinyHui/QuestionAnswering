@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     mode_support = ['index', 'embedding', 'structure']
 
-    parser = argparse.ArgumentParser(description='Define source file to build index dictionary.')
+    parser = argparse.ArgumentParser(description='Define mode to choose version for converting.')
     parser.add_argument('--mode', type=str,
                         help='Convert text version to index, embedding or structure?')
     args = parser.parse_args()

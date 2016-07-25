@@ -127,6 +127,8 @@ if __name__ == "__main__":
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
     parser.add_argument('--CCA_stage', type=int, default=1,
                         help='Use 2 stage CCA, set as -1 for train paraphrase CCA')
+    parser.add_argument('--para_map_file', type=str, default=PARA_MAP_FILE,
+                        help='Define location for CCA model trained by paraphrase question')
     parser.add_argument('--reuse', default=[], nargs=2, help='Reuse pre-trained data, two arguments: stage file')
     parser.add_argument('--worker', type=int, default=PROCESS_NUM, help='Process number')
 
@@ -153,6 +155,8 @@ if __name__ == "__main__":
         train_two_stage_cca = False
         if cca_stage == 2:
             use_paraphrase_map = True
+            PARA_MAP_FILE = args.para_map_file
+            assert feature in ['avg', 'holographic'], "%s is not supported by 2 stage CCA"
             assert os.path.exists(PARA_MAP_FILE), "%s not exist" % PARA_MAP_FILE
 
     # reuse trained model
