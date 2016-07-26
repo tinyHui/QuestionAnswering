@@ -31,9 +31,9 @@ cdef class Utils(object):
         cdef unsigned int i
         cdef float v
 
-        # if vec is all 0, we skip it; if vec is all 1, it does not affect the calculation
-        cdef bint a_useless = np.sum(a) == 0 and np.all(a == 1)
-        cdef bint b_useless = np.sum(b) == 0 and np.all(b == 1)
+        # if vec is all 0, it does not affect the calculation, we skip it
+        cdef bint a_useless = np.sum(a) == 0
+        cdef bint b_useless = np.sum(b) == 0
 
         cdef np.ndarray result = np.ones(EMBEDDING_SIZE) # R^1 x EMBEDDING_SIZE
         if a_useless or b_useless:

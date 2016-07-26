@@ -227,8 +227,10 @@ class ParaphraseQuestionRaw(object):
             suf = 'indx'
         elif mode == 'embedding':
             suf = 'emb'
+        elif mode == 'structure':
+            suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index' or 'embedding")
+            raise AttributeError("Mode can be only 'str', 'index', 'embedding', 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -249,18 +251,21 @@ class ParaphraseQuestionRaw(object):
 
             else:
                 # to token
-                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-                if self.__mode == 'str':
-                    if self.__grams > 1:
-                        q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
-                        q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
-                elif self.__mode == 'index':
-                    q1_tokens = list(map(int, q1_tokens))
-                    q2_tokens = list(map(int, q2_tokens))
-                elif self.__mode == 'embedding':
-                    q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
-                    q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
-                yield q1_tokens, q2_tokens, align
+                if self.__mode == 'structure':
+                    yield q1, q2
+                else:
+                    q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+                    if self.__mode == 'str':
+                        if self.__grams > 1:
+                            q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
+                            q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
+                    elif self.__mode == 'index':
+                        q1_tokens = list(map(int, q1_tokens))
+                        q2_tokens = list(map(int, q2_tokens))
+                    elif self.__mode == 'embedding':
+                        q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
+                        q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
+                    yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
         voc_num = {0: 13067, 1: 13093}
@@ -297,7 +302,7 @@ class ReVerbPairs(object):
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index' or 'embedding")
+            raise AttributeError("Mode can be only 'str', 'index', 'embedding' or 'structure'")
         self.__mode = mode
 
         if usage in ['train', 'test']:
@@ -323,7 +328,7 @@ class ReVerbPairs(object):
                 q_id, q, a, l = line.strip().split('\t')
                 l = int(l)
 
-            if self.__mode == 'raw':
+            if self.__mode in ['raw', 'structure']:
                 if self.__usage == 'train':
                     yield (q, a)
                 else:

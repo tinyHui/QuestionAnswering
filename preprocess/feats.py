@@ -197,7 +197,7 @@ class Holographic(object):
             feat = [None] * param_num
             for i in range(param_num):
                 if i in self.data_emb.sent_indx:
-                    struct = get_struct(self.data_emb.is_q_indx(), d_emb[i], d_struct[i])
+                    struct = get_struct(self.data_emb.is_q_indx(i), d_emb[i], d_struct[i])
                     feat[i] = self.utils.cc(struct, EMBEDDING_SIZE)
                 else:
                     feat[i] = d_emb[i]
