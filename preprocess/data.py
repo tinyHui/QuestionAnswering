@@ -263,7 +263,7 @@ class ParaphraseQuestionRaw(object):
                 yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
-        voc_num = {0: 6667, 1: 6622}
+        voc_num = {0: 13067, 1: 13093}
         return voc_num[i]
 
     def is_q_indx(self, _):
@@ -276,8 +276,8 @@ class ParaphraseQuestionRaw(object):
         return "ReVerb Paraphrase Questions raw"
 
     def __len__(self):
-        # head -50000
-        return 50000
+        # head -150000
+        return 150000
 
         # full
         # return 35291309
