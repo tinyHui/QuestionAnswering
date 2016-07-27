@@ -35,7 +35,7 @@ cdef class Utils(object):
         cdef bint a_useless = np.sum(a) == 0
         cdef bint b_useless = np.sum(b) == 0
 
-        cdef np.ndarray result = np.ones(EMBEDDING_SIZE) # R^1 x EMBEDDING_SIZE
+        cdef np.ndarray result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE) # R^1 x EMBEDDING_SIZE
         if a_useless or b_useless:
             # value of a or b does not affect the result
             if a_useless and b_useless:
@@ -59,7 +59,7 @@ cdef class Utils(object):
 
 
     def cc(self, list struct, unsigned int EMBEDDING_SIZE):
-        result = np.ones(EMBEDDING_SIZE)
+        result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
         for emb_w in struct:
             if isinstance(emb_w, list):
                 part_result = self.cc(emb_w, EMBEDDING_SIZE)

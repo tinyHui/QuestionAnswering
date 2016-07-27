@@ -281,8 +281,8 @@ class ParaphraseQuestionRaw(object):
         return "ReVerb Paraphrase Questions raw"
 
     def __len__(self):
-        # head -150000
-        return 150000
+        # head -300000
+        return 300000
 
         # full
         # return 35291309
