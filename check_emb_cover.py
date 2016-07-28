@@ -5,7 +5,6 @@ if __name__ == '__main__':
 
     with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
         emb_voc_dict = pkl.load(f)
-        emb_voc = emb_voc_dict.keys()
 
     with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
         qa_voc_dict = pkl.load(f)
@@ -29,7 +28,7 @@ if __name__ == '__main__':
         unseen_num = 0
         for voc in voc_list:
             try:
-                _ = emb_voc[voc]
+                _ = emb_voc_dict[voc]
             except KeyError:
                 unseen_num += 1
 
