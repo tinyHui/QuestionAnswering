@@ -1,6 +1,6 @@
 if __name__ == "__main__":
     from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN
-    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
+    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE
     from preprocess.data import WordEmbeddingRaw
     from collections import defaultdict
     import pickle as pkl
@@ -43,11 +43,13 @@ if __name__ == "__main__":
 
     unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float32')
     unknown_count = 0
+    low_freq_token_list = []
     for token, occur_count in token_occur_count.items():
         if occur_count == 3:
             try:
                 # for token only occur once and token have trained embedding
                 unknown_emb += word_emb_hash[token]
+                low_freq_token_list.append(token)
                 unknown_count += 1
             except KeyError:
                 continue
@@ -56,5 +58,8 @@ if __name__ == "__main__":
     word_emb_hash[UNKNOWN_TOKEN] = unknown_emb
 
     logging.info("Saving word embedding dictionary")
+    with open(LOW_FREQ_TOKEN_FILE, 'wb') as f:
+        pkl.dump(low_freq_token_list, f, protocol=4)
+
     with open(WORD_EMBEDDING_BIN_FILE, 'wb') as f:
         pkl.dump(word_emb_hash, f, protocol=4)

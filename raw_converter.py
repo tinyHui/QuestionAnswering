@@ -5,29 +5,31 @@ DUMP_PARA_FILE = "./data/paraphrases.%s"
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
-    from word2vec import WORD_EMBEDDING_BIN_FILE
+    from word2vec import WORD_EMBEDDING_BIN_FILE, LOW_FREQ_TOKEN_FILE
     from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
-    from word2vec import EMBEDDING_SIZE
     import pickle as pkl
     import os
     import sys
     import argparse
 
-    def word_hash(w, hash_map, mode):
-        if mode == 'index':
-            try:
-                return hash_map[w]
-            except KeyError:
-                # unseen token
-                return UNKNOWN_TOKEN_INDX
-        elif mode == 'embedding':
-            try:
-                value = hash_map[w]
-            except KeyError:
-                # for unseen words, the embedding is zero \in R^Embedding_size
-                value = hash_map[UNKNOWN_TOKEN]
-            return '|'.join(map(str, value))
+    def word2index(w, hash_map):
+        try:
+            return hash_map[w]
+        except KeyError:
+            # unseen token
+            return UNKNOWN_TOKEN_INDX
+
+    def word2hash(w, hash_map, low_freq_token_list):
+        if w in low_freq_token_list:
+            return hash_map[UNKNOWN_TOKEN]
+
+        try:
+            value = hash_map[w]
+        except KeyError:
+            # for unseen words, the embedding is zero \in R^Embedding_size
+            value = hash_map[UNKNOWN_TOKEN]
+        return '|'.join(map(str, value))
 
     mode_support = ['index', 'embedding', 'structure']
 
@@ -54,6 +56,8 @@ if __name__ == '__main__':
         suf = 'emb'
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
+        with open(LOW_FREQ_TOKEN_FILE, 'rb') as f:
+            low_freq_token_list = pkl.load(f)
     else:
         data_mode = 'raw'
         suf = 'struct'
@@ -113,10 +117,10 @@ if __name__ == '__main__':
                 for i in range(param_num):
                     if i in data.sent_indx:
                         if mode == mode_support[0]:
-                            tokens = [str(word_hash(token, voc_hash[i], mode)) for token in d[i]]
+                            tokens = [str(word2index(token, voc_hash[i])) for token in d[i]]
                             sentence = " ".join(tokens)
                         elif mode == mode_support[1]:
-                            tokens = [str(word_hash(token, emb_voc_dict, mode)) for token in d[i]]
+                            tokens = [str(word2hash(token, emb_voc_dict, low_freq_token_list)) for token in d[i]]
                             sentence = " ".join(tokens)
                         else:
                             # mode == mode_support[2]:
