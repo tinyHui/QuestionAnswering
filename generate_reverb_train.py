@@ -6,7 +6,7 @@ FILE = './data/reverb-train.txt'
 
 if __name__ == '__main__':
     data = ReVerbTrainRaw()
-    i = 1
+    i = 0
     with open(FILE, 'a') as f:
         for q, a in data:
             i += 1
