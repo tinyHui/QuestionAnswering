@@ -133,6 +133,7 @@ class ReVerbTrainRaw(object):
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
+            r, e1, e2 = [re.sub(r'\-', ' ', w) for w in [r, e1, e2]]
 
             # find the suitable pattern
             # random choose some for training, reduce training size
@@ -171,6 +172,7 @@ class ReVerbTestRaw(object):
         for raw in open(self.__file, 'r'):
             # remove ".e", ".r" in token
             line = raw.replace('.r', '').replace('.e', '')
+            line = re.sub(r'\-', ' ', line)
             l, q, a = line.strip().split('\t')
 
             q_id = self.__q_id_map[q]
