@@ -175,7 +175,11 @@ class ReVerbTestRaw(object):
             l, q, a = line.strip().split('\t')
 
             q_id = self.__q_id_map[q]
-            r, e1, e2 = a.split()
+            try:
+                r, e1, e2 = a.split()
+            except ValueError:
+                r, e1 = a.split()
+                e2 = "PLACEHOLDER"
             r, e1, e2 = [re.sub(r'\-', ' ', w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 

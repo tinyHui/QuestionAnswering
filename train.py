@@ -233,7 +233,7 @@ if __name__ == "__main__":
         logging.info("project question matrix use paraphrase questions")
         Qs1 = Qs.dot(paraphrase_map_U)
         Qs2 = Qs.dot(paraphrase_map_V)
-        Qs = (Qs1 + Qs2) / 2
+        Qs = np.hstack((Qs1, Qs2))
 
     if 0 <= reuse_stage <= 1:
         c_qq_sqrt, c_aa_sqrt, result = xcov(Qs, As, sparse=sparse)

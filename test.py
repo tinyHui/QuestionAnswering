@@ -1,17 +1,14 @@
 from collections import defaultdict
-from collections import UserList
 from sys import stdout
 from multiprocessing import Process, Manager,Queue
 from queue import Empty
-from itertools import islice
 from preprocess.feats import FEATURE_OPTS, feats_loader
 from CCA import distance
-from functools import partial
 import argparse
 import pickle as pkl
+import numpy as np
 import logging
 import os
-from time import sleep
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 OUTPUT_FILE_TOP1 = './result/reverb-test-with_dist.top1.%s.txt'
@@ -29,7 +26,9 @@ def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_
             feat = f(d)
             _, crt_q_v, crt_a_v, _ = feat
             if use_paraphrase_map:
-                crt_q_v = (crt_q_v.dot(Q1_k) + crt_q_v.dot(Q2_k)) / 2
+                crt_q_v1 = crt_q_v.dot(Q1_k)
+                crt_q_v2 = crt_q_v.dot(Q2_k)
+                crt_q_v = np.hstack((crt_q_v1, crt_q_v2))
             proj_q = crt_q_v.dot(Q_k)
             proj_a = crt_a_v.dot(A_k)
             dist = distance(proj_q, proj_a)
