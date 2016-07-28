@@ -1,10 +1,13 @@
 if __name__ == '__main__':
     from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw
-    from word2vec import WORD_EMBEDDING_BIN_FILE
+    from word2vec import WORD_EMBEDDING_BIN_FILE, LOW_FREQ_TOKEN_FILE
     import pickle as pkl
 
     with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
         emb_voc_dict = pkl.load(f)
+
+    with open(LOW_FREQ_TOKEN_FILE, 'rb') as f:
+        low_freq_token_list = pkl.load(f)
 
     reverb = ReVerbPairs(usage='train', mode='raw_token', grams=1)
     paraphrase = ParaphraseQuestionRaw(mode='raw_token', grams=1)
@@ -21,6 +24,8 @@ if __name__ == '__main__':
         for line in src_data:
             for i in src_data.sent_indx:
                 for token in line[i]:
+                    if token in low_freq_token_list:
+                        continue
                     try:
                         _ = emb_voc_dict[token]
                     except KeyError:
