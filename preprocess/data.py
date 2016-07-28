@@ -191,7 +191,7 @@ class WordEmbeddingRaw(object):
         self.__file = WORD_EMBEDDING_FILE
         self.f = open(self.__file, 'r')
         for line in self.f:
-            self.emb_size, self.length = line.split(' ')
+            self.length, self.emb_size = line.split(' ')
             break
 
     def __iter__(self):
@@ -202,7 +202,7 @@ class WordEmbeddingRaw(object):
         self.f.close()
 
     def __len__(self):
-        return self.length
+        return int(self.length)
 
     def __str__(self):
         return "Word Embeddings"
@@ -262,7 +262,7 @@ class ParaphraseQuestionRaw(object):
                     yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
-        voc_num = {0: 13067, 1: 13093}
+        voc_num = {0: 18852, 1: 18954}
         return voc_num[i]
 
     def is_q_indx(self, _):
@@ -373,7 +373,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx: 10538, a_indx: 15301}
+            voc_num = {q_indx: 13974, a_indx: 18402}
         elif self.__grams == 2:
             voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 3:
@@ -388,7 +388,7 @@ class ReVerbPairs(object):
 
     def __len__(self):
         if self.__usage == 'train':
-            return 149993
+            return 269979
 
             # 3 patterns, use all triples
             # return 35540263
