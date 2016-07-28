@@ -6,9 +6,8 @@ if __name__ == '__main__':
     with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
         emb_voc_dict = pkl.load(f)
 
-    reverb = ReVerbPairs(usage='train', mode='str', grams=gram)
-    paraphrase = ParaphraseQuestionRaw(mode='str', grams=gram)
-
+    reverb = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+    paraphrase = ParaphraseQuestionRaw(mode='raw_token', grams=1)
 
     check_pending_list = [
         ("Question Answer", reverb),
@@ -26,6 +25,7 @@ if __name__ == '__main__':
                         _ = emb_voc_dict[token]
                     except KeyError:
                         unseen_num += 1
+                    finally:
+                        voc_num += 1
 
         print("{}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
-

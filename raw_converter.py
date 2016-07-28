@@ -6,7 +6,7 @@ DUMP_PARA_FILE = "./data/paraphrases.%s"
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
-    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
     from word2vec import EMBEDDING_SIZE
     import pickle as pkl
@@ -26,7 +26,7 @@ if __name__ == '__main__':
                 value = hash_map[w]
             except KeyError:
                 # for unseen words, the embedding is zero \in R^Embedding_size
-                value = [0] * EMBEDDING_SIZE
+                value = hash_map[UNKNOWN_TOKEN]
             return '|'.join(map(str, value))
 
     mode_support = ['index', 'embedding', 'structure']
