@@ -213,8 +213,10 @@ class ParaphraseQuestionRaw(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
+        elif mode == 'raw_token':
+            suf = 'txt'
         elif mode == 'str':
-            suf = 'proc'
+            suf = 'txt'
         elif mode == 'index':
             suf = 'indx'
         elif mode == 'embedding':
@@ -247,7 +249,7 @@ class ParaphraseQuestionRaw(object):
                     yield q1, q2
                 else:
                     q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-                    if self.__mode == 'str':
+                    if self.__mode in ['str', 'raw_token']:
                         if self.__grams > 1:
                             q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
                             q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
@@ -285,8 +287,10 @@ class ReVerbPairs(object):
     def __init__(self, usage='train', mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
+        elif mode == 'raw_token':
+            suf = 'txt'
         elif mode == 'str':
-            suf = 'proc'
+            suf = 'txt'
         elif mode == 'index':
             suf = 'indx'
         elif mode == 'embedding':
@@ -334,7 +338,7 @@ class ReVerbPairs(object):
                 q_tokens = q.split()
                 a_tokens = a.split()
 
-                if self.__mode == 'str':
+                if self.__mode in ['str', 'raw_token']:
                     e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
                     a_tokens = e1_tokens + r_tokens + e2_tokens
                 if self.__grams > 1:

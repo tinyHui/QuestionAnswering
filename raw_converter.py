@@ -50,7 +50,7 @@ if __name__ == '__main__':
             para_voc_dict = pkl.load(f)
     elif mode == mode_support[1]:
         print("loading embedding hash")
-        data_mode = 'str'
+        data_mode = 'raw_token'
         suf = 'emb'
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
