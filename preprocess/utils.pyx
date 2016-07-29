@@ -13,7 +13,7 @@ cdef class Utils(object):
         result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE)
         # average of embedding of the words
         for emb_w in sentence:
-            if np.sum(emb_w) == 0:
+            if np.all(emb_w == 0):
                 continue
             # for each token, find its embedding
             # unseen token will automatically take 0 x R^300
@@ -32,8 +32,8 @@ cdef class Utils(object):
         cdef float v
 
         # if vec is all 0, it does not affect the calculation, we skip it
-        cdef bint a_useless = np.sum(a) == 0
-        cdef bint b_useless = np.sum(b) == 0
+        cdef bint a_useless = np.all(a == 0)
+        cdef bint b_useless = np.all(b == 0)
 
         cdef np.ndarray result = np.zeros(EMBEDDING_SIZE, dtype=DTYPE) # R^1 x EMBEDDING_SIZE
         if a_useless or b_useless:
