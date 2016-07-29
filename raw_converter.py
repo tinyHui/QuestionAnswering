@@ -22,13 +22,13 @@ if __name__ == '__main__':
 
     def word2hash(w, hash_map, low_freq_token_list):
         if w in low_freq_token_list:
-            return hash_map[UNKNOWN_TOKEN]
-
-        try:
-            value = hash_map[w]
-        except KeyError:
-            # for unseen words, the embedding is zero \in R^Embedding_size
             value = hash_map[UNKNOWN_TOKEN]
+        else:
+            try:
+                value = hash_map[w]
+            except KeyError:
+                # for unseen words, the embedding is zero \in R^Embedding_size
+                value = hash_map[UNKNOWN_TOKEN]
         return '|'.join(map(str, value))
 
     mode_support = ['index', 'embedding', 'structure']
