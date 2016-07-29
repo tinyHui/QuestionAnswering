@@ -9,8 +9,8 @@ if __name__ == '__main__':
     with open(LOW_FREQ_TOKEN_FILE, 'rb') as f:
         low_freq_token_list = pkl.load(f)
 
-    reverb = ReVerbPairs(usage='train', mode='raw_token', grams=1)
-    paraphrase = ParaphraseQuestionRaw(mode='raw_token', grams=1)
+    reverb = ReVerbPairs(usage='train', mode='str', grams=1)
+    paraphrase = ParaphraseQuestionRaw(mode='str', grams=1)
 
     check_pending_list = [
         ("Question Answer", reverb),
