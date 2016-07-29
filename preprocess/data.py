@@ -323,7 +323,7 @@ class ParaphraseMicrosoftRaw(object):
                 elif self.__mode == 'embedding':
                     s1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s1_tokens]
                     s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s2_tokens]
-                yield s1_tokens, s2_tokens
+                yield quality, id1, id2, s1_tokens, s2_tokens
 
     def is_q_indx(self, i):
         return i in self.sent_indx
