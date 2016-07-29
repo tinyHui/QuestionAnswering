@@ -331,6 +331,12 @@ class ParaphraseMicrosoftRaw(object):
     def get_mode(self):
         return self.__mode
 
+    def get_q_indx(self):
+        return 3
+
+    def get_a_indx(self):
+        return 4
+
     def __str__(self):
         return "Microsoft Research Paraphrase raw"
 
@@ -436,6 +442,18 @@ class ReVerbPairs(object):
 
     def get_mode(self):
         return self.__mode
+
+    def get_q_indx(self):
+        if self.__usage == 'train':
+            return 0
+        elif self.__usage == 'test':
+            return 1
+
+    def get_a_indx(self):
+        if self.__usage == 'train':
+            return 1
+        elif self.__usage == 'test':
+            return 2
 
     def __len__(self):
         if self.__usage == 'train':

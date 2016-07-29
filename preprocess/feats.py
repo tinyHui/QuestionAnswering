@@ -22,6 +22,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data = ReVerbPairs(usage=usage, mode='index', grams=1)
         else:
             data = ParaphraseMicrosoftRaw(mode='index')
+        q_indx = data.get_q_indx()
+        a_indx = data.get_a_indx()
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
@@ -30,6 +32,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data = ReVerbPairs(usage=usage, mode='index', grams=2)
         else:
             data = ParaphraseMicrosoftRaw(mode='index')
+        q_indx = data.get_q_indx()
+        a_indx = data.get_a_indx()
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
@@ -38,6 +42,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data = ReVerbPairs(usage=usage, mode='index', grams=3)
         else:
             data = ParaphraseMicrosoftRaw(mode='index')
+        q_indx = data.get_q_indx()
+        a_indx = data.get_a_indx()
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
@@ -46,6 +52,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data = ReVerbPairs(usage=usage, mode='embedding')
         else:
             data = ParaphraseMicrosoftRaw(mode='embedding')
+        q_indx = data.get_q_indx()
+        a_indx = data.get_a_indx()
         feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
@@ -56,7 +64,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         else:
             data_emb = ParaphraseMicrosoftRaw(mode='embedding')
             data_struct = ParaphraseMicrosoftRaw(mode='structure')
-
+        q_indx = data_emb.get_q_indx()
+        a_indx = data_emb.get_a_indx()
         feats = Holographic(data_emb=data_emb, data_struct=data_struct)
 
     # elif feat_select == FEATURE_OPTS[]:
@@ -77,7 +86,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
     else:
         raise SystemError("%s is not an available feature" % feat_select)
 
-    return feats
+    return q_indx, a_indx, feats
 
 
 def get_parse_tree(sentence, job_id):

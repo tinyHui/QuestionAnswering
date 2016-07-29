@@ -20,7 +20,7 @@ PROCESS_NUM = 15
 MAX_HOLD = 1000
 
 
-def generate_part_dense(feats_queue, qa_queue):
+def generate_part_dense(feats_queue, qa_queue, q_indx, a_indx):
     Qs = []
     As = []
     hold = 0
@@ -29,8 +29,8 @@ def generate_part_dense(feats_queue, qa_queue):
             d, f = feats_queue.get(timeout=5)
             feat = f(d)
 
-            Qs.append(feat[0])
-            As.append(feat[1])
+            Qs.append(feat[q_indx])
+            As.append(feat[a_indx])
             hold += 1
             if hold == MAX_HOLD:
                 qa_queue.put((np.asarray(Qs), np.asarray(As)))
@@ -43,7 +43,7 @@ def generate_part_dense(feats_queue, qa_queue):
             break
 
 
-def generate_part_sparse(feats_queue, qa_queue):
+def generate_part_sparse(feats_queue, qa_queue, q_indx, a_indx):
     Qs = []
     As = []
     hold = 0
@@ -52,8 +52,8 @@ def generate_part_sparse(feats_queue, qa_queue):
             d, f = feats_queue.get(timeout=5)
             feat = f(d)
 
-            Qs.append(feat[0])
-            As.append(feat[1])
+            Qs.append(feat[q_indx])
+            As.append(feat[a_indx])
             hold += 1
             if hold == MAX_HOLD:
                 qa_queue.put((csr_matrix(Qs, dtype='float32'), csr_matrix(As, dtype='float32')))
@@ -194,10 +194,10 @@ if __name__ == "__main__":
 
         feats_queue = Queue()
         qa_queue = Queue()
-        feats = feats_loader(feature, usage='train', train_two_stage_cca=train_two_stage_cca)
+        q_indx, a_indx, feats = feats_loader(feature, usage='train', train_two_stage_cca=train_two_stage_cca)
         length = len(feats)
 
-        p_list = [Process(target=generate_part, args=(feats_queue, qa_queue))
+        p_list = [Process(target=generate_part, args=(feats_queue, qa_queue, q_indx, a_indx))
                   for i in range(PROCESS_NUM)]
 
         for p in p_list:
