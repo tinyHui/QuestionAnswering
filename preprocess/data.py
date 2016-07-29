@@ -238,9 +238,6 @@ class ParaphraseQuestionRaw(object):
         elif mode == 'embedding':
             # unknown token embedding is 0
             suf = 'emb'
-        elif mode == 'embedding_with_unknown':
-            # unknown token embedding take from the average
-            suf = 'embunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
@@ -278,7 +275,7 @@ class ParaphraseQuestionRaw(object):
                 elif self.__mode == 'index':
                     q1_tokens = list(map(int, q1_tokens))
                     q2_tokens = list(map(int, q2_tokens))
-                elif self.__mode in ['embedding', 'embedding_with_unknown']:
+                elif self.__mode == 'embedding':
                     q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                     q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
                 yield q1_tokens, q2_tokens, align
@@ -318,9 +315,6 @@ class ReVerbPairs(object):
         elif mode == 'embedding':
             # unknown token embedding is 0
             suf = 'emb'
-        elif mode == 'embedding_with_unknown':
-            # unknown token embedding take from the average
-            suf = 'embunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
@@ -372,7 +366,7 @@ class ReVerbPairs(object):
                 elif self.__mode == 'index':
                     q_tokens = list(map(int, q_tokens))
                     a_tokens = list(map(int, a_tokens))
-                elif self.__mode in ['embedding', 'embedding_with_unknown']:
+                elif self.__mode == 'embedding':
                     q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                     a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
                 # elif self.__mode == 'structure': keep same
@@ -399,7 +393,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx: 13974, a_indx: 18402}
+            voc_num = {q_indx: 14062, a_indx: 18400}
         elif self.__grams == 2:
             voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 3:

@@ -45,7 +45,7 @@ if __name__ == "__main__":
     unknown_count = 0
     low_freq_token_list = []
     for token, occur_count in token_occur_count.items():
-        if occur_count == 3:
+        if occur_count <= 3:
             try:
                 # for token only occur once and token have trained embedding
                 unknown_emb += word_emb_hash[token]
