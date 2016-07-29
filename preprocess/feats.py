@@ -1,5 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
-from preprocess.data import get_struct, ReVerbPairs, ParaphraseParalexRaw
+from preprocess.data import get_struct, ReVerbPairs, ParaphraseMicrosoftRaw
 from word2vec import EMBEDDING_SIZE
 from preprocess.utils import Utils
 import numpy as np
@@ -37,7 +37,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=3)
         else:
-            data = ParaphraseParalexRaw(mode='index')
+            data = ParaphraseMicrosoftRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
@@ -45,7 +45,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='embedding')
         else:
-            data = ParaphraseParalexRaw(mode='embedding')
+            data = ParaphraseMicrosoftRaw(mode='embedding')
         feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
