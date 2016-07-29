@@ -183,10 +183,10 @@ class ReVerbTestRaw(object):
             # remove ".e", ".r" in token
             line = raw.replace('.r', '').replace('.e', '')
             l, q, a = line.strip().split('\t')
+            q_id = self.__q_id_map[q]
             q = no_sym(a)
             a = no_sym(a)
-
-            q_id = self.__q_id_map[q]
+            
             try:
                 r, e1, e2 = a.split()
             except ValueError:
