@@ -21,7 +21,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=1)
         else:
-            data = ParaphraseParalexRaw(mode='index')
+            data = ParaphraseMicrosoftRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
@@ -29,7 +29,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=2)
         else:
-            data = ParaphraseParalexRaw(mode='index')
+            data = ParaphraseMicrosoftRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
@@ -54,8 +54,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data_emb = ReVerbPairs(usage=usage, mode='embedding')
             data_struct = ReVerbPairs(usage=usage, mode='structure')
         else:
-            data_emb = ParaphraseParalexRaw(mode='embedding')
-            data_struct = ParaphraseParalexRaw(mode='structure')
+            data_emb = ParaphraseMicrosoftRaw(mode='embedding')
+            data_struct = ParaphraseMicrosoftRaw(mode='structure')
 
         feats = Holographic(data_emb=data_emb, data_struct=data_struct)
 
