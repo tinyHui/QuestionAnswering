@@ -5,11 +5,10 @@ DUMP_PARA_FILE = "./data/paraphrases.%s"
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
-    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE
+    from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
     import pickle as pkl
-    import numpy as np
     import os
     import sys
     import argparse
@@ -21,19 +20,16 @@ if __name__ == '__main__':
             # unseen token
             return UNKNOWN_TOKEN_INDX
 
-    def word2hash(w, hash_map, use_avg_for_unknown):
+    def word2hash(w, hash_map):
         try:
             value = hash_map[w]
         except KeyError:
-            if use_avg_for_unknown:
-                # for unseen words, the embedding is zero \in R^Embedding_size
-                value = hash_map[UNKNOWN_TOKEN]
-            else:
-                value = np.zeros(EMBEDDING_SIZE)
+            # for unseen words, the embedding is the average \in R^Embedding_size
+            value = hash_map[UNKNOWN_TOKEN]
         return '|'.join(map(str, value))
 
 
-    mode_support = ['index', 'embedding_0_unk', 'embedding_avg_unk', 'structure']
+    mode_support = ['index', 'embedding', 'structure']
 
     parser = argparse.ArgumentParser(description='Define mode to choose version for converting.')
     parser.add_argument('--mode', type=str,
@@ -55,13 +51,7 @@ if __name__ == '__main__':
     elif mode == mode_support[1]:
         print("loading embedding hash")
         data_mode = 'str'
-        suf = 'emb0unk'
-        with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
-            emb_voc_dict = pkl.load(f)
-    elif mode == mode_support[2]:
-        print("loading embedding hash")
-        data_mode = 'str'
-        suf = 'embavgunk'
+        suf = 'emb'
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
     else:
@@ -126,10 +116,7 @@ if __name__ == '__main__':
                             tokens = [str(word2index(token, voc_hash[i])) for token in d[i]]
                             sentence = " ".join(tokens)
                         elif mode == mode_support[1]:
-                            tokens = [str(word2hash(token, emb_voc_dict, use_avg_for_unknown=False)) for token in d[i]]
-                            sentence = " ".join(tokens)
-                        elif mode == mode_support[2]:
-                            tokens = [str(word2hash(token, emb_voc_dict, use_avg_for_unknown=True)) for token in d[i]]
+                            tokens = [str(word2hash(token, emb_voc_dict)) for token in d[i]]
                             sentence = " ".join(tokens)
                         else:
                             # mode == mode_support[3]:
