@@ -39,7 +39,7 @@ def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define test process.')
     parser.add_argument('--CCA_stage', type=int,
-                        help='Use 2 stage CCA, set as -1 for train paraphrase CCA')
+                        help='Define CCA stage number')
     parser.add_argument('--para_map_file', type=str,
                         help='Define location for CCA model trained by paraphrase question')
     parser.add_argument('--feature', nargs=2, default=[],

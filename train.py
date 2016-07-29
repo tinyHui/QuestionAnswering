@@ -126,7 +126,7 @@ if __name__ == "__main__":
                         help='Use sparse matrix for C_AA, C_AB and C_BB')
     parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
     parser.add_argument('--CCA_stage', type=int, default=1,
-                        help='Use 2 stage CCA, set as -1 for train paraphrase CCA')
+                        help='Define CCA stage number, set as -1 for train paraphrase CCA')
     parser.add_argument('--para_map_file', type=str, default=PARA_MAP_FILE,
                         help='Define location for CCA model trained by paraphrase question')
     parser.add_argument('--reuse', default=[], nargs=2, help='Reuse pre-trained data, two arguments: stage file')
