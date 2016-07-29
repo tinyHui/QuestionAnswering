@@ -12,16 +12,29 @@ UNKNOWN_TOKEN = 'UNKNOWN'
 UNKNOWN_TOKEN_INDX = 0
 
 
-def process_raw(raw):
+def no_sym(raw):
     # to lower case
     s = raw.lower()
+
+    GRAMMAR_SYM = r'(\')'
+    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
+    SPACES = r' +'
+    SYM_AT = r'\@'
+
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
+    for p, t in RE_SET:
+        s = re.sub(p, t, s)
+    s = s.strip()
+    return s
+
+
+def process_raw(s):
     # replace month name to number
     MONTH_NAME = zip([name.lower() for name in month_name[1:]], [name.lower() for name in month_abbr[1:]])
     for i, (name, abbr) in enumerate(MONTH_NAME):
         s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
 
     # define replace pattern
-    GRAMMAR_SYM = r'(\')'
     DATE = r'([0-9]{1,2})?[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ][0-9]{4}|' \
            r'[0-9]{4}[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ]([0-9]{1,2})?|' \
            '[0-9]{1,2}(st|nd|rd|th)?[\/\- ][0-9]{1,2}|' \
@@ -33,16 +46,13 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
-    SYM_AT = r'\@'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SYM, ' '),
-              (SYM_AT, ' at '), (SPACES, ' ')]
+    RE_SET = [(DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
-    s = re.sub(r'\-', ' ', s).strip()
+    s = s.strip()
     return s
 
 
@@ -133,7 +143,7 @@ class ReVerbTrainRaw(object):
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
-            r, e1, e2 = [re.sub(r'\-', ' ', w) for w in [r, e1, e2]]
+            r, e1, e2 = [no_sym(w) for w in [r, e1, e2]]
 
             # find the suitable pattern
             # random choose some for training, reduce training size
@@ -173,6 +183,8 @@ class ReVerbTestRaw(object):
             # remove ".e", ".r" in token
             line = raw.replace('.r', '').replace('.e', '')
             l, q, a = line.strip().split('\t')
+            q = no_sym(a)
+            a = no_sym(a)
 
             q_id = self.__q_id_map[q]
             try:
@@ -243,31 +255,33 @@ class ParaphraseQuestionRaw(object):
     def __iter__(self):
         for line in open(self.__file, 'r'):
             q1, q2, align = line.strip().split('\t')
+            q1 = no_sym(q1)
+            q2 = no_sym(q2)
+            if self.__mode == 'raw':
+                yield q1, q2, align
+                continue
+
             # word generalise
             if self.__mode == 'str':
                 q1 = process_raw(q1)
                 q2 = process_raw(q2)
 
-            if self.__mode == 'raw':
-                yield q1, q2, align
-
+            # to token
+            if self.__mode == 'structure':
+                yield q1, q2
             else:
-                # to token
-                if self.__mode == 'structure':
-                    yield q1, q2
-                else:
-                    q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-                    if self.__mode in ['str', 'raw_token']:
-                        if self.__grams > 1:
-                            q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
-                            q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
-                    elif self.__mode == 'index':
-                        q1_tokens = list(map(int, q1_tokens))
-                        q2_tokens = list(map(int, q2_tokens))
-                    elif self.__mode in ['embedding', 'embedding_with_unknown']:
-                        q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
-                        q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
-                    yield q1_tokens, q2_tokens, align
+                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+                if self.__mode in ['str', 'raw_token']:
+                    if self.__grams > 1:
+                        q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
+                        q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
+                elif self.__mode == 'index':
+                    q1_tokens = list(map(int, q1_tokens))
+                    q2_tokens = list(map(int, q2_tokens))
+                elif self.__mode in ['embedding', 'embedding_with_unknown']:
+                    q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
+                    q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
+                yield q1_tokens, q2_tokens, align
 
     def get_voc_num(self, i):
         voc_num = {0: 18852, 1: 18954}
