@@ -191,6 +191,7 @@ class ReVerbTestRaw(object):
                 r, e1 = a.split()
                 e2 = "PLACEHOLDER"
 
+            q = no_sym(q) + ' ?'
             r, e1, e2 = [no_sym(w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
