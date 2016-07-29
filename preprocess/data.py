@@ -12,29 +12,17 @@ UNKNOWN_TOKEN = 'UNKNOWN'
 UNKNOWN_TOKEN_INDX = 0
 
 
-def no_sym(raw):
+def process_raw(raw):
     # to lower case
     s = raw.lower()
 
-    GRAMMAR_SYM = r'(\')'
-    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
-    SPACES = r' +'
-    SYM_AT = r'\@'
-
-    RE_SET = [(GRAMMAR_SYM, ' \\1'), (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
-    for p, t in RE_SET:
-        s = re.sub(p, t, s)
-    s = s.strip()
-    return s
-
-
-def process_raw(s):
     # replace month name to number
     MONTH_NAME = zip([name.lower() for name in month_name[1:]], [name.lower() for name in month_abbr[1:]])
     for i, (name, abbr) in enumerate(MONTH_NAME):
         s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
 
     # define replace pattern
+    GRAMMAR_SYM = r'(\')'
     DATE = r'([0-9]{1,2})?[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ][0-9]{4}|' \
            r'[0-9]{4}[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ]([0-9]{1,2})?|' \
            '[0-9]{1,2}(st|nd|rd|th)?[\/\- ][0-9]{1,2}|' \
@@ -46,10 +34,13 @@ def process_raw(s):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
+    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
     SPACES = r' +'
+    SYM_AT = r'\@'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' ')]
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '),
+              (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = s.strip()
@@ -143,7 +134,7 @@ class ReVerbTrainRaw(object):
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
-            r, e1, e2 = [no_sym(w) for w in [r, e1, e2]]
+            r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
 
             # find the suitable pattern
             # random choose some for training, reduce training size
@@ -191,8 +182,8 @@ class ReVerbTestRaw(object):
                 r, e1 = a.split()
                 e2 = "PLACEHOLDER"
 
-            q = no_sym(q) + ' ?'
-            r, e1, e2 = [no_sym(w) for w in [r, e1, e2]]
+            q = process_raw(q) + ' ?'
+            r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
             yield q_id, q, a, l
@@ -229,8 +220,6 @@ class ParaphraseQuestionRaw(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
-        elif mode == 'raw_token':
-            suf = 'txt'
         elif mode == 'str':
             suf = 'txt'
         elif mode == 'index':
@@ -238,9 +227,6 @@ class ParaphraseQuestionRaw(object):
         elif mode == 'embedding':
             # unknown token embedding is 0
             suf = 'emb'
-        elif mode == 'embedding_with_unknown':
-            # unknown token embedding is average
-            suf = 'embunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
@@ -255,8 +241,6 @@ class ParaphraseQuestionRaw(object):
     def __iter__(self):
         for line in open(self.__file, 'r'):
             q1, q2, align = line.strip().split('\t')
-            q1 = no_sym(q1)
-            q2 = no_sym(q2)
             if self.__mode == 'raw':
                 yield q1, q2, align
                 continue
@@ -271,14 +255,14 @@ class ParaphraseQuestionRaw(object):
                 yield q1, q2
             else:
                 q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-                if self.__mode in ['str', 'raw_token']:
+                if self.__mode == 'str':
                     if self.__grams > 1:
                         q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
                         q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
                 elif self.__mode == 'index':
                     q1_tokens = list(map(int, q1_tokens))
                     q2_tokens = list(map(int, q2_tokens))
-                elif self.__mode in ['embedding', 'embedding_with_unknown']:
+                elif self.__mode == 'embedding':
                     q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                     q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
                 yield q1_tokens, q2_tokens, align
@@ -309,8 +293,6 @@ class ReVerbPairs(object):
     def __init__(self, usage='train', mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
-        elif mode == 'raw_token':
-            suf = 'txt'
         elif mode == 'str':
             suf = 'txt'
         elif mode == 'index':
@@ -318,9 +300,6 @@ class ReVerbPairs(object):
         elif mode == 'embedding':
             # unknown token embedding is 0
             suf = 'emb'
-        elif mode == 'embedding_with_unknown':
-            # unknown token embedding take from the average
-            suf = 'embunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
@@ -357,14 +336,10 @@ class ReVerbPairs(object):
                     # test
                     yield (q_id, q, a, l)
             else:
-                if self.__mode == 'str':
-                    q = process_raw(q)
-                    a = process_raw(a)
-
                 q_tokens = q.split()
                 a_tokens = a.split()
 
-                if self.__mode in ['str', 'raw_token']:
+                if self.__mode == 'str':
                     e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
                     a_tokens = e1_tokens + r_tokens + e2_tokens
                 if self.__grams > 1:
@@ -372,7 +347,7 @@ class ReVerbPairs(object):
                 elif self.__mode == 'index':
                     q_tokens = list(map(int, q_tokens))
                     a_tokens = list(map(int, a_tokens))
-                elif self.__mode in ['embedding', 'embedding_with_unknown']:
+                elif self.__mode == 'embedding':
                     q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                     a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
                 # elif self.__mode == 'structure': keep same

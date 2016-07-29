@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # get token occur time
     logging.info("calculating embedding for UNKNOWN token")
     token_occur_count = defaultdict(int)
-    src_data = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+    src_data = ReVerbPairs(usage='train', mode='str', grams=1)
     for line in src_data:
         for i in src_data.sent_indx:
             for token in line[i]:
