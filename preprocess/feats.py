@@ -54,7 +54,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data = ParaphraseMicrosoftRaw(mode='embedding')
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
-        feats = WordEmbedding(data)
+        feats = AvgEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
@@ -152,7 +152,7 @@ class Ngram(object):
 #             yield self.model.predict(feat)
 
 
-class WordEmbedding(object):
+class AvgEmbedding(object):
     def __init__(self, data):
         '''
         Represent sentence data using word embedding trained by British National Corpus

@@ -88,7 +88,7 @@ if __name__ == '__main__':
             Q1_k, Q2_k = pkl.load(f)
 
     logging.info("calculating distance")
-    feats = feats_loader(feature, usage='test')
+    _, _, feats = feats_loader(feature, usage='test')
     length = len(feats)
 
     # multiprocess to calculate the distance
