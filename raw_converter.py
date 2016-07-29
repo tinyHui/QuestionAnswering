@@ -5,11 +5,10 @@ DUMP_PARA_FILE = "./data/paraphrases.%s"
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
-    from word2vec import WORD_EMBEDDING_BIN_FILE, LOW_FREQ_TOKEN_FILE, EMBEDDING_SIZE
+    from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
     import pickle as pkl
-    import numpy as np
     import os
     import sys
     import argparse
@@ -21,24 +20,18 @@ if __name__ == '__main__':
             # unseen token
             return UNKNOWN_TOKEN_INDX
 
-    def word2hash(w, hash_map, low_freq_token_list, unknown_use_avg):
-        if unknown_use_avg:
-            unknown_token_emb = hash_map[UNKNOWN_TOKEN]
-        else:
-            unknown_token_emb = np.zeros(EMBEDDING_SIZE, dtype='float32')
+    def word2hash(w, hash_map):
+        unknown_token_emb = hash_map[UNKNOWN_TOKEN]
 
-        if w in low_freq_token_list:
+        try:
+            value = hash_map[w]
+        except KeyError:
+            # for unseen words, the embedding is zero \in R^Embedding_size
             value = unknown_token_emb
-        else:
-            try:
-                value = hash_map[w]
-            except KeyError:
-                # for unseen words, the embedding is zero \in R^Embedding_size
-                value = unknown_token_emb
         return '|'.join(map(str, value))
 
 
-    mode_support = ['index', 'embedding', 'embedding_with_unknown', 'structure']
+    mode_support = ['index', 'embedding', 'structure']
 
     parser = argparse.ArgumentParser(description='Define mode to choose version for converting.')
     parser.add_argument('--mode', type=str,
@@ -63,8 +56,6 @@ if __name__ == '__main__':
         suf = 'emb'
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
-        with open(LOW_FREQ_TOKEN_FILE, 'rb') as f:
-            low_freq_token_list = pkl.load(f)
     else:
         data_mode = 'raw'
         suf = 'struct'
@@ -127,10 +118,10 @@ if __name__ == '__main__':
                             tokens = [str(word2index(token, voc_hash[i])) for token in d[i]]
                             sentence = " ".join(tokens)
                         elif mode == mode_support[1]:
-                            tokens = [str(word2hash(token, emb_voc_dict, low_freq_token_list, unknown_use_avg=False)) for token in d[i]]
+                            tokens = [str(word2hash(token, emb_voc_dict)) for token in d[i]]
                             sentence = " ".join(tokens)
                         elif mode == mode_support[2]:
-                            tokens = [str(word2hash(token, emb_voc_dict, low_freq_token_list, unknown_use_avg=True)) for token in d[i]]
+                            tokens = [str(word2hash(token, emb_voc_dict)) for token in d[i]]
                             sentence = " ".join(tokens)
                         else:
                             # mode == mode_support[2]:
