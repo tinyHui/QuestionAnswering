@@ -1,5 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
-from preprocess.data import get_struct, ReVerbPairs, ParaphraseQuestionRaw
+from preprocess.data import get_struct, ReVerbPairs, ParaphraseParalexRaw
 from word2vec import EMBEDDING_SIZE
 from preprocess.utils import Utils
 import numpy as np
@@ -21,7 +21,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=1)
         else:
-            data = ParaphraseQuestionRaw(mode='index')
+            data = ParaphraseParalexRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
@@ -29,7 +29,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=2)
         else:
-            data = ParaphraseQuestionRaw(mode='index')
+            data = ParaphraseParalexRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
@@ -37,7 +37,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=3)
         else:
-            data = ParaphraseQuestionRaw(mode='index')
+            data = ParaphraseParalexRaw(mode='index')
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[3]:
@@ -45,7 +45,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='embedding')
         else:
-            data = ParaphraseQuestionRaw(mode='embedding')
+            data = ParaphraseParalexRaw(mode='embedding')
         feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
@@ -54,8 +54,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data_emb = ReVerbPairs(usage=usage, mode='embedding')
             data_struct = ReVerbPairs(usage=usage, mode='structure')
         else:
-            data_emb = ParaphraseQuestionRaw(mode='embedding')
-            data_struct = ParaphraseQuestionRaw(mode='structure')
+            data_emb = ParaphraseParalexRaw(mode='embedding')
+            data_struct = ParaphraseParalexRaw(mode='structure')
 
         feats = Holographic(data_emb=data_emb, data_struct=data_struct)
 

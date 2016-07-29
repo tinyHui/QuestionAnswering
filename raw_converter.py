@@ -1,12 +1,14 @@
 DUMP_TRAIN_FILE = "./data/reverb-train.%s"
 DUMP_TEST_FILE = "./data/reverb-test.%s"
-DUMP_PARA_FILE = "./data/paraphrases.%s"
+DUMP_PARA_PARALEX_FILE = "./data/paraphrases.paralex.%s"
+DUMP_PARA_MS_FILE = "./data/paraphrases.paralex.ms.%s"
 
 
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
-    from preprocess.data import ReVerbPairs, ParaphraseQuestionRaw, UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
+    from preprocess.data import ReVerbPairs, ParaphraseParalexRaw, ParaphraseMicrosoftRaw,\
+        UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
     import pickle as pkl
     import os
@@ -70,8 +72,12 @@ if __name__ == '__main__':
     data_list.append((data, path))
 
     # add paraphrase questions data
-    data = ParaphraseQuestionRaw(mode=data_mode)
-    path = DUMP_PARA_FILE % suf
+    data = ParaphraseParalexRaw(mode=data_mode)
+    path = DUMP_PARA_PARALEX_FILE % suf
+    data_list.append((data, path))
+
+    data = ParaphraseMicrosoftRaw(mode=data_mode)
+    path = DUMP_PARA_MS_FILE % suf
     data_list.append((data, path))
 
     job_id = 0
@@ -98,7 +104,7 @@ if __name__ == '__main__':
                     # q, a are located in index 1 and 2
                     voc_hash[1] = qa_voc_dict[0]
                     voc_hash[2] = qa_voc_dict[1]
-            elif isinstance(data, ParaphraseQuestionRaw):
+            elif isinstance(data, ParaphraseParalexRaw):
                 voc_hash = para_voc_dict
 
         with open(path, 'a') as f:
