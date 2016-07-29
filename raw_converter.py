@@ -71,14 +71,15 @@ if __name__ == '__main__':
     path = DUMP_TEST_FILE % suf
     data_list.append((data, path))
 
-    # add paraphrase questions data
-    data = ParaphraseParalexRaw(mode=data_mode)
-    path = DUMP_PARA_PARALEX_FILE % suf
-    data_list.append((data, path))
+    if mode != mode_support[0]:
+        # add paraphrase questions data
+        data = ParaphraseParalexRaw(mode=data_mode)
+        path = DUMP_PARA_PARALEX_FILE % suf
+        data_list.append((data, path))
 
-    data = ParaphraseMicrosoftRaw(mode=data_mode)
-    path = DUMP_PARA_MS_FILE % suf
-    data_list.append((data, path))
+        data = ParaphraseMicrosoftRaw(mode=data_mode)
+        path = DUMP_PARA_MS_FILE % suf
+        data_list.append((data, path))
 
     job_id = 0
     for data, path in data_list:
