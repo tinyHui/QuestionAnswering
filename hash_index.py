@@ -18,14 +18,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Define source file to build index dictionary.')
     parser.add_argument('--grams', type=int, default=1, help='Define N for Ngram')
-    parser.add_argument('--source', type=str,
-                        help='Vocabulary for qa pairs/paraphrase questions, optional values are qa, para')
     args = parser.parse_args()
 
-    source = args.source
-    source_option = ['qa', 'para_paralex', 'para_ms']
-    assert source in source_option, "source can be only %s" % " ".join(source_option)
-
+    source = 'qa'
     gram = args.grams
     if gram == 1:
         DUMP_FILE = UNIGRAM_DICT_FILE % source
@@ -46,12 +41,7 @@ if __name__ == "__main__":
 
     logging.info("Generating source data")
     # data is a group of sentences
-    if source == source_option[0]:
-        src_data = ReVerbPairs(usage='train', mode='str', grams=gram)
-    elif source == source_option[0]:
-        src_data = ParaphraseParalexRaw(mode='str', grams=gram)
-    else:
-        src_data = ParaphraseMicrosoftRaw(mode='str', grams=gram)
+    src_data = ReVerbPairs(usage='train', mode='str', grams=gram)
 
     logging.info("Extracting tokens")
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)

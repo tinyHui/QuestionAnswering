@@ -222,15 +222,13 @@ class ParaphraseParalexRaw(object):
             suf = 'txt'
         elif mode == 'str':
             suf = 'txt'
-        elif mode == 'index':
-            suf = 'indx'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
             suf = 'emb'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index', 'embedding', 'structure'")
+            raise AttributeError("Mode can be only 'str', 'embedding', 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -259,20 +257,13 @@ class ParaphraseParalexRaw(object):
                     if self.__grams > 1:
                         q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
                         q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
-                elif self.__mode == 'index':
-                    q1_tokens = list(map(int, q1_tokens))
-                    q2_tokens = list(map(int, q2_tokens))
                 elif self.__mode == 'embedding':
                     q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                     q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
                 yield q1_tokens, q2_tokens, align
 
-    def get_voc_num(self, i):
-        voc_num = {0: 18833, 1: 18823}
-        return voc_num[i]
-
-    def is_q_indx(self, _):
-        return True
+    def is_q_indx(self, i):
+        return i in self.sent_indx
 
     def get_mode(self):
         return self.__mode
@@ -294,15 +285,13 @@ class ParaphraseMicrosoftRaw(object):
             suf = 'txt'
         elif mode == 'str':
             suf = 'txt'
-        elif mode == 'index':
-            suf = 'indx'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
             suf = 'emb'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index', 'embedding', 'structure'")
+            raise AttributeError("Mode can be only 'str', 'embedding', 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -331,20 +320,13 @@ class ParaphraseMicrosoftRaw(object):
                     if self.__grams > 1:
                         s1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[s1_tokens[j:] for j in range(self.__grams)])]
                         s2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[s2_tokens[j:] for j in range(self.__grams)])]
-                elif self.__mode == 'index':
-                    s1_tokens = list(map(int, s1_tokens))
-                    s2_tokens = list(map(int, s2_tokens))
                 elif self.__mode == 'embedding':
                     s1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s1_tokens]
                     s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s2_tokens]
                 yield s1_tokens, s2_tokens
 
-    def get_voc_num(self, i):
-        voc_num = {0: 18833, 1: 18823}
-        return voc_num[i]
-
-    def is_q_indx(self, _):
-        return True
+    def is_q_indx(self, i):
+        return i in self.sent_indx
 
     def get_mode(self):
         return self.__mode
