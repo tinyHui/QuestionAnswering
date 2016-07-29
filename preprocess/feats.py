@@ -43,18 +43,18 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
     elif feat_select == FEATURE_OPTS[3]:
         # word embedding
         if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='embedding')
+            data = ReVerbPairs(usage=usage, mode='embedding_0_unk')
         else:
-            data = ParaphraseQuestionRaw(mode='embedding')
+            data = ParaphraseQuestionRaw(mode='embedding_0_unk')
         feats = WordEmbedding(data)
 
     elif feat_select == FEATURE_OPTS[4]:
         # holographic correlation
         if not train_two_stage_cca:
-            data_emb = ReVerbPairs(usage=usage, mode='embedding')
+            data_emb = ReVerbPairs(usage=usage, mode='embedding_avg_unk')
             data_struct = ReVerbPairs(usage=usage, mode='structure')
         else:
-            data_emb = ParaphraseQuestionRaw(mode='embedding')
+            data_emb = ParaphraseQuestionRaw(mode='embedding_avg_unk')
             data_struct = ParaphraseQuestionRaw(mode='structure')
 
         feats = Holographic(data_emb=data_emb, data_struct=data_struct)

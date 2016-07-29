@@ -224,13 +224,16 @@ class ParaphraseQuestionRaw(object):
             suf = 'txt'
         elif mode == 'index':
             suf = 'indx'
-        elif mode == 'embedding':
+        elif mode == 'embedding_0_unk':
             # unknown token embedding is 0
-            suf = 'emb'
+            suf = 'emb0unk'
+        elif mode == 'embedding_avg_unk':
+            # unknown token embedding is the average of low frequency words' embedding
+            suf = 'embavgunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index', 'embedding', 'structure'")
+            raise AttributeError("Mode can be only 'str', 'index', 'embedding_0_unk', 'embedding_avg_unk 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -262,7 +265,7 @@ class ParaphraseQuestionRaw(object):
                 elif self.__mode == 'index':
                     q1_tokens = list(map(int, q1_tokens))
                     q2_tokens = list(map(int, q2_tokens))
-                elif self.__mode == 'embedding':
+                elif self.__mode in ['embedding_0_unk', 'embedding_avg_unk']:
                     q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                     q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
                 yield q1_tokens, q2_tokens, align
@@ -297,13 +300,16 @@ class ReVerbPairs(object):
             suf = 'txt'
         elif mode == 'index':
             suf = 'indx'
-        elif mode == 'embedding':
+        elif mode == 'embedding_0_unk':
             # unknown token embedding is 0
-            suf = 'emb'
+            suf = 'emb0unk'
+        elif mode == 'embedding_avg_unk':
+            # unknown token embedding is the average of low frequency words' embedding
+            suf = 'embavgunk'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index', 'embedding' or 'structure'")
+            raise AttributeError("Mode can be only 'str', 'index', 'embedding_0_unk', 'embedding_avg_unk 'structure'")
         self.__mode = mode
 
         if usage in ['train', 'test']:
@@ -347,7 +353,7 @@ class ReVerbPairs(object):
                 elif self.__mode == 'index':
                     q_tokens = list(map(int, q_tokens))
                     a_tokens = list(map(int, a_tokens))
-                elif self.__mode == 'embedding':
+                elif self.__mode in ['embedding_0_unk', 'embedding_avg_unk']:
                     q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                     a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
                 # elif self.__mode == 'structure': keep same
