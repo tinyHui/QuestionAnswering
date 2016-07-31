@@ -103,6 +103,20 @@ def get_parse_tree(sentence, job_id):
     return response['result']['parsetree']
 
 
+def get_lemmas(sentence, job_id):
+    URL = "http://localhost:8080/jsonrpc"
+    HEADERS = {'content-type': 'application/json'}
+
+    payload = {
+        "method": "lemma",
+        "params": [sentence],
+        "jsonrpc": "2.0",
+        "id": job_id,
+    }
+    response = requests.post(URL, data=json.dumps(payload), headers=HEADERS).json()
+    return response['result']['lemma']
+
+
 class Ngram(object):
     def __init__(self, data):
         '''

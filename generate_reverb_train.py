@@ -1,5 +1,5 @@
 from preprocess.data import ReVerbTrainRaw
-import codecs
+from preprocess.feats import get_lemmas
 from sys import stdout
 
 FILE = './data/reverb-train.txt'
@@ -12,5 +12,6 @@ if __name__ == '__main__':
             i += 1
             stdout.write("\rgenerated: %d" % i)
             stdout.flush()
-            f.write("{}\t{}\n".format(q, a))
+            q_lemmas = get_lemmas(q_lemmas)
+            f.write("{}\t{}\n".format(q_lemmas, a))
     stdout.write("\nTotal: %d\n" % i)
