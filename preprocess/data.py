@@ -264,6 +264,12 @@ class ParaphraseWikiAnswer(object):
     def get_mode(self):
         return self.__mode
 
+    def get_q_indx(self):
+        return 0
+
+    def get_a_indx(self):
+        return 1
+
     def __str__(self):
         return "WikiAnswer Paraphrase Questions"
 

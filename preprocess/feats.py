@@ -1,5 +1,5 @@
 # convert all sentences to their representations but keep data in other columns
-from preprocess.data import get_struct, ReVerbPairs, ParaphraseMicrosoftRaw
+from preprocess.data import get_struct, ReVerbPairs, ParaphraseWikiAnswer
 from word2vec import EMBEDDING_SIZE
 from preprocess.utils import Utils
 import numpy as np
@@ -21,7 +21,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=1)
         else:
-            data = ParaphraseMicrosoftRaw(mode='index')
+            data = ParaphraseWikiAnswer(mode='index')
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
@@ -31,7 +31,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=2)
         else:
-            data = ParaphraseMicrosoftRaw(mode='index')
+            data = ParaphraseWikiAnswer(mode='index')
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
@@ -41,7 +41,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='index', grams=3)
         else:
-            data = ParaphraseMicrosoftRaw(mode='index')
+            data = ParaphraseWikiAnswer(mode='index')
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
@@ -51,7 +51,7 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
         if not train_two_stage_cca:
             data = ReVerbPairs(usage=usage, mode='embedding')
         else:
-            data = ParaphraseMicrosoftRaw(mode='embedding')
+            data = ParaphraseWikiAnswer(mode='embedding')
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = AvgEmbedding(data)
@@ -62,8 +62,8 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
             data_emb = ReVerbPairs(usage=usage, mode='embedding')
             data_struct = ReVerbPairs(usage=usage, mode='structure')
         else:
-            data_emb = ParaphraseMicrosoftRaw(mode='embedding')
-            data_struct = ParaphraseMicrosoftRaw(mode='structure')
+            data_emb = ParaphraseWikiAnswer(mode='embedding')
+            data_struct = ParaphraseWikiAnswer(mode='structure')
         q_indx = data_emb.get_q_indx()
         a_indx = data_emb.get_a_indx()
         feats = Holographic(data_emb=data_emb, data_struct=data_struct)
