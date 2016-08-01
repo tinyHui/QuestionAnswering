@@ -6,7 +6,7 @@ LOWEST_FREQ = 3
 
 if __name__ == "__main__":
     from collections import defaultdict
-    from preprocess.data import ReVerbPairs, ParaphraseParalexRaw, ParaphraseMicrosoftRaw,\
+    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw,\
         UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
     import pickle as pkl
     import os

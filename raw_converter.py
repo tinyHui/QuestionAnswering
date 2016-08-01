@@ -7,7 +7,7 @@ DUMP_PARA_MS_FILE = "./data/paraphrases.ms.%s"
 if __name__ == '__main__':
     from hash_index import UNIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
-    from preprocess.data import ReVerbPairs, ParaphraseParalexRaw, ParaphraseMicrosoftRaw,\
+    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw,\
         UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
     import pickle as pkl
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     if mode != mode_support[0]:
         # add paraphrase questions data
-        data = ParaphraseParalexRaw(mode=data_mode)
+        data = ParaphraseWikiAnswer(mode=data_mode)
         path = DUMP_PARA_PARALEX_FILE % suf
         data_list.append((data, path))
 

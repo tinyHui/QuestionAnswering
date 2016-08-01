@@ -216,7 +216,7 @@ class WordEmbeddingRaw(object):
 
 
 # paraphrase
-class ParaphraseParalexRaw(object):
+class ParaphraseWikiAnswer(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
@@ -232,21 +232,16 @@ class ParaphraseParalexRaw(object):
         self.__mode = mode
         self.__grams = grams
 
-        self.__file = './data/paraphrases.paralex.%s' % suf
+        self.__file = './data/paraphrases.wikianswer.%s' % suf
         # index of return data contains sentence
         self.sent_indx = (0, 1)
 
     def __iter__(self):
         for line in open(self.__file, 'r'):
-            q1, q2, align = line.strip().split('\t')
+            q1, q2 = line.strip().split('\t')
             if self.__mode == 'raw':
-                yield q1, q2, align
+                yield q1, q2
                 continue
-
-            # word generalise
-            if self.__mode == 'str':
-                q1 = process_raw(q1)
-                q2 = process_raw(q2)
 
             # to token
             if self.__mode == 'structure':
@@ -260,23 +255,20 @@ class ParaphraseParalexRaw(object):
                 elif self.__mode == 'embedding':
                     q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
                     q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
-                yield q1_tokens, q2_tokens, align
+                yield q1_tokens, q2_tokens
 
     def is_q_indx(self, i):
+        # both two columns are sentences
         return i in self.sent_indx
 
     def get_mode(self):
         return self.__mode
 
     def __str__(self):
-        return "ReVerb Paraphrase Questions raw"
+        return "WikiAnswer Paraphrase Questions"
 
     def __len__(self):
-        # head -300000
-        return 300000
-
-        # full
-        # return 35291309
+        return 267956
 
 
 class ParaphraseMicrosoftRaw(object):

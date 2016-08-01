@@ -1,5 +1,5 @@
 if __name__ == '__main__':
-    from preprocess.data import ReVerbPairs, ParaphraseParalexRaw
+    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer
     from word2vec import WORD_EMBEDDING_BIN_FILE, LOW_FREQ_TOKEN_FILE
     import pickle as pkl
 
@@ -10,7 +10,7 @@ if __name__ == '__main__':
         low_freq_token_list = pkl.load(f)
 
     reverb = ReVerbPairs(usage='train', mode='str', grams=1)
-    paraphrase = ParaphraseParalexRaw(mode='str', grams=1)
+    paraphrase = ParaphraseWikiAnswer(mode='str', grams=1)
 
     check_pending_list = [
         ("Question Answer", reverb),
