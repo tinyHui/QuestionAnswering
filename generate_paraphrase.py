@@ -53,10 +53,8 @@ if __name__ == '__main__':
                         # for each lemma sentence, find its original sentence
                         q_para = sent_lemma_map[q_para_lemma]
                         # generalize the sentence, remember to add ? in the end
-                        q_proc = process_raw(q) + ' ?'
-                        q_para_proc = process_raw(q_para) + ' ?'
                         # record down
-                        fw.write("{}\t{}\n".format(q_proc, q_para_proc))
+                        fw.write("{}\t{}\n".format(q, q_para))
                         i += 1
                         stdout.write("\rgenerated: %d" % i)
                         stdout.flush()
