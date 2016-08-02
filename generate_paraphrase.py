@@ -4,6 +4,7 @@ from preprocess.data import process_raw
 from word2vec import WORD_EMBEDDING_BIN_FILE
 from random import sample
 import pickle as pkl
+import re
 
 FILE = './data/paraphrases.wikianswer.txt'
 
@@ -81,7 +82,7 @@ if __name__ == '__main__':
                         q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
                         # use tokens to regenerate sentence
                         q_para = " ".join(q_para_lemma_tokens) + " ?"
-                        
+
                         # generalize the sentence, remember to add ? in the end
                         # record down
                         fw.write("{}\t{}\n".format(q, q_para))
