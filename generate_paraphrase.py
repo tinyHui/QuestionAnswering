@@ -49,6 +49,7 @@ if __name__ == '__main__':
 
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
+    valid_start = ["who", "what", "when", "where"]
     with open(FILE, 'a') as fw:
         with open('./data/wikianswers-paraphrases-1.0/questions.txt', 'r') as fr:
             for line in fr:
@@ -62,8 +63,12 @@ if __name__ == '__main__':
                     q = q.lower()
                     # remove symbols
                     q_tokens = re.findall('[a-z0-9]+', q)
+
                     # use tokens to regenerate sentence
                     q = " ".join(q_tokens) + " ?"
+                    # sentence start with "who", "what" ... 
+                    if not any([q.startswith(p) for p in valid_start]):
+                        continue
 
                     # make sure all tokens have the embedding
                     if any([token not in word_embedding_keys for token in q_tokens]):
@@ -73,7 +78,7 @@ if __name__ == '__main__':
                     q_para_lemma_list = para_lemma_map[lemma]
 
                     # generate paraphrase pairs
-                    for q in q_para_lemma_list:
+                    for q_para_lemma in q_para_lemma_list:
                         # for each lemma sentence, find its original sentence
                         q_para = sent_lemma_map[q_para_lemma]
 
@@ -82,6 +87,9 @@ if __name__ == '__main__':
                         q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
                         # use tokens to regenerate sentence
                         q_para = " ".join(q_para_lemma_tokens) + " ?"
+                        # sentence start with "who", "what" ... 
+                        if not any([q_para.startswith(p) for p in valid_start]):
+                            continue
 
                         # generalize the sentence, remember to add ? in the end
                         # record down
