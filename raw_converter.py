@@ -1,6 +1,6 @@
 DUMP_TRAIN_FILE = "./data/reverb-train.%s"
 DUMP_TEST_FILE = "./data/reverb-test.%s"
-DUMP_PARA_PARALEX_FILE = "./data/paraphrases.paralex.%s"
+DUMP_PARA_PARALEX_FILE = "./data/paraphrases.wikianswer.%s"
 DUMP_PARA_MS_FILE = "./data/paraphrases.ms.%s"
 
 
