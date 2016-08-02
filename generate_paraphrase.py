@@ -58,23 +58,32 @@ if __name__ == '__main__':
                 try:
                     # question, tokens, POS, lemma
                     _, q, _, lemma = content.split('\t')
-                    q_tokens = q.split()
+                    q = q.lower()
+                    # remove symbols
+                    q_tokens = re.findall('[a-z0-9]+', q)
+                    # use tokens to regenerate sentence
+                    q = " ".join(q_tokens) + " ?"
+
                     # make sure all tokens have the embedding
                     if any([token not in word_embedding_keys for token in q_tokens]):
                         continue
-                    # find paraphrase sentences, lemma version
-                    try:
-                        q_para_lemma_list = sample(para_lemma_map[lemma], 3)
-                    except ValueError:
-                        # sample number larger than population
-                        q_para_lemma_list = para_lemma_map[lemma]
+
+                    # get corresponde lemma sentences
+                    q_para_lemma_list = para_lemma_map[lemma]
+
                     # generate paraphrase pairs
-                    for q_para_lemma in q_para_lemma_list:
+                    for q in q_para_lemma_list:
+                        q_para_lemma = q.lower()
+                        # remove symbols
+                        q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
+                        # use tokens to regenerate sentence
+                        q_para_lemma_list = " ".join(q_para_lemma_tokens) + " ?"
+
                         # for each lemma sentence, find its original sentence
                         q_para = sent_lemma_map[q_para_lemma]
                         # generalize the sentence, remember to add ? in the end
                         # record down
-                        fw.write("{}\t{}\n".format(q.lower(), q_para.lower()))
+                        fw.write("{}\t{}\n".format()
                         i += 1
                         stdout.write("\rgenerated: %d" % i)
                         stdout.flush()
