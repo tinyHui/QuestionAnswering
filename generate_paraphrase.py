@@ -1,6 +1,7 @@
 from collections import defaultdict
 from sys import stdout
 from preprocess.data import process_raw
+from random import sample
 
 FILE = './data/paraphrases.wikianswer.txt'
 
@@ -41,20 +42,25 @@ if __name__ == '__main__':
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
     with open(FILE, 'a') as fw:
-        with open('./data/wikianswers-paraphrases-1.0/questions.50000.txt', 'r') as fr:
+        with open('./data/wikianswers-paraphrases-1.0/questions.part.txt', 'r') as fr:
             for line in fr:
                 content = line.strip()
                 try:
                     # question, tokens, POS, lemma
                     _, q, _, lemma = content.split('\t')
                     # find paraphrase sentences, lemma version
-                    q_para_lemma_list = para_lemma_map[lemma]
+                    try:
+                        q_para_lemma_list = sample(para_lemma_map[lemma], 3)
+                    except ValueError:
+                        # sample number larger than population
+                        q_para_lemma_list = para_lemma_map[lemma]
+                    # generate paraphrase pairs
                     for q_para_lemma in q_para_lemma_list:
                         # for each lemma sentence, find its original sentence
                         q_para = sent_lemma_map[q_para_lemma]
                         # generalize the sentence, remember to add ? in the end
                         # record down
-                        fw.write("{}\t{}\n".format(q, q_para))
+                        fw.write("{}\t{}\n".format(q.lower(), q_para.lower()))
                         i += 1
                         stdout.write("\rgenerated: %d" % i)
                         stdout.flush()
