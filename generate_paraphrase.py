@@ -73,17 +73,18 @@ if __name__ == '__main__':
 
                     # generate paraphrase pairs
                     for q in q_para_lemma_list:
-                        q_para_lemma = q.lower()
+                        # for each lemma sentence, find its original sentence
+                        q_para = sent_lemma_map[q_para_lemma]
+
+                        q_para_lemma = q_para.lower()
                         # remove symbols
                         q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
                         # use tokens to regenerate sentence
-                        q_para_lemma_list = " ".join(q_para_lemma_tokens) + " ?"
-
-                        # for each lemma sentence, find its original sentence
-                        q_para = sent_lemma_map[q_para_lemma]
+                        q_para = " ".join(q_para_lemma_tokens) + " ?"
+                        
                         # generalize the sentence, remember to add ? in the end
                         # record down
-                        fw.write("{}\t{}\n".format()
+                        fw.write("{}\t{}\n".format(q, q_para))
                         i += 1
                         stdout.write("\rgenerated: %d" % i)
                         stdout.flush()
