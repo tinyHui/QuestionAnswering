@@ -274,7 +274,7 @@ class ParaphraseWikiAnswer(object):
         return "WikiAnswer Paraphrase Questions"
 
     def __len__(self):
-        return 267956
+        return 300000
 
 
 class ParaphraseMicrosoftRaw(object):

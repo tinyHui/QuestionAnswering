@@ -1,7 +1,9 @@
 from collections import defaultdict
 from sys import stdout
 from preprocess.data import process_raw
+from word2vec import WORD_EMBEDDING_BIN_FILE
 from random import sample
+import pickle as pkl
 
 FILE = './data/paraphrases.wikianswer.txt'
 
@@ -39,15 +41,27 @@ if __name__ == '__main__':
                 continue
     stdout.write("\n")
 
+    stdout.write("Loading word embedding hashmap\n")
+    with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
+        emb_voc_dict = pkl.load(f)
+    word_embedding_keys = emb_voc_dict.keys()
+
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
     with open(FILE, 'a') as fw:
-        with open('./data/wikianswers-paraphrases-1.0/questions.part.txt', 'r') as fr:
+        with open('./data/wikianswers-paraphrases-1.0/questions.txt', 'r') as fr:
             for line in fr:
+                if i > 300000:
+                    break
+
                 content = line.strip()
                 try:
                     # question, tokens, POS, lemma
                     _, q, _, lemma = content.split('\t')
+                    q_tokens = q.split()
+                    # make sure all tokens have the embedding
+                    if any([token not in word_embedding_keys for token in q_tokens]):
+                        continue
                     # find paraphrase sentences, lemma version
                     try:
                         q_para_lemma_list = sample(para_lemma_map[lemma], 3)
