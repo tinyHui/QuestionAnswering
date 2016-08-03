@@ -17,22 +17,21 @@ OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
-def loader(feat, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
+def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
     while True:
         try:
-            indx, (d, f) = feat
+            indx, (d, f) = feats_queue.get(timeout=5)
+            stdout.write("\rTesting: %d/%d" % (indx+1, length))
+            stdout.flush()
             feat = f(d)
             _, crt_q_v, crt_a_v, _ = feat
             if use_paraphrase_map:
                 crt_q_v1 = crt_q_v.dot(Q1_k)
                 crt_q_v2 = crt_q_v.dot(Q2_k)
                 crt_q_v = np.hstack((crt_q_v1, crt_q_v2))
-            if Q_k is not None and A_k is not None:
-                proj_q = crt_q_v.dot(Q_k)
-                proj_a = crt_a_v.dot(A_k)
-                dist = distance(proj_q, proj_a)
-            else:
-                dist = distance(crt_q_v, crt_a_v)
+            proj_q = crt_q_v.dot(Q_k)
+            proj_a = crt_a_v.dot(A_k)
+            dist = distance(proj_q, proj_a)
             results[indx] = dist
         except Empty:
             break
@@ -96,10 +95,24 @@ if __name__ == '__main__':
     _, _, feats = feats_loader(feature, usage='test')
     length = len(feats)
 
-    # calculate the distance
-    result = {}
-    for feat in enumerate(feats):
-        loader(feat, result, length, Q_k, A_k, use_paraphrase_map, Q1_k, Q2_k)
+    # multiprocess to calculate the distance
+    manager = Manager()
+    feats_queue = Queue(maxsize=length)
+    result_list_share = manager.dict()
+
+    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length,
+                                           use_paraphrase_map, Q1_k, Q2_k))
+              for _ in range(PROCESS_NUM)]
+
+    for p in p_list:
+        p.daemon = True
+        p.start()
+
+    for i, feat in enumerate(feats):
+        feats_queue.put((i, feat))
+
+    for p in p_list:
+        p.join()
 
     # sort by index, low to high
     stdout.write("\n")
