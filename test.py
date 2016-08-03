@@ -17,12 +17,10 @@ OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
-def loader(feats_queue, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
+def loader(feat, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
     while True:
         try:
-            indx, (d, f) = feats_queue.get(timeout=5)
-            stdout.write("\rTesting: %d/%d" % (indx+1, length))
-            stdout.flush()
+            indx, (d, f) = feat
             feat = f(d)
             _, crt_q_v, crt_a_v, _ = feat
             if use_paraphrase_map:
@@ -98,24 +96,10 @@ if __name__ == '__main__':
     _, _, feats = feats_loader(feature, usage='test')
     length = len(feats)
 
-    # multiprocess to calculate the distance
-    manager = Manager()
-    feats_queue = Queue(maxsize=length)
-    result_list_share = manager.dict()
-
-    p_list = [Process(target=loader, args=(feats_queue, result_list_share, length,
-                                           Q_k, A_k, use_paraphrase_map, Q1_k, Q2_k))
-              for _ in range(PROCESS_NUM)]
-
-    for p in p_list:
-        p.daemon = True
-        p.start()
-
-    for i, feat in enumerate(feats):
-        feats_queue.put((i, feat))
-
-    for p in p_list:
-        p.join()
+    # calculate the distance
+    result = {}
+    for feat in enumerate(feats):
+        loader(feat, result, length, Q_k, A_k, use_paraphrase_map, Q1_k, Q2_k)
 
     # sort by index, low to high
     stdout.write("\n")
