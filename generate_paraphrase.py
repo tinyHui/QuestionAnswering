@@ -6,7 +6,7 @@ from random import sample
 import pickle as pkl
 import re
 
-FILE = './data/paraphrases.wikianswer.txt'
+FILE = './data/wikianswers-paraphrases-1.0/paraphrases.wikianswer.full.txt'
 
 if __name__ == '__main__':
     # generate hash map
@@ -49,13 +49,9 @@ if __name__ == '__main__':
 
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
-    valid_start = ["who", "what", "when", "where"]
     with open(FILE, 'a') as fw:
         with open('./data/wikianswers-paraphrases-1.0/questions.txt', 'r') as fr:
             for line in fr:
-                if i > 300000:
-                    break
-
                 content = line.strip()
                 try:
                     # question, tokens, POS, lemma
@@ -66,9 +62,6 @@ if __name__ == '__main__':
 
                     # use tokens to regenerate sentence
                     q = " ".join(q_tokens) + " ?"
-                    # sentence start with "who", "what" ... 
-                    if not any([q.startswith(p) for p in valid_start]):
-                        continue
 
                     # make sure all tokens have the embedding
                     if any([token not in word_embedding_keys for token in q_tokens]):
@@ -87,9 +80,6 @@ if __name__ == '__main__':
                         q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
                         # use tokens to regenerate sentence
                         q_para = " ".join(q_para_lemma_tokens) + " ?"
-                        # sentence start with "who", "what" ... 
-                        if not any([q_para.startswith(p) for p in valid_start]):
-                            continue
 
                         # generalize the sentence, remember to add ? in the end
                         # record down
