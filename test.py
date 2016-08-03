@@ -17,7 +17,7 @@ OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
 PROCESS_NUM = 20
 
 
-def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
+def loader(feats_queue, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
     while True:
         try:
             indx, (d, f) = feats_queue.get(timeout=5)
@@ -29,9 +29,12 @@ def loader(feats_queue, Q_k, A_k, results, length, use_paraphrase_map=False, Q1_
                 crt_q_v1 = crt_q_v.dot(Q1_k)
                 crt_q_v2 = crt_q_v.dot(Q2_k)
                 crt_q_v = np.hstack((crt_q_v1, crt_q_v2))
-            proj_q = crt_q_v.dot(Q_k)
-            proj_a = crt_a_v.dot(A_k)
-            dist = distance(proj_q, proj_a)
+            if Q_k is not None and A_k is not None:
+                proj_q = crt_q_v.dot(Q_k)
+                proj_a = crt_a_v.dot(A_k)
+                dist = distance(proj_q, proj_a)
+            else:
+                dist = distance(crt_q_v, crt_a_v)
             results[indx] = dist
         except Empty:
             break
@@ -56,7 +59,7 @@ if __name__ == '__main__':
 
     # 1/2 stage CCA
     cca_stage = args.CCA_stage
-    assert cca_stage in [1, 2], "can only use 1 stage CCA or 2 stage CCA"
+    assert cca_stage in [0, 1, 2], "can only use 1 stage CCA or 2 stage CCA or no CCA"
     use_paraphrase_map = False
     if cca_stage == 2:
         use_paraphrase_map = True
@@ -76,10 +79,14 @@ if __name__ == '__main__':
             os.remove(f)
 
     logging.info("using feature: %s" % feature)
-    logging.info("loading CCA model")
-    # load CCA model
-    with open(qa_model_file, 'rb') as f:
-        Q_k, A_k = pkl.load(f)
+
+    Q_k = None
+    A_k = None
+    if cca_stage > 0:
+        logging.info("loading CCA model")
+        # load CCA model
+        with open(qa_model_file, 'rb') as f:
+            Q_k, A_k = pkl.load(f)
 
     Q1_k = None
     Q2_k = None
@@ -96,8 +103,8 @@ if __name__ == '__main__':
     feats_queue = Queue(maxsize=length)
     result_list_share = manager.dict()
 
-    p_list = [Process(target=loader, args=(feats_queue, Q_k, A_k, result_list_share, length,
-                                           use_paraphrase_map, Q1_k, Q2_k))
+    p_list = [Process(target=loader, args=(feats_queue, result_list_share, length,
+                                           Q_k, A_k, use_paraphrase_map, Q1_k, Q2_k))
               for _ in range(PROCESS_NUM)]
 
     for p in p_list:
