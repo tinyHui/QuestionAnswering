@@ -22,7 +22,6 @@ def tokenize(raw):
         s = re.sub(r'\b{}\b|\b{}\b'.format(name, abbr), '%02d' % (i + 1), s)
 
     # define replace pattern
-    GRAMMAR_SYM = r'(\')'
     DATE = r'([0-9]{1,2})?[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ][0-9]{4}|' \
            r'[0-9]{4}[\.\/\- ][0-9]{1,2}(st|nd|rd|th)?[\.\/\- ]([0-9]{1,2})?|' \
            '[0-9]{1,2}(st|nd|rd|th)?[\/\- ][0-9]{1,2}|' \
@@ -36,7 +35,7 @@ def tokenize(raw):
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
-    RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
+    RE_SET = [(DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
               (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
@@ -45,10 +44,11 @@ def tokenize(raw):
 
 
 def no_symbol(s):
+    GRAMMAR_SYM = r'(\')'
     SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
     SYM_AT = r'\@'
     SPACES = r' +'
-    RE_SET = [(SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = s.strip()
@@ -122,8 +122,8 @@ class ReVerbTrainRaw(object):
                                         'What is the {r} of {e2}',
                                         'Who is the {r} of {e2}',
                                         'What is {r} by {e1}',
-                                        'Who is {e2}\'s {r}',
-                                        'What is {e2}\'s {r}',
+                                        'Who is {e2} \'s {r}',
+                                        'What is {e2} \'s {r}',
                                         'Who is {r} by {e1}']
         # shared by *-in, *-on
         self.__special_in_q_pattern_list = ['When did {e1} {r}',
@@ -314,7 +314,7 @@ class ParaphraseMicrosoftRaw(object):
             # to token
             if self.__mode == 'raw_token':
                 s1_tokens, s2_tokens = [s.split() for s in [s1, s2]]
-                yield s1_tokens, s2_tokens
+                yield quality, id1, id2, s1_tokens, s2_tokens
             elif self.__mode == 'structure':
                 yield quality, id1, id2, s1, s2
             elif self.__mode == 'embedding':
