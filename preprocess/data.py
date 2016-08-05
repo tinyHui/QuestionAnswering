@@ -230,13 +230,15 @@ class ParaphraseWikiAnswer(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
+        elif mode == 'raw_token':
+            suf = 'txt'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
             suf = 'emb'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'embedding', 'structure'")
+            raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -252,7 +254,10 @@ class ParaphraseWikiAnswer(object):
                 continue
 
             # to token
-            if self.__mode == 'structure':
+            if self.__mode == 'raw_token':
+                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+                yield q1_tokens, q2_tokens
+            elif self.__mode == 'structure':
                 yield q1, q2
             elif self.__mode == 'embedding':
                 q1_tokens, q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
@@ -283,13 +288,15 @@ class ParaphraseMicrosoftRaw(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
+        elif mode == 'raw_token':
+            suf = 'txt'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
             suf = 'emb'
         elif mode == 'structure':
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'embedding', 'structure'")
+            raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
         self.__mode = mode
         self.__grams = grams
 
@@ -305,7 +312,10 @@ class ParaphraseMicrosoftRaw(object):
                 continue
 
             # to token
-            if self.__mode == 'structure':
+            if self.__mode == 'raw_token':
+                s1_tokens, s2_tokens = [s.split() for s in [s1, s2]]
+                yield s1_tokens, s2_tokens
+            elif self.__mode == 'structure':
                 yield quality, id1, id2, s1, s2
             elif self.__mode == 'embedding':
                 s1_tokens, s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
@@ -354,7 +364,8 @@ class ReVerbPairs(object):
             # give structure sentence
             suf = 'struct'
         else:
-            raise AttributeError("Mode can be only 'str', 'index', 'embedding' or 'structure'")
+            raise AttributeError("Mode can be only 'raw', 'raw_token', "
+                                 "'proc_token', 'index', 'embedding' or 'structure'")
         self.__mode = mode
 
         if usage in ['train', 'test']:
