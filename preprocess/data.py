@@ -260,8 +260,8 @@ class ParaphraseWikiAnswer(object):
             elif self.__mode == 'structure':
                 yield q1, q2
             elif self.__mode == 'embedding':
-                q1_tokens, q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
-                                        for s in [q1, q2] for w in s.split()]
+                q1_tokens, q2_tokens = [[np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s.split()]
+                                        for s in [q1, q2]]
                 yield q1_tokens, q2_tokens
 
     def is_q_indx(self, i):
@@ -318,8 +318,8 @@ class ParaphraseMicrosoftRaw(object):
             elif self.__mode == 'structure':
                 yield quality, id1, id2, s1, s2
             elif self.__mode == 'embedding':
-                s1_tokens, s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
-                                        for s in [s1, s2] for w in s.split()]
+                s1_tokens, s2_tokens = [[np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s.split()]
+                                        for s in [s1, s2]]
                 yield quality, id1, id2, s1_tokens, s2_tokens
 
     def is_q_indx(self, i):
