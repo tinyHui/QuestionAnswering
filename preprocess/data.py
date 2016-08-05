@@ -122,8 +122,8 @@ class ReVerbTrainRaw(object):
                                         'What is the {r} of {e2}',
                                         'Who is the {r} of {e2}',
                                         'What is {r} by {e1}',
-                                        'Who is {e2} \'s {r}',
-                                        'What is {e2} \'s {r}',
+                                        'Who is {e2}\'s {r}',
+                                        'What is {e2}\'s {r}',
                                         'Who is {r} by {e1}']
         # shared by *-in, *-on
         self.__special_in_q_pattern_list = ['When did {e1} {r}',
