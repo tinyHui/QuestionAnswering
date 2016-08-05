@@ -2,9 +2,9 @@ from collections import defaultdict
 from sys import stdout
 from word2vec import WORD_EMBEDDING_BIN_FILE
 import pickle as pkl
-import re
+from preprocess.data import no_symbol
 
-FILE = './data/wikianswers-paraphrases-1.0/paraphrases.wikianswer.full.txt'
+FILE = '/disk/ocean/s1516713/wikianswers-paraphrases-1.0/paraphrases.wikianswer.full.txt'
 
 if __name__ == '__main__':
     # generate hash map
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     para_lemma_map = defaultdict(list)
     i = 0
     stdout.write("Loading wikianswers-paraphrases-1.0/word_alignments.txt\n")
-    with open('./data/wikianswers-paraphrases-1.0/word_alignments.txt', 'r') as f:
+    with open('/disk/ocean/s1516713/wikianswers-paraphrases-1.0/word_alignments.txt', 'r') as f:
         for line in f:
             content = line.strip()
             q1, q2, _ = content.split('\t')
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     sent_lemma_map = {}
     i = 0
     stdout.write("Loading wikianswers-paraphrases-1.0/questions.txt\n")
-    with open('./data/wikianswers-paraphrases-1.0/questions.txt', 'r') as f:
+    with open('/disk/ocean/s1516713/wikianswers-paraphrases-1.0/questions.txt', 'r') as f:
         for line in f:
             content = line.strip()
             try:
@@ -48,21 +48,17 @@ if __name__ == '__main__':
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
     with open(FILE, 'a') as fw:
-        with open('./data/wikianswers-paraphrases-1.0/questions.txt', 'r') as fr:
+        with open('/disk/ocean/s1516713/wikianswers-paraphrases-1.0/questions.txt', 'r') as fr:
             for line in fr:
                 content = line.strip()
                 try:
                     # question, tokens, POS, lemma
                     _, q, _, lemma = content.split('\t')
-                    q = q.lower()
                     # remove symbols
-                    q_tokens = re.findall('[a-z0-9]+', q)
-
-                    # use tokens to regenerate sentence
-                    q = " ".join(q_tokens) + " ?"
+                    q = no_symbol(q)
 
                     # make sure all tokens have the embedding
-                    if any([token not in word_embedding_keys for token in q_tokens]):
+                    if any([token not in word_embedding_keys for token in q.split()]):
                         continue
 
                     # get corresponde lemma sentences
@@ -73,13 +69,9 @@ if __name__ == '__main__':
                         # for each lemma sentence, find its original sentence
                         q_para = sent_lemma_map[q_para_lemma]
 
-                        q_para_lemma = q_para.lower()
                         # remove symbols
-                        q_para_lemma_tokens = re.findall('[a-z0-9]+', q_para_lemma)
-                        # use tokens to regenerate sentence
-                        q_para = " ".join(q_para_lemma_tokens) + " ?"
+                        q_para = no_symbol(q_para)
 
-                        # generalize the sentence, remember to add ? in the end
                         # record down
                         fw.write("{}\t{}\n".format(q, q_para))
                         i += 1

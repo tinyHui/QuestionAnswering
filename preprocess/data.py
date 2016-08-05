@@ -115,23 +115,23 @@ class ReVerbTrainRaw(object):
                         );
         """)
         # define the pattern
-        self.__normal_q_pattern_list = ['Who {r} {e2} ?',
-                                        'What {r} {e2} ?',
-                                        'Who does {e1} {r} ?',
-                                        'What does {e1} {r} ?',
-                                        'What is the {r} of {e2} ?',
-                                        'Who is the {r} of {e2} ?',
-                                        'What is {r} by {e1} ?',
-                                        'Who is {e2} \'s {r} ?',
-                                        'What is {e2} \'s {r} ?',
-                                        'Who is {r} by {e1} ?']
+        self.__normal_q_pattern_list = ['Who {r} {e2}',
+                                        'What {r} {e2}',
+                                        'Who does {e1} {r}',
+                                        'What does {e1} {r}',
+                                        'What is the {r} of {e2}',
+                                        'Who is the {r} of {e2}',
+                                        'What is {r} by {e1}',
+                                        'Who is {e2} \'s {r}',
+                                        'What is {e2} \'s {r}',
+                                        'Who is {r} by {e1}']
         # shared by *-in, *-on
-        self.__special_in_q_pattern_list = ['When did {e1} {r} ?',
-                                            'When was {e1} {r} ?',
-                                            'Where was {e1} {r} ?',
-                                            'Where did {e1} {r} ?']
-        self.__special_on_q_pattern_list = ['When did {e1} {r} ?',
-                                            'When was {e1} {r} ?']
+        self.__special_in_q_pattern_list = ['When did {e1} {r}',
+                                            'When was {e1} {r}',
+                                            'Where was {e1} {r}',
+                                            'Where did {e1} {r}']
+        self.__special_on_q_pattern_list = ['When did {e1} {r}',
+                                            'When was {e1} {r}']
 
         # answer pattern
         self.__normal_a_pattern = '{e1}|{r}|{e2}'
@@ -190,7 +190,7 @@ class ReVerbTestRaw(object):
                 r, e1 = a.split()
                 e2 = "PLACEHOLDER"
 
-            q = no_symbol(q) + ' ?'
+            q = no_symbol(q)
             r, e1, e2 = [no_symbol(w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
