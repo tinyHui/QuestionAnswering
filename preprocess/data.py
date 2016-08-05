@@ -250,12 +250,12 @@ class ParaphraseWikiAnswer(object):
         for line in open(self.__file, 'r'):
             q1, q2 = line.strip().split('\t')
             if self.__mode == 'raw':
-                yield q1, q2
+                yield no_symbol(q1), no_symbol(q2)
                 continue
 
             # to token
             if self.__mode == 'raw_token':
-                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+                q1_tokens, q2_tokens = [no_symbol(s).split() for s in [q1, q2]]
                 yield q1_tokens, q2_tokens
             elif self.__mode == 'structure':
                 yield q1, q2
@@ -308,12 +308,12 @@ class ParaphraseMicrosoftRaw(object):
         for line in open(self.__file, 'r'):
             quality, id1, id2, s1, s2 = line.strip().split('\t')
             if self.__mode == 'raw':
-                yield quality, id1, id2, s1, s2
+                yield quality, id1, id2, no_symbol(s1), no_symbol(s2)
                 continue
 
             # to token
             if self.__mode == 'raw_token':
-                s1_tokens, s2_tokens = [s.split() for s in [s1, s2]]
+                s1_tokens, s2_tokens = [no_symbol(s).split() for s in [s1, s2]]
                 yield quality, id1, id2, s1_tokens, s2_tokens
             elif self.__mode == 'structure':
                 yield quality, id1, id2, s1, s2
