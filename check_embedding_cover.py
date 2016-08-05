@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
         print("Consider Appear Times: {}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
 
+        voc_list = set(voc_list)
         unseen_num = 0
         voc_num = len(voc_list)
         for token in voc_list:
