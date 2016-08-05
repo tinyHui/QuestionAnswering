@@ -21,6 +21,7 @@ if __name__ == '__main__':
         voc_num = 0
         unseen_num = 0
 
+        voc_list = []
         for line in src_data:
             for i in src_data.sent_indx:
                 for token in line[i]:
@@ -31,6 +32,16 @@ if __name__ == '__main__':
                     except KeyError:
                         unseen_num += 1
                     finally:
+                        voc_list.append(token)
                         voc_num += 1
 
-        print("{}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
+        print("Consider Appear Times: {}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
+
+        unseen_num = 0
+        voc_num = len(voc_list)
+        for token in voc_list:
+            try:
+                _ = emb_voc_dict[token]
+            except KeyError:
+                unseen_num += 1
+        print("Consider Only Token: {}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
