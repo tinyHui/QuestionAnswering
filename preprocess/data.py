@@ -142,6 +142,8 @@ class ReVerbTrainRaw(object):
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
+            # remove \'s for relation
+            r = re.sub(r'\'\w', '', r)
             r, e1, e2 = [no_symbol(w) for w in [r, e1, e2]]
 
             # find the suitable pattern
