@@ -11,9 +11,7 @@ import logging
 import os
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-OUTPUT_FILE_TOP1 = './result/reverb-test-with_dist.top1.%s.txt'
-OUTPUT_FILE_TOP5 = './result/reverb-test-with_dist.top5.%s.txt'
-OUTPUT_FILE_TOP10 = './result/reverb-test-with_dist.top10.%s.txt'
+OUTPUT_FILE = './result/reverb-test-with_dist.%s.txt'
 PROCESS_NUM = 20
 
 
@@ -67,13 +65,10 @@ if __name__ == '__main__':
     # full_rank = args.full_rank
     PROCESS_NUM = args.worker
 
-    OUTPUT_FILE_TOP1 = OUTPUT_FILE_TOP1 % feature
-    OUTPUT_FILE_TOP5 = OUTPUT_FILE_TOP5 % feature
-    OUTPUT_FILE_TOP10 = OUTPUT_FILE_TOP10 % feature
+    OUTPUT_FILE = OUTPUT_FILE % feature
 
-    for f in [OUTPUT_FILE_TOP1, OUTPUT_FILE_TOP5, OUTPUT_FILE_TOP10]:
-        if os.path.exists(f):
-            os.remove(f)
+    if os.path.exists(OUTPUT_FILE):
+        os.remove(OUTPUT_FILE)
 
     logging.info("using feature: %s" % feature)
 
@@ -130,28 +125,11 @@ if __name__ == '__main__':
         output_tuple[q].append((pred, a))
         line_num += 1
 
-    f1 = open(OUTPUT_FILE_TOP1, 'a')
-    f5 = open(OUTPUT_FILE_TOP5, 'a')
-    f10 = open(OUTPUT_FILE_TOP10, 'a')
+    f = open(OUTPUT_FILE, 'a')
 
     for q in output_tuple.keys():
-        # sort by distance, accent
-        tmp_set = sorted(output_tuple[q], key=lambda x: x[0])
-        if len(tmp_set) == 0: continue
-
-        # only keep the best one
-        pred, a = tmp_set[0]
-        output_line = "{}\t{}\t{}\n".format(q, pred, a)
-        f1.write(output_line)
-        # keep top 5
-        for pred, a in tmp_set[:5]:
+        for pred, a in output_tuple[q]:
             output_line = "{}\t{}\t{}\n".format(q, pred, a)
-            f5.write(output_line)
-        # keep top 10
-        for pred, a in tmp_set[:10]:
-            output_line = "{}\t{}\t{}\n".format(q, pred, a)
-            f10.write(output_line)
+            f.write(output_line)
 
-    f1.close()
-    f5.close()
-    f10.close()
+    f.close()

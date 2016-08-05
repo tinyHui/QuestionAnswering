@@ -44,13 +44,13 @@ if __name__ == '__main__':
     # load dictionary
     if mode == mode_support[0]:
         print("loading vocabulary index")
-        data_mode = 'str'
+        data_mode = 'proc_token'
         suf = 'indx'
         with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
             qa_voc_dict = pkl.load(f)
     elif mode == mode_support[1]:
         print("loading embedding hash")
-        data_mode = 'str'
+        data_mode = 'raw_token'
         suf = 'emb'
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
@@ -70,6 +70,7 @@ if __name__ == '__main__':
     data_list.append((data, path))
 
     if mode != mode_support[0]:
+        # not to index version
         # add paraphrase questions data
         data = ParaphraseWikiAnswer(mode=data_mode)
         path = DUMP_PARA_PARALEX_FILE % suf

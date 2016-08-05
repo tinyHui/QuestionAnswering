@@ -12,7 +12,7 @@ UNKNOWN_TOKEN = 'UNKNOWN'
 UNKNOWN_TOKEN_INDX = 0
 
 
-def process_raw(raw):
+def tokenize(raw):
     # to lower case
     s = raw.lower()
 
@@ -34,13 +34,21 @@ def process_raw(raw):
     NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
-    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
     SPACES = r' +'
-    SYM_AT = r'\@'
     # replace all matched phrase to TOKEN name
     RE_SET = [(GRAMMAR_SYM, ' \\1'), (DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '),
-              (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
+              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '), (SPACES, ' ')]
+    for p, t in RE_SET:
+        s = re.sub(p, t, s)
+    s = s.strip()
+    return s
+
+
+def no_symbol(s):
+    SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
+    SYM_AT = r'\@'
+    SPACES = r' +'
+    RE_SET = [(SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = s.strip()
@@ -107,23 +115,23 @@ class ReVerbTrainRaw(object):
                         );
         """)
         # define the pattern
-        self.__normal_q_pattern_list = ['who {r} {e2} ?',
-                                        'what {r} {e2} ?',
-                                        'who does {e1} {r} ?',
-                                        'what does {e1} {r} ?',
-                                        'what is the {r} of {e2} ?',
-                                        'who is the {r} of {e2} ?',
-                                        'what is {r} by {e1} ?',
-                                        'who is {e2} \'s {r} ?',
-                                        'what is {e2} \'s {r} ?',
-                                        'who is {r} by {e1} ?']
+        self.__normal_q_pattern_list = ['Who {r} {e2} ?',
+                                        'What {r} {e2} ?',
+                                        'Who does {e1} {r} ?',
+                                        'What does {e1} {r} ?',
+                                        'What is the {r} of {e2} ?',
+                                        'Who is the {r} of {e2} ?',
+                                        'What is {r} by {e1} ?',
+                                        'Who is {e2} \'s {r} ?',
+                                        'What is {e2} \'s {r} ?',
+                                        'Who is {r} by {e1} ?']
         # shared by *-in, *-on
-        self.__special_in_q_pattern_list = ['when did {e1} {r} ?',
-                                            'when was {e1} {r} ?',
-                                            'where was {e1} {r} ?',
-                                            'where did {e1} {r} ?']
-        self.__special_on_q_pattern_list = ['when did {e1} {r} ?',
-                                            'when was {e1} {r} ?']
+        self.__special_in_q_pattern_list = ['When did {e1} {r} ?',
+                                            'When was {e1} {r} ?',
+                                            'Where was {e1} {r} ?',
+                                            'Where did {e1} {r} ?']
+        self.__special_on_q_pattern_list = ['When did {e1} {r} ?',
+                                            'When was {e1} {r} ?']
 
         # answer pattern
         self.__normal_a_pattern = '{e1}|{r}|{e2}'
@@ -134,7 +142,7 @@ class ReVerbTrainRaw(object):
             r = r.replace('.r', '')
             e1 = e1.replace('.e', '')
             e2 = e2.replace('.e', '')
-            r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
+            r, e1, e2 = [no_symbol(w) for w in [r, e1, e2]]
 
             # find the suitable pattern
             # random choose some for training, reduce training size
@@ -182,8 +190,8 @@ class ReVerbTestRaw(object):
                 r, e1 = a.split()
                 e2 = "PLACEHOLDER"
 
-            q = process_raw(q) + ' ?'
-            r, e1, e2 = [process_raw(w) for w in [r, e1, e2]]
+            q = no_symbol(q) + ' ?'
+            r, e1, e2 = [no_symbol(w) for w in [r, e1, e2]]
             a = '{e1}|{r}|{e2}'.format(r=r, e1=e1, e2=e2)
 
             yield q_id, q, a, l
@@ -204,7 +212,7 @@ class WordEmbeddingRaw(object):
     def __iter__(self):
         for line in self.f:
             w, *emb = line.strip().split()
-            yield w.lower(), list(map(float, emb))
+            yield w, list(map(float, emb))
 
         self.f.close()
 
@@ -219,8 +227,6 @@ class WordEmbeddingRaw(object):
 class ParaphraseWikiAnswer(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
-            suf = 'txt'
-        elif mode == 'str':
             suf = 'txt'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
@@ -246,15 +252,9 @@ class ParaphraseWikiAnswer(object):
             # to token
             if self.__mode == 'structure':
                 yield q1, q2
-            else:
-                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
-                if self.__mode == 'str':
-                    if self.__grams > 1:
-                        q1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q1_tokens[j:] for j in range(self.__grams)])]
-                        q2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q2_tokens[j:] for j in range(self.__grams)])]
-                elif self.__mode == 'embedding':
-                    q1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q1_tokens]
-                    q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q2_tokens]
+            elif self.__mode == 'embedding':
+                q1_tokens, q2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
+                                        for s in [q1, q2] for w in s.split()]
                 yield q1_tokens, q2_tokens
 
     def is_q_indx(self, i):
@@ -281,8 +281,6 @@ class ParaphraseMicrosoftRaw(object):
     def __init__(self, mode='str', grams=1):
         if mode == 'raw':
             suf = 'txt'
-        elif mode == 'str':
-            suf = 'txt'
         elif mode == 'embedding':
             # unknown token embedding is the average of low frequency words' embedding
             suf = 'emb'
@@ -304,23 +302,12 @@ class ParaphraseMicrosoftRaw(object):
                 yield quality, id1, id2, s1, s2
                 continue
 
-            # word generalise
-            if self.__mode == 'str':
-                s1 = process_raw(s1)
-                s2 = process_raw(s2)
-
             # to token
             if self.__mode == 'structure':
                 yield quality, id1, id2, s1, s2
-            else:
-                s1_tokens, s2_tokens = [s.split() for s in [s1, s2]]
-                if self.__mode == 'str':
-                    if self.__grams > 1:
-                        s1_tokens = [w1 + " " + w2 for w1, w2 in zip(*[s1_tokens[j:] for j in range(self.__grams)])]
-                        s2_tokens = [w1 + " " + w2 for w1, w2 in zip(*[s2_tokens[j:] for j in range(self.__grams)])]
-                elif self.__mode == 'embedding':
-                    s1_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s1_tokens]
-                    s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in s2_tokens]
+            elif self.__mode == 'embedding':
+                s1_tokens, s2_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32')
+                                        for s in [s1, s2] for w in s.split()]
                 yield quality, id1, id2, s1_tokens, s2_tokens
 
     def is_q_indx(self, i):
@@ -347,15 +334,22 @@ class ParaphraseMicrosoftRaw(object):
 class ReVerbPairs(object):
     def __init__(self, usage='train', mode='str', grams=1):
         if mode == 'raw':
+            # give raw string sentence
             suf = 'txt'
-        elif mode == 'str':
+        elif mode == 'raw_token':
+            # give raw tokens
+            suf = 'txt'
+        elif mode == 'proc_token':
+            # give tokenized tokens
             suf = 'txt'
         elif mode == 'index':
+            # give index value
             suf = 'indx'
         elif mode == 'embedding':
-            # unknown token embedding is 0
+            # give embedding value
             suf = 'emb'
         elif mode == 'structure':
+            # give structure sentence
             suf = 'struct'
         else:
             raise AttributeError("Mode can be only 'str', 'index', 'embedding' or 'structure'")
@@ -391,10 +385,14 @@ class ReVerbPairs(object):
                     # test
                     yield (q_id, q, a, l)
             else:
+                if self.__mode == 'proc_token':
+                    q = tokenize(q)
+                    a = tokenize(a)
+
                 q_tokens = q.split()
                 a_tokens = a.split()
 
-                if self.__mode == 'str':
+                if self.__mode in ['raw_token', 'proc_token']:
                     e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
                     a_tokens = e1_tokens + r_tokens + e2_tokens
                 if self.__grams > 1:
@@ -405,8 +403,6 @@ class ReVerbPairs(object):
                 elif self.__mode == 'embedding':
                     q_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in q_tokens]
                     a_tokens = [np.asarray(list(map(float, w.split('|'))), dtype='float32') for w in a_tokens]
-                # elif self.__mode == 'structure': keep same
-
                 # produce the token per line
                 if self.__usage == 'train':
                     yield (q_tokens, a_tokens)
@@ -469,96 +465,3 @@ class ReVerbPairs(object):
 
     def __str__(self):
         return "ReVerb QA pairs"
-
-# paraphrased sentences
-# class PPDB(object):
-#     def __init__(self, usage='train', mode='str', voc_dict=None):
-#         if usage in ['train', 'test']:
-#             self.file = './data/msr_paraphrase_%s.txt' % usage
-#             self.usage = usage
-#         else:
-#             raise SystemError("usage can be only train/test")
-#         self.voc_dict = voc_dict
-#         if mode == 'index':
-#             assert voc_dict is not None, "must take vocabulary-index dictionary."
-#         self.mode = mode
-#         # index of return data contains sentence
-#         self.sent_indx = (0, 1)
-#
-#     def __iter__(self):
-#         for line in open(self.file, 'r'):
-#             q1, q2 = line.strip().split('\t')
-#             q1_tokens, q2_tokens = [process_raw(s).split() for s in [q1, q2]]
-#             # insert sentence start/end symbols
-#             q1_tokens.insert(0, "[")
-#             q1_tokens.append("]")
-#             q2_tokens.insert(0, "[")
-#             q2_tokens.append("]")
-#
-#             # paraphrased sentences similarity
-#             similarity_score = 0.0
-#
-#             if self.mode == 'str':
-#                 yield (q1_tokens, q2_tokens, similarity_score)
-#             elif self.mode == 'index':
-#                 # index each word using hash dictionary
-#                 q1_tokens_indx, q2_tokens_indx = [[word2index(w, self.voc_dict) for w in s] for s in
-#                                                   [q1_tokens, q2_tokens]]
-#                 yield (q1_tokens_indx, q2_tokens_indx, similarity_score)
-#             else:
-#                 raise AttributeError("Mode can be only 'str' or 'index'")
-#
-#     def __len__(self):
-#         if self.usage == 'train':
-#             return 4077
-#         elif self.usage == 'test':
-#             return 1726
-#
-#     def __str__(self):
-#         return "PPDB"
-
-
-# question answer pairs in WikiQA corpus
-# class WikiQA(object):
-#     def __init__(self, usage='train', mode='str', voc_dict=None):
-#         if usage in ['train', 'test']:
-#             self.file = './data/WikiQA-%s.txt' % usage
-#             self.usage = usage
-#         else:
-#             raise SystemError("usage can be only train/test")
-#         self.voc_dict = voc_dict
-#         if mode == 'index':
-#             assert voc_dict is not None, "must take vocabulary-index dictionary."
-#         self.mode = mode
-#         # index of return data contains sentence
-#         self.sent_indx = (0, 1)
-#
-#     def __iter__(self):
-#         for line in open(self.file, 'r'):
-#             q, a, label = line.strip().split('\t')
-#             q_tokens, a_tokens = [process_raw(s).split() for s in [q, a]]
-#             # insert sentence start/end symbols
-#             q_tokens.insert(0, "[")
-#             q_tokens.append("]")
-#             a_tokens.insert(0, "[")
-#             a_tokens.append("]")
-#             # convert label as integer, right answer, wrong answer
-#             label = int(label)
-#
-#             if self.mode == 'str':
-#                 yield (q_tokens, a_tokens, label)
-#             elif self.mode == 'index':
-#                 # index each word using hash dictionary
-#                 q_tokens_indx, a_tokens_indx = [[word2index(w, self.voc_dict) for w in s] for s in [q_tokens, a_tokens]]
-#                 yield (q_tokens_indx, a_tokens_indx, label)
-#             else:
-#                 raise AttributeError("Mode can be only 'str' or 'index'")
-#
-#     def __len__(self):
-#         if self.usage == 'train':
-#             return 1180
-#         elif self.usage == 'test':
-#             return 6165
-#
-#     def __str__(self):
-#         return "WikiQA"

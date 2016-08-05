@@ -1,8 +1,6 @@
 from collections import defaultdict
 from sys import stdout
-from preprocess.data import process_raw
 from word2vec import WORD_EMBEDDING_BIN_FILE
-from random import sample
 import pickle as pkl
 import re
 

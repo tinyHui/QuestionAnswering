@@ -6,8 +6,7 @@ LOWEST_FREQ = 3
 
 if __name__ == "__main__":
     from collections import defaultdict
-    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw,\
-        UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
+    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN, UNKNOWN_TOKEN_INDX
     import pickle as pkl
     import os
     import sys
@@ -41,7 +40,7 @@ if __name__ == "__main__":
 
     logging.info("Generating source data")
     # data is a group of sentences
-    src_data = ReVerbPairs(usage='train', mode='str', grams=gram)
+    src_data = ReVerbPairs(usage='train', mode='proc_token', grams=gram)
 
     logging.info("Extracting tokens")
     logging.warning("Ignore tokens appears less than %d" % LOWEST_FREQ)
