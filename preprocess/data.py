@@ -438,7 +438,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
-            voc_num = {q_indx: 14106, a_indx: 18400}
+            voc_num = {q_indx: 14052, a_indx: 18400}
         elif self.__grams == 2:
             voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 3:
