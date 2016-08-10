@@ -99,20 +99,24 @@ class ReVerbTrainRaw(object):
         # 14377737 triples in total
         # 2697790 triples, relation ends with -in
         # 1098684 triples, relation ends with -on
+        # self.__content = c.execute("""
+        #     SELECT  *
+        #         FROM    (   SELECT  *
+        #                     FROM    tuples
+        #                     WHERE   rel not like '%-in.r' and rel not like '%-on.r'
+        #                     LIMIT 30000
+        #                 )
+        #         UNION
+        #         SELECT  *
+        #         FROM    (   SELECT  *
+        #                     FROM    tuples
+        #                     WHERE   rel like '%-in.r' or rel like '%-on.r'
+        #                     LIMIT 60000
+        #                 );
+        # """)
         self.__content = c.execute("""
             SELECT  *
-                FROM    (   SELECT  *
-                            FROM    tuples
-                            WHERE   rel not like '%-in.r' and rel not like '%-on.r'
-                            LIMIT 30000
-                        )
-                UNION
-                SELECT  *
-                FROM    (   SELECT  *
-                            FROM    tuples
-                            WHERE   rel like '%-in.r' or rel like '%-on.r'
-                            LIMIT 60000
-                        );
+            FROM    tuples
         """)
         # define the pattern
         self.__normal_q_pattern_list = ['Who {r} {e2}',
@@ -438,6 +442,7 @@ class ReVerbPairs(object):
             a_indx = 2
 
         if self.__grams == 1:
+            # main train
             voc_num = {q_indx: 14052, a_indx: 18400}
         elif self.__grams == 2:
             voc_num = {q_indx: 0, a_indx: 0}
@@ -465,10 +470,11 @@ class ReVerbPairs(object):
 
     def __len__(self):
         if self.__usage == 'train':
-            return 269979
+            # main train
+            # return 269979
 
             # 3 patterns, use all triples
-            # return 35540263
+            return 43133211
 
             # full patterns
             # return 117202052
