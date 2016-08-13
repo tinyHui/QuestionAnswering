@@ -285,7 +285,11 @@ class ParaphraseWikiAnswer(object):
         return "WikiAnswer Paraphrase Questions"
 
     def __len__(self):
-        return 300000
+        # full WikiAnswer Paraphrase Questions, with words in one questions have all embedding value
+        return 4942127
+
+        # main train
+        # return 300000
 
 
 class ParaphraseMicrosoftRaw(object):
@@ -342,7 +346,10 @@ class ParaphraseMicrosoftRaw(object):
         return "Microsoft Research Paraphrase raw"
 
     def __len__(self):
+        # after filter
         return 3900
+
+        # before filter
         # return 5801
 
 
