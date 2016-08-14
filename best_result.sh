@@ -5,7 +5,7 @@ set -e
 echo "Enter 'total sample lines number', 'sample parts', 'file name', 'file line number'."
 read total_sample_lines_num parts_num
 
-filename='./data/reverb-train.full.txt'
+filename='./data/reverb-train.full.emb'
 file_lines_num=43133211
 
 part_lines_num=$(echo "$total_sample_lines_num/$parts_num" | bc)
@@ -13,10 +13,10 @@ max_parts=$(echo "$file_lines_num/$part_lines_num" | bc)
 
 count=1
 for i in $(shuf -i 1-$max_parts -n $parts_num | sort -n); do
-    echo "generating part$count ./data/reverb-train.part$count.txt"
+    echo "generating part$count ./data/reverb-train.part$count.emb"
     start=$(echo "($i-1)*$part_lines_num+1" | bc);
     end=$(echo "($i*$part_lines_num)" | bc);
-    sed -n "${start},${end}p" $filename > "./data/reverb-train.part$count.txt";
+    sed -n "${start},${end}p" $filename > "./data/reverb-train.part$count.emb";
     count=$(echo "$count+1" | bc);
 done;
 
