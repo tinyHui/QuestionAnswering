@@ -8,10 +8,10 @@ read parts_num
 for i in $(seq $parts_num); do
     echo "training part$i ./data/reverb-train.part$i.emb"
 
-    ln -s "./data/reverb-train.part$i.emb" ./data/reverb-train.emb
+    mv "./data/reverb-train.part$i.emb" ./data/reverb-train.emb
     python train.py --feature avg --CCA_stage 2 --para_map_file /disk/ocean/s1516713/bin5/ParaMap.pkl
 
-    rm ./data/reverb-train.emb
+    mv ./data/reverb-train.emb "./data/reverb-train.part$i.emb"
     mv ./bin/Raw.avg.pkl "/disk/ocean/s1516713/bin5/Raw.avg.part$i.pkl"
     mv ./bin/XCOV.avg.pkl "/disk/ocean/s1516713/bin5/XCOV.avg.part$i.pkl"
     mv ./bin/CCA.avg.pkl "/disk/ocean/s1516713/bin5/CCA.avg.part$i.pkl"
