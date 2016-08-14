@@ -13,9 +13,10 @@ max_parts=$(echo "$file_lines_num/$part_lines_num" | bc)
 
 count=1
 for i in $(shuf -i 1-$max_parts -n $parts_num | sort -n); do
-    echo "generating part$count ./data/reverb-train.part$count.txt"
     start=$(echo "($i-1)*$part_lines_num+1" | bc);
     end=$(echo "($i*$part_lines_num)" | bc);
+    echo "generating part$count ./data/reverb-train.part$count.txt: $start-$end"
+
     sed -n "${start},${end}p" $filename > "./data/reverb-train.part$count.txt";
 
     count=$(echo "$count+1" | bc);
