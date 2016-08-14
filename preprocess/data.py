@@ -481,7 +481,10 @@ class ReVerbPairs(object):
             # return 269979
 
             # 3 patterns, use all triples
-            return 43133211
+            # return 43133211
+
+            # multiple parts
+            return 250000
 
             # full patterns
             # return 117202052
