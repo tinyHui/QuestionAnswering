@@ -71,7 +71,7 @@ if __name__ == '__main__':
     OUTPUT_FILE = OUTPUT_FILE % feature
 
     if os.path.exists(OUTPUT_FILE):
-        os.remove(OUTPUT_FILE)
+        logging.warning("%s exist" % OUTPUT_FILE)
 
     logging.info("using feature: %s" % feature)
 
