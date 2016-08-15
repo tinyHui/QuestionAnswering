@@ -13,7 +13,7 @@ class PairSpliter(object):
     def __iter__(self):
         for line in self.data:
             for i in self.data.sent_indx:
-                yield [token if token in self.unknown_tokens else UNKNOWN_TOKEN for token in line[i]]
+                yield [token if token not in self.unknown_tokens else UNKNOWN_TOKEN for token in line[i]]
 
 
 if __name__ == "__main__":
@@ -34,15 +34,26 @@ if __name__ == "__main__":
     # read through the file, extract all tokens with low frequency
     freq_dict = defaultdict(int)
     data = ParaphraseWikiAnswer(mode='raw_token')
+    count = 0
     for line in data:
         for i in data.sent_indx:
             for token in line[i]:
                 freq_dict[token] += 1
+        sys.stdout.write("\rloaded: %.2f%%" % (float(count) / len(data) * 100))
+        sys.stdout.flush()
+        count += 1
+    sys.stdout.write("\n")
 
     unknown_tokens = []
+    count = 0
+    token_num = len(freq_dict.keys())
     for token, freq in freq_dict.items():
-        if freq < 3:
+        if freq <= 3:
             unknown_tokens.append(token)
+        sys.stdout.write("\rscanned: %.2f%%" % (float(count) / token_num * 100))
+        sys.stdout.flush()
+        count += 1
+    sys.stdout.write("\n")
 
     with open(LOW_FREQ_TOKEN_FILE, 'wb') as f:
         pkl.dump(unknown_tokens, f, protocol=4)
