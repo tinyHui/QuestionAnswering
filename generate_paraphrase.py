@@ -1,7 +1,5 @@
 from collections import defaultdict
 from sys import stdout
-from word2vec import WORD_EMBEDDING_BIN_FILE
-import pickle as pkl
 from preprocess.data import no_symbol
 
 FILE = '/disk/ocean/s1516713/wikianswers-paraphrases-1.0/paraphrases.wikianswer.full.txt'
@@ -40,11 +38,6 @@ if __name__ == '__main__':
                 continue
     stdout.write("\n")
 
-    stdout.write("Loading word embedding hashmap\n")
-    with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
-        emb_voc_dict = pkl.load(f)
-    word_embedding_keys = emb_voc_dict.keys()
-
     i = 0
     stdout.write("Generating paraphrases.wikianswer.txt\n")
     with open(FILE, 'a') as fw:
@@ -56,10 +49,6 @@ if __name__ == '__main__':
                     _, q, _, lemma = content.split('\t')
                     # remove symbols
                     q = no_symbol(q)
-
-                    # make sure all tokens have the embedding
-                    if any([token not in word_embedding_keys for token in q.split()]):
-                        continue
 
                     # get corresponde lemma sentences
                     q_para_lemma_list = para_lemma_map[lemma]
