@@ -423,8 +423,8 @@ class ReVerbPairs(object):
                 if self.__mode in ['raw_token', 'proc_token']:
                     e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
                     a_tokens = e1_tokens + r_tokens + e2_tokens
-                if self.__grams > 1:
-                    q_tokens = [" ".join(ws) for ws in zip(*[q_tokens[j:] for j in range(self.__grams)])]
+                    if self.__grams > 1:
+                        q_tokens = [" ".join(ws) for ws in zip(*[q_tokens[j:] for j in range(self.__grams)])]
                 elif self.__mode == 'index':
                     q_tokens = list(map(int, q_tokens))
                     a_tokens = list(map(int, a_tokens))

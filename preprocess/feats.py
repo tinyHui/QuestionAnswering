@@ -18,30 +18,21 @@ def feats_loader(feat_select, usage, train_two_stage_cca=False):
 
     if feat_select == FEATURE_OPTS[0]:
         # bag-of-word, unigram
-        if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', grams=1)
-        else:
-            data = ParaphraseWikiAnswer(mode='index')
+        data = ReVerbPairs(usage=usage, mode='index', grams=1)
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[1]:
         # bag-of-word, bigram
-        if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', grams=2)
-        else:
-            data = ParaphraseWikiAnswer(mode='index')
+        data = ReVerbPairs(usage=usage, mode='index', grams=2)
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
 
     elif feat_select == FEATURE_OPTS[2]:
         # bag-of-word, thrigram
-        if not train_two_stage_cca:
-            data = ReVerbPairs(usage=usage, mode='index', grams=3)
-        else:
-            data = ParaphraseWikiAnswer(mode='index')
+        data = ReVerbPairs(usage=usage, mode='index', grams=3)
         q_indx = data.get_q_indx()
         a_indx = data.get_a_indx()
         feats = Ngram(data)
