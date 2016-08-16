@@ -6,7 +6,7 @@ import numpy as np
 import requests
 import json
 
-FEATURE_OPTS = ['unigram', 'bigram', 'thrigram', 'avg', 'holographic']
+FEATURE_OPTS = ['unigram', 'bigram', 'trigram', 'avg', 'holographic']
 
 
 def feats_loader(feat_select, usage, train_two_stage_cca=False):

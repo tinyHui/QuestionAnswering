@@ -455,10 +455,18 @@ class ReVerbPairs(object):
         if self.__grams == 1:
             # main train
             voc_num = {q_indx: 14052, a_indx: 18400}
+            # 3 patterns, use all triples
+            # voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 2:
-            voc_num = {q_indx: 209358, a_indx: 39913}
+            # main train
+            voc_num = {q_indx: 40820, a_indx: 18400}
+            # 3 patterns, use all triples
+            # voc_num = {q_indx: 0, a_indx: 0}
         elif self.__grams == 3:
-            voc_num = {q_indx: 452535, a_indx: 39913}
+            # main train
+            voc_num = {q_indx: 45020, a_indx: 18400}
+            # 3 patterns, use all triples
+            # voc_num = {q_indx: 0, a_indx: 0}
         return voc_num[i]
 
     def get_usage(self):
@@ -486,9 +494,6 @@ class ReVerbPairs(object):
 
             # 3 patterns, use all triples
             # return 43133211
-
-            # tuning the best
-            # return 3000000
 
             # full patterns
             # return 117202052
