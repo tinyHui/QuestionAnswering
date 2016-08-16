@@ -424,7 +424,7 @@ class ReVerbPairs(object):
                     e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
                     a_tokens = e1_tokens + r_tokens + e2_tokens
                 if self.__grams > 1:
-                    q_tokens = [w1 + " " + w2 for w1, w2 in zip(*[q_tokens[j:] for j in range(self.__grams)])]
+                    q_tokens = [" ".join(ws) for ws in zip(*[q_tokens[j:] for j in range(self.__grams)])]
                 elif self.__mode == 'index':
                     q_tokens = list(map(int, q_tokens))
                     a_tokens = list(map(int, a_tokens))
@@ -456,9 +456,9 @@ class ReVerbPairs(object):
             # main train
             voc_num = {q_indx: 14052, a_indx: 18400}
         elif self.__grams == 2:
-            voc_num = {q_indx: 40820, a_indx: 18400}
+            voc_num = {q_indx: 209358, a_indx: 39913}
         elif self.__grams == 3:
-            voc_num = {q_indx: 0, a_indx: 0}
+            voc_num = {q_indx: 452535, a_indx: 39913}
         return voc_num[i]
 
     def get_usage(self):
@@ -482,10 +482,10 @@ class ReVerbPairs(object):
     def __len__(self):
         if self.__usage == 'train':
             # main train
-            # return 269979
+            return 269979
 
             # 3 patterns, use all triples
-            return 43133211
+            # return 43133211
 
             # tuning the best
             # return 3000000
