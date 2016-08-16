@@ -5,7 +5,7 @@ DUMP_PARA_MS_FILE = "./data/paraphrases.ms.%s"
 
 
 if __name__ == '__main__':
-    from hash_index import UNIGRAM_DICT_FILE
+    from hash_index import UNIGRAM_DICT_FILE, BIGRAM_DICT_FILE, TRIGRAM_DICT_FILE
     from word2vec import WORD_EMBEDDING_BIN_FILE
     from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw,\
         UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         return '|'.join(map(str, value))
 
 
-    mode_support = ['index', 'embedding', 'structure']
+    mode_support = ['unigram', 'bigram', 'trigram', 'embedding', 'structure']
 
     parser = argparse.ArgumentParser(description='Define mode to choose version for converting.')
     parser.add_argument('--mode', type=str,
@@ -45,10 +45,22 @@ if __name__ == '__main__':
     if mode == mode_support[0]:
         print("loading vocabulary index")
         data_mode = 'proc_token'
-        suf = 'indx'
+        suf = 'uni'
         with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
             qa_voc_dict = pkl.load(f)
     elif mode == mode_support[1]:
+        print("loading vocabulary index")
+        data_mode = 'proc_token'
+        suf = 'bi'
+        with open(BIGRAM_DICT_FILE % "qa", 'rb') as f:
+            qa_voc_dict = pkl.load(f)
+    if mode == mode_support[2]:
+        print("loading vocabulary index")
+        data_mode = 'proc_token'
+        suf = 'tri'
+        with open(TRIGRAM_DICT_FILE % "qa", 'rb') as f:
+            qa_voc_dict = pkl.load(f)
+    elif mode == mode_support[3]:
         print("loading embedding hash")
         data_mode = 'raw_token'
         suf = 'emb'

@@ -1,6 +1,6 @@
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.%s.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.%s.pkl'
-THRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.%s.pkl'
+TRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.%s.pkl'
 LOWEST_FREQ = 3
 
 
@@ -33,10 +33,6 @@ if __name__ == "__main__":
     if os.path.exists(DUMP_FILE):
         logging.info("Word index file exists, skip")
         sys.exit(0)
-
-    multi_gram = gram > 1
-    if multi_gram:
-        assert os.path.exists(UNIGRAM_DICT_FILE), "must train unigram first"
 
     logging.info("Generating source data")
     # data is a group of sentences

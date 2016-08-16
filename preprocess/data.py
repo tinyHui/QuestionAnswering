@@ -231,7 +231,7 @@ class WordEmbeddingRaw(object):
 
 # paraphrase
 class ParaphraseWikiAnswer(object):
-    def __init__(self, mode='str', grams=1):
+    def __init__(self, mode='str'):
         if mode == 'raw':
             suf = 'txt'
         elif mode == 'raw_token':
@@ -244,8 +244,6 @@ class ParaphraseWikiAnswer(object):
         else:
             raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
         self.__mode = mode
-        self.__grams = grams
-
         self.__file = './data/paraphrases.wikianswer.%s' % suf
         # index of return data contains sentence
         self.sent_indx = (0, 1)
@@ -293,7 +291,7 @@ class ParaphraseWikiAnswer(object):
 
 
 class ParaphraseMicrosoftRaw(object):
-    def __init__(self, mode='str', grams=1):
+    def __init__(self, mode='str'):
         if mode == 'raw':
             suf = 'txt'
         elif mode == 'raw_token':
@@ -306,7 +304,6 @@ class ParaphraseMicrosoftRaw(object):
         else:
             raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
         self.__mode = mode
-        self.__grams = grams
 
         self.__file = './data/paraphrases.ms.%s' % suf
         # index of return data contains sentence
@@ -367,7 +364,14 @@ class ReVerbPairs(object):
             suf = 'txt'
         elif mode == 'index':
             # give index value
-            suf = 'indx'
+            if grams == 1:
+                suf = 'uni'
+            elif grams == 2:
+                suf = 'bi'
+            elif grams == 3:
+                suf = 'tri'
+            else:
+                raise SystemError("ReVerbPairs only accept uni/bi/tri-grams")
         elif mode == 'embedding':
             # give embedding value
             suf = 'emb'
@@ -452,7 +456,7 @@ class ReVerbPairs(object):
             # main train
             voc_num = {q_indx: 14052, a_indx: 18400}
         elif self.__grams == 2:
-            voc_num = {q_indx: 0, a_indx: 0}
+            voc_num = {q_indx: 40820, a_indx: 18400}
         elif self.__grams == 3:
             voc_num = {q_indx: 0, a_indx: 0}
         return voc_num[i]
