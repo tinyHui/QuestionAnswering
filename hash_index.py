@@ -1,6 +1,6 @@
 UNIGRAM_DICT_FILE = './bin/unigram_indx_hash.%s.pkl'
 BIGRAM_DICT_FILE = './bin/bigram_indx_hash.%s.pkl'
-TRIGRAM_DICT_FILE = './bin/thrigram_indx_hash.%s.pkl'
+TRIGRAM_DICT_FILE = './bin/trigram_indx_hash.%s.pkl'
 LOWEST_FREQ = 3
 
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     elif gram == 2:
         DUMP_FILE = BIGRAM_DICT_FILE % source
     elif gram == 3:
-        DUMP_FILE = THRIGRAM_DICT_FILE % source
+        DUMP_FILE = TRIGRAM_DICT_FILE % source
     else:
         raise SystemError("Does not support %d-gram" % gram)
 
