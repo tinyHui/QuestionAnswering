@@ -25,8 +25,10 @@ if __name__ == "__main__":
         DUMP_FILE = UNIGRAM_DICT_FILE % source
     elif gram == 2:
         DUMP_FILE = BIGRAM_DICT_FILE % source
+        LOWEST_FREQ = 0
     elif gram == 3:
         DUMP_FILE = TRIGRAM_DICT_FILE % source
+        LOWEST_FREQ = 0
     else:
         raise SystemError("Does not support %d-gram" % gram)
 

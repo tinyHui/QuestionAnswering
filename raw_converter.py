@@ -38,7 +38,6 @@ if __name__ == '__main__':
                         help='Convert text version to index, embedding or structure?')
     args = parser.parse_args()
     mode = args.mode
-    assert mode in mode_support, "mode must be %s" % ', '.join(mode_support)
 
     print("converting raw string file into %s" % mode)
     # load dictionary
@@ -46,42 +45,49 @@ if __name__ == '__main__':
         print("loading vocabulary index")
         data_mode = 'proc_token'
         suf = 'uni'
+        gram = 1
         with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
             qa_voc_dict = pkl.load(f)
     elif mode == mode_support[1]:
         print("loading vocabulary index")
         data_mode = 'proc_token'
         suf = 'bi'
+        gram = 2
         with open(BIGRAM_DICT_FILE % "qa", 'rb') as f:
             qa_voc_dict = pkl.load(f)
-    if mode == mode_support[2]:
+    elif mode == mode_support[2]:
         print("loading vocabulary index")
         data_mode = 'proc_token'
         suf = 'tri'
+        gram = 3
         with open(TRIGRAM_DICT_FILE % "qa", 'rb') as f:
             qa_voc_dict = pkl.load(f)
     elif mode == mode_support[3]:
         print("loading embedding hash")
         data_mode = 'raw_token'
         suf = 'emb'
+        gram = 1
         with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
             emb_voc_dict = pkl.load(f)
-    else:
+    elif mode == mode_support[4]:
         data_mode = 'raw'
         suf = 'struct'
+        gram = 1
+    else:
+        raise SystemError("mode must be %s" % ', '.join(mode_support))
 
     data_list = []
     # add train data
-    data = ReVerbPairs(usage='train', mode=data_mode)
+    data = ReVerbPairs(usage='train', mode=data_mode, grams=gram)
     path = DUMP_TRAIN_FILE % suf
     data_list.append((data, path))
 
     # add test data
-    data = ReVerbPairs(usage='test', mode=data_mode)
+    data = ReVerbPairs(usage='test', mode=data_mode, grams=gram)
     path = DUMP_TEST_FILE % suf
     data_list.append((data, path))
 
-    if mode != mode_support[0]:
+    if mode not in mode_support[0:3]:
         # not to index version
         # add paraphrase questions data
         data = ParaphraseWikiAnswer(mode=data_mode)
@@ -107,7 +113,7 @@ if __name__ == '__main__':
                 is_reverb_test = True
 
         voc_hash = {}
-        if mode == mode_support[0]:
+        if mode in mode_support[0:3]:
             if isinstance(data, ReVerbPairs):
                 if data.get_usage() == 'train':
                     voc_hash = qa_voc_dict
@@ -128,10 +134,10 @@ if __name__ == '__main__':
 
                 for i in range(param_num):
                     if i in data.sent_indx:
-                        if mode == mode_support[0]:
+                        if mode in mode_support[0:3]:
                             tokens = [str(word2index(token, voc_hash[i])) for token in d[i]]
                             sentence = " ".join(tokens)
-                        elif mode == mode_support[1]:
+                        elif mode == mode_support[3]:
                             tokens = [str(word2hash(token, emb_voc_dict)) for token in d[i]]
                             sentence = " ".join(tokens)
                         else:
