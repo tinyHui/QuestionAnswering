@@ -285,8 +285,8 @@ class ParaphraseWikiAnswer(object):
         return "WikiAnswer Paraphrase Questions"
 
     def __len__(self):
-        # full WikiAnswer Paraphrase Questions, with words in paired questions have all embedding value
-        # return 2513718
+        # full WikiAnswer Paraphrase Questions
+        # return 13710104
 
         # main train
         return 300000
@@ -478,10 +478,10 @@ class ReVerbPairs(object):
     def __len__(self):
         if self.__usage == 'train':
             # main train
-            return 269979
+            # return 269979
 
             # 3 patterns, use all triples
-            # return 43133211
+            return 43133211
 
             # tuning the best
             # return 3000000

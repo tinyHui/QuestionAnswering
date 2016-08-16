@@ -1,5 +1,5 @@
 if __name__ == "__main__":
-    from preprocess.data import ReVerbPairs, UNKNOWN_TOKEN
+    from preprocess.data import ParaphraseWikiAnswer, UNKNOWN_TOKEN
     from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE
     from preprocess.data import WordEmbeddingRaw
     from collections import defaultdict
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
         sys.stdout.flush()
         line_num += 1
-        word_emb_hash[w] = emb
+        word_emb_hash[w] = np.asarray(emb, dtype='float32')
     sys.stdout.write("\n")
 
     #
@@ -35,12 +35,12 @@ if __name__ == "__main__":
     # get token occur time
     logging.info("calculating embedding for UNKNOWN token")
     token_occur_count = defaultdict(int)
-    src_data = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+    src_data = ParaphraseWikiAnswer(mode='raw_token', grams=1)
     for line in src_data:
         for i in src_data.sent_indx:
             for token in line[i]:
                 token_occur_count[token] += 1
-
+    
     unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float32')
     unknown_count = 0
     low_freq_token_list = []
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # get average of embedding
     unknown_emb /= float(unknown_count)
     word_emb_hash[UNKNOWN_TOKEN] = unknown_emb
-
+    
     logging.info("Saving word embedding dictionary")
     with open(LOW_FREQ_TOKEN_FILE, 'wb') as f:
         pkl.dump(low_freq_token_list, f, protocol=4)
