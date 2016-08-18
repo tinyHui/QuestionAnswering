@@ -31,6 +31,8 @@ python hash_embedding.py
 
 # How To Train & Test
 ## Train
+All train models will be stored inside the ./bin dictionary.
+
 We can use the following command to get the usage manual.
 ```
 python train.py --help

@@ -284,10 +284,10 @@ class ParaphraseWikiAnswer(object):
 
     def __len__(self):
         # full WikiAnswer Paraphrase Questions
-        # return 13710104
+        return 13710104
 
         # main train
-        return 300000
+        # return 300000
 
 
 class ParaphraseMicrosoftRaw(object):
@@ -400,7 +400,10 @@ class ReVerbPairs(object):
         for line in open(self.__file, 'r'):
             if self.__usage == 'train':
                 # train
-                q, a = line.strip().split('\t')
+                try:
+                    q, a = line.strip().split('\t')
+                except ValueError:
+                    pass
             else:
                 # test
                 q_id, q, a, l = line.strip().split('\t')
@@ -454,19 +457,19 @@ class ReVerbPairs(object):
 
         if self.__grams == 1:
             # main train
-            voc_num = {q_indx: 14052, a_indx: 18400}
-            # 3 patterns, use all triples
-            # voc_num = {q_indx: 0, a_indx: 0}
+            # voc_num = {q_indx: 14052, a_indx: 18400}
+            # prove performance of uni-/bi-/tri-grams
+            voc_num = {q_indx: 30027, a_indx: 44267}
         elif self.__grams == 2:
             # main train
-            voc_num = {q_indx: 40820, a_indx: 18400}
-            # 3 patterns, use all triples
-            # voc_num = {q_indx: 0, a_indx: 0}
+            # voc_num = {q_indx: 40820, a_indx: 18400}
+            # prove performance of uni-/bi-/tri-grams
+            voc_num = {q_indx: 126754, a_indx: 44267}
         elif self.__grams == 3:
             # main train
-            voc_num = {q_indx: 45020, a_indx: 18400}
-            # 3 patterns, use all triples
-            # voc_num = {q_indx: 0, a_indx: 0}
+            # voc_num = {q_indx: 45020, a_indx: 18400}
+            # prove performance of uni-/bi-/tri-grams
+            voc_num = {q_indx: 162646, a_indx: 44267}
         return voc_num[i]
 
     def get_usage(self):
@@ -490,13 +493,16 @@ class ReVerbPairs(object):
     def __len__(self):
         if self.__usage == 'train':
             # main train
-            return 269979
+            # return 269979
 
             # 3 patterns, use all triples
-            # return 43133211
+            return 43133211
 
             # full patterns
             # return 117202052
+
+            # prove performance of uni-/bi-/tri-grams
+            # return 1000000
 
         elif self.__usage == 'test':
             return 48910

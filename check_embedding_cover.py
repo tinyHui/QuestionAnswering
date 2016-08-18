@@ -7,8 +7,8 @@ if __name__ == '__main__':
         emb_voc_dict = pkl.load(f)
 
     reverb = ReVerbPairs(usage='train', mode='raw_token', grams=1)
-    para_wiki = ParaphraseWikiAnswer(mode='raw_token', grams=1)
-    para_msr = ParaphraseMicrosoftRaw(mode='raw_token', grams=1)
+    para_wiki = ParaphraseWikiAnswer(mode='raw_token')
+    para_msr = ParaphraseMicrosoftRaw(mode='raw_token')
 
     check_pending_list = [
         ("Question Answer", reverb),
