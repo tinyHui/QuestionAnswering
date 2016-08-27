@@ -5,6 +5,7 @@ from word2vec import WORD_EMBEDDING_FILE
 from nltk.tree import Tree
 import sqlite3
 import re
+import os
 import numpy as np
 
 
@@ -205,6 +206,19 @@ class ReVerbTestRaw(object):
     def __str__(self):
         return "ReVerb test raw"
 
+
+# Gigaword
+class GigawordRaw(object):
+    def __init__(self):
+        self.__folder = '/disk/ocean/public/corpora/english_gigaword_segmented/5.0/data/afp_eng/'
+
+    def __iter__(self):
+        for fname in os.listdir(self.__folder):
+            with open(fname, 'r') as f:
+                for line in f:
+                    content = line.strip()
+                    tokens = content.split(' ')
+                    return tokens
 
 # Word Embedding
 class WordEmbeddingRaw(object):
