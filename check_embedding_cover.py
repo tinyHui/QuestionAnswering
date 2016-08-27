@@ -18,13 +18,15 @@ if __name__ == '__main__':
             model = pkl.load(f)
         embedding_models.append(model)
 
-    reverb = ReVerbPairs(usage='test', mode='raw_token', grams=1)
-    # para_wiki = ParaphraseWikiAnswer(mode='raw_token')
+    reverb_train = ReVerbPairs(usage='test', mode='raw_token', grams=1)
+    reverb_test = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+    para_wiki = ParaphraseWikiAnswer(mode='raw_token')
     # para_msr = ParaphraseMicrosoftRaw(mode='raw_token')
 
     check_pending_list = [
-        ("Question Answer", reverb),
-        # ("WikiAnswer Paraphrase", para_wiki),
+        ("Question Answer Train", reverb_train),
+        ("Question Answer Test", reverb_test),
+        ("WikiAnswer Paraphrase", para_wiki),
         # ("MSR Paraphrase", para_msr),
     ]
 

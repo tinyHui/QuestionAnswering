@@ -214,11 +214,16 @@ class GigawordRaw(object):
 
     def __iter__(self):
         for fname in os.listdir(self.__folder):
-            with open(fname, 'r') as f:
+            fname_abs = os.path.join(self.__folder, fname)
+            with open(fname_abs, 'r') as f:
                 for line in f:
                     content = line.strip()
                     tokens = content.split(' ')
-                    return tokens
+                    yield tokens
+
+    def __len__(self):
+        return 27487013
+
 
 # Word Embedding
 class WordEmbeddingRaw(object):
