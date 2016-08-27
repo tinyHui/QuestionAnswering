@@ -18,21 +18,24 @@ if __name__ == '__main__':
             model = pkl.load(f)
         embedding_models.append(model)
 
-    reverb_train = ReVerbPairs(usage='test', mode='raw_token', grams=1)
-    reverb_test = ReVerbPairs(usage='train', mode='raw_token', grams=1)
-    para_wiki = ParaphraseWikiAnswer(mode='raw_token')
-    # para_msr = ParaphraseMicrosoftRaw(mode='raw_token')
-
-    check_pending_list = [
-        ("Question Answer Train", reverb_train),
-        ("Question Answer Test", reverb_test),
-        ("WikiAnswer Paraphrase", para_wiki),
-        # ("MSR Paraphrase", para_msr),
-    ]
-
     for fname, emb_voc_dict in zip(embedding_models_files, embedding_models):
-        print("For %s" % fname)
+        print("# Result of %s:" % fname)
+
+        reverb_train = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+        reverb_test = ReVerbPairs(usage='test', mode='raw_token', grams=1)
+        para_wiki = ParaphraseWikiAnswer(mode='raw_token')
+        # para_msr = ParaphraseMicrosoftRaw(mode='raw_token')
+
+        check_pending_list = [
+            ("Question Answer Train", reverb_train),
+            ("Question Answer Test", reverb_test),
+            ("WikiAnswer Paraphrase", para_wiki),
+            # ("MSR Paraphrase", para_msr),
+        ]
+
         for description, src_data in check_pending_list:
+            print("# For %s" % description)
+
             voc_num = 0
             unseen_num = 0
 
