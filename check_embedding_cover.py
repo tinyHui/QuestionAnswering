@@ -34,7 +34,7 @@ if __name__ == '__main__':
         ]
 
         for description, src_data in check_pending_list:
-            print("# For %s" % description)
+            print("\n* For %s" % description)
 
             voc_num = 0
             unseen_num = 0
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                             voc_list.append(token)
                             voc_num += 1
 
-            print("\tConsider Appear Times: {}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
+            print("\tConsider Appear Times: {}/{}={}% unseen".format(unseen_num, voc_num, float(unseen_num) / voc_num * 100))
 
             voc_list = set(voc_list)
             unseen_num = 0
@@ -61,4 +61,4 @@ if __name__ == '__main__':
                     _ = emb_voc_dict[token]
                 except KeyError:
                     unseen_num += 1
-            print("\tConsider Only Token: {}: {}/{}={}% unseen".format(description, unseen_num, voc_num, float(unseen_num) / voc_num * 100))
+            print("\tConsider Only Token: {}/{}={}% unseen".format(description, voc_num, float(unseen_num) / voc_num * 100))
