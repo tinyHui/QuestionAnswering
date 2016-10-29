@@ -13,6 +13,9 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 Q_MATRIX = "./bin/Q.%s.pkl"
 A_MATRIX = "./bin/A.%s.pkl"
 
+PARA_1_MATRIX = "./bin/Para1.%s.pkl"
+PARA_2_MATRIX = "./bin/Para2.%s.pkl"
+
 INF_FREQ = 2000  # information message frequency
 PROCESS_NUM = 15
 MAX_HOLD = INF_FREQ / 4
@@ -159,7 +162,6 @@ if __name__ == "__main__":
     parser.add_argument('--CCA_stage', type=int, default=1,
                         help='Define CCA stage number, set as -1 for train paraphrase CCA')
     parser.add_argument('--worker', type=int, default=PROCESS_NUM, help='Process number')
-    parser.add_argument('--large', action='store_true', default=False, help='Process large matrix')
 
     args = parser.parse_args()
     feature = args.feature
@@ -167,7 +169,6 @@ if __name__ == "__main__":
     sparse = args.sparse
     PROCESS_NUM = args.worker
     MAX_HOLD = INF_FREQ // 4
-    need_segment = args.large
 
     mid_fix = feature
 
@@ -180,10 +181,9 @@ if __name__ == "__main__":
         train_two_stage_cca = True
     else:
         train_two_stage_cca = False
-
-    # dump file name
-    Q_MATRIX = Q_MATRIX % mid_fix
-    A_MATRIX = A_MATRIX % mid_fix
+        # dump file name
+        Q_MATRIX = Q_MATRIX % mid_fix
+        A_MATRIX = A_MATRIX % mid_fix
 
     logging.info("constructing train data")
     if sparse:

@@ -4,6 +4,11 @@ import logging
 from scipy.linalg import sqrtm as dense_sqrt
 from scipy.linalg import inv as dense_inv
 from scipy.sparse.linalg import svds
+from preprocess.data import ReVerbPairs
+from word2vec import EMBEDDING_SIZE
+from preprocess.feats import FEATURE_OPTS
+from text2feature import Q_MATRIX, A_MATRIX, PARA_1_MATRIX, PARA_2_MATRIX
+import argparse
 import os
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -55,24 +60,54 @@ def segment_generator(base_fname):
 
 
 if __name__ == '__main__':
-    # the following program is using Numpy cordinate, which is height x width
-    Q_MATRIX = "./bin/Q.avg.pkl"
-    A_MATRIX = "./bin/A.avg.pkl"
-    Q_SEG_MATRIX = Q_MATRIX
-    A_SEG_MATRIX = A_MATRIX
-    ParaMap_MATRIX = "./bin/ParaMap.pkl"
-    MODULE_FNAME = "./bin/CCA.avg.pkl"
+    parser = argparse.ArgumentParser(description='Define training process.')
+    parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
+    parser.add_argument('--stage', type=str, help="Tain paraphrase data/1-stage CCA/2-stage CCA")
 
-    para_1, para_2 = load(ParaMap_MATRIX)                       # R^300 x 300
-    _, para_1_width = para_1.shape
-    _, para_2_width = para_2.shape
-    para_width = para_1_width + para_2_width
+    args = parser.parse_args()
+    feature = args.feature
+    stage_name = args.stage
 
-    c_qq = np.zeros((para_width, para_width))                    # R^600 x 600
-    c_aa = np.zeros((a_width, a_width))                          # R^300 x 300
-    c_qa = np.zeros((para_width, a_width))                       # R^600 x 300
-    for seg_Q, seg_A in zip(segment_generator(Q_SEG_MATRIX),
-                            segment_generator(A_SEG_MATRIX)):
+    if stage_name == "paraphrase":
+        stage = -1
+    elif stage_name == "1stage":
+        stage = 1
+    elif stage_name == "2stage":
+        stage = 2
+    else:
+        raise ValueError("stage can be only set as paraphrase/1stage/2stage")
+
+    if stage == -1:
+        L_SEG_MATRIX = PARA_1_MATRIX % feature
+        R_SEG_MATRIX = PARA_2_MATRIX % feature
+        MODULE_FNAME = "./bin/ParaMap.%s.pkl" % feature
+    else:
+        L_SEG_MATRIX = Q_MATRIX % feature
+        R_SEG_MATRIX = A_MATRIX % feature
+        MODULE_FNAME = "./bin/CCA.%s.pkl" % feature
+
+    sample_num = len(ReVerbPairs(usage='train'))
+
+    if stage == 2:
+        ParaMap_MATRIX = "./bin/ParaMap.pkl"
+        para_1, para_2 = load(ParaMap_MATRIX)                   # R^300 x 300
+        _, para_1_width = para_1.shape
+        _, para_2_width = para_2.shape
+        para_width = para_1_width + para_2_width
+
+        c_qq = np.zeros((para_width, para_width))               # R^600 x 600
+        c_qa = np.zeros((para_width, EMBEDDING_SIZE))           # R^600 x 300
+
+    else:
+        c_qq = np.zeros((EMBEDDING_SIZE, EMBEDDING_SIZE))
+        c_qa = np.zeros((EMBEDDING_SIZE, EMBEDDING_SIZE))
+        para_1 = np.eye(EMBEDDING_SIZE)
+        para_2 = np.eye(EMBEDDING_SIZE)
+
+    c_aa = np.zeros((EMBEDDING_SIZE, EMBEDDING_SIZE))           # R^300 x 300
+
+    for seg_Q, seg_A in zip(segment_generator(L_SEG_MATRIX),
+                            segment_generator(R_SEG_MATRIX)):
         seg_Q = seg_Q.astype('float64')
         seg_A = seg_A.astype('float64')
         logging.info("product with Para map 1")
@@ -83,11 +118,9 @@ if __name__ == '__main__':
         seg_Q_Para_map = np.hstack((seg_Q_Para_map_1, seg_Q_Para_map_2))     # R^10000 x 600
         del seg_Q_Para_map_1, seg_Q_Para_map_2
 
-        logging.info("refresh c_qq")
+        logging.info("refresh c_qq, c_aa, c_qa")
         c_qq += seg_Q_Para_map.T.dot(seg_Q_Para_map)
-        logging.info("refresh c_aa")
         c_aa += seg_A.T.dot(seg_A)
-        logging.info("refresh c_qa")
         c_qa += seg_Q_Para_map.T.dot(seg_A)
 
     logging.info("keep only diagonal")
