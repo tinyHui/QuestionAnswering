@@ -30,6 +30,12 @@ python hash_embedding.py
 ```
 
 # How To Train & Test
+Before executing, we need to compile the Cython code inside ./preprocess/utils.pyx
+```
+cython ./preprocess/utils.pyx
+python setup.py build_ext
+```
+
 ## Train
 All train models will be stored inside the ./bin dictionary.
 
@@ -69,6 +75,8 @@ python train.py --feature avg --CCA_stage 2 --para_map_file ./bin/ParaMap.pkl --
 ```
 
 ## Test
+All result files are located inside ./result folder.
+
 Let’s suppose we put trained model files under ./bin/1_stage and ./bin/2_stage
 ```
 python test.py --CCA_stage 1 --feature avg ./bin/1_stage/CCA.avg.pkl

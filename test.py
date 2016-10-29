@@ -3,7 +3,7 @@ from sys import stdout
 from multiprocessing import Process, Manager,Queue
 from queue import Empty
 from preprocess.feats import FEATURE_OPTS, feats_loader
-from CCA import distance
+from scipy.spatial.distance import cosine
 import argparse
 import pickle as pkl
 import numpy as np
@@ -13,6 +13,12 @@ import os
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 OUTPUT_FILE = './result/reverb-test-with_dist.%s.txt'
 PROCESS_NUM = 20
+
+
+# get distance between the question and answer, return with the answer index
+def distance(proj_q, proj_a):
+    dist = cosine(proj_q, proj_a)
+    return dist
 
 
 def loader(feats_queue, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):

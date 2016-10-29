@@ -1,260 +1,116 @@
-from preprocess.feats import FEATURE_OPTS, feats_loader
-from scipy.sparse import csr_matrix
-from scipy.sparse import vstack as sparse_vstack
 import numpy as np
-from multiprocessing import Queue, Process
-from queue import Empty
-from CCA import xcov, decompose
-import argparse
 import pickle as pkl
 import logging
+from scipy.linalg import sqrtm as dense_sqrt
+from scipy.linalg import inv as dense_inv
+from scipy.sparse.linalg import svds
 import os
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-QA_PAIR_FILE = "./bin/Raw.%s.pkl"
-XCOV_FILE = "./bin/XCOV.%s.pkl"
-CCA_FILE = "./bin/CCA.%s.pkl"
-PARA_MAP_FILE = "./bin/ParaMap.pkl"
-INF_FREQ = 6000  # information message frequency
-PROCESS_NUM = 15
-MAX_HOLD = 1000
 
 
-def generate_part_dense(feats_queue, qa_queue, q_indx, a_indx):
-    Qs = []
-    As = []
-    hold = 0
-    while True:
-        try:
-            d, f = feats_queue.get(timeout=5)
-            feat = f(d)
-
-            Qs.append(feat[q_indx])
-            As.append(feat[a_indx])
-            hold += 1
-            if hold == MAX_HOLD:
-                qa_queue.put((np.asarray(Qs), np.asarray(As)))
-                hold = 0
-                Qs = []
-                As = []
-        except Empty:
-            if Qs:
-                qa_queue.put((np.asarray(Qs), np.asarray(As)))
-            break
+def load(fname):
+    logging.info("Loadding %s" % fname)
+    with open(fname, 'rb') as f:
+        m = pkl.load(f)
+    return m
 
 
-def generate_part_sparse(feats_queue, qa_queue, q_indx, a_indx):
-    Qs = []
-    As = []
-    hold = 0
-    while True:
-        try:
-            d, f = feats_queue.get(timeout=5)
-            feat = f(d)
-
-            Qs.append(feat[q_indx])
-            As.append(feat[a_indx])
-            hold += 1
-            if hold == MAX_HOLD:
-                qa_queue.put((csr_matrix(Qs, dtype='float32'), csr_matrix(As, dtype='float32')))
-                hold = 0
-                Qs = []
-                As = []
-        except Empty:
-            if Qs:
-                qa_queue.put((np.asarray(Qs), np.asarray(As)))
-            break
+def dump(obj, fname):
+    logging.info("Dumping %s" % fname)
+    with open(fname, 'wb') as f:
+        pkl.dump(obj, f, protocol=4)
 
 
-def generate_dense(qa_queue, length):
-    Qs = None
-    As = None
-    count = 0
-    while True:
-        try:
-            Qs_temp, As_temp = qa_queue.get()
-            count += Qs_temp.shape[0]
-            if Qs is None:
-                Qs = Qs_temp
-                As = As_temp
-            else:
-                Qs = np.vstack((Qs, Qs_temp))
-                As = np.vstack((As, As_temp))
-            if count == length:
-                raise Empty
-            if count % INF_FREQ == 0:
-                logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-        except Empty:
-            logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-            break
+def segment_dump(m, base_fname):
+    SEG_HEIGHT = 500000
+    h, _ = m.shape
 
-    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-    return np.asarray(Qs), np.asarray(As)
+    start = 0
+    part_count = 0
+    while start < h:
+        part = m[start:start+SEG_HEIGHT]
+        fname = "{}.part{}".format(base_fname, part_count)
+        dump(part, fname)
+        start += SEG_HEIGHT
+        part_count += 1
 
 
-def generate_sparse(qa_queue, length):
-    Qs = None
-    As = None
-    count = 0
-    while True:
-        try:
-            Qs_temp, As_temp = qa_queue.get()
-            count += Qs_temp.shape[0]
-            if Qs is None:
-                Qs = Qs_temp
-                As = As_temp
-            else:
-                Qs = sparse_vstack((Qs, Qs_temp))
-                As = sparse_vstack((As, As_temp))
-            if count == length:
-                raise Empty
-            if count % INF_FREQ == 0:
-                logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-        except Empty:
-            logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-            break
+def segment_generator(base_fname):
+    fname_list = []
+    main_fpath = os.path.dirname(base_fname)
+    main_fname = os.path.basename(base_fname)
+    for fname in os.listdir(main_fpath):
+        if fname.startswith(main_fname):
+            fname_list.append(fname)
 
-    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
-    return Qs, As
+    file_number = len(fname_list)
+    logging.info("Found %d files" % file_number)
+    for part_count in range(file_number - 1):
+        fname = "{}.part{}".format(base_fname, part_count)
+        with open(fname, 'rb') as f:
+            logging.info("loading: %s, %d/%d" % (fname, part_count+1, len(fname_list)))
+            m = pkl.load(f)
+        yield m
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Define training process.')
-    parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
-    parser.add_argument('--freq', type=int, default=INF_FREQ, help='Information print out frequency')
-    parser.add_argument('--sparse', action='store_true', default=False,
-                        help='Use sparse matrix for C_AA, C_AB and C_BB')
-    parser.add_argument('--svds', type=int, default=-1, help='Define k value for svds, otherwise use full svd')
-    parser.add_argument('--CCA_stage', type=int, default=1,
-                        help='Define CCA stage number, set as -1 for train paraphrase CCA')
-    parser.add_argument('--para_map_file', type=str, default=PARA_MAP_FILE,
-                        help='Define location for CCA model trained by paraphrase question')
-    parser.add_argument('--reuse', default=[], nargs=2, help='Reuse pre-trained data, two arguments: stage file')
-    parser.add_argument('--worker', type=int, default=PROCESS_NUM, help='Process number')
+if __name__ == '__main__':
+    # the following program is using Numpy cordinate, which is height x width
+    Q_MATRIX = "./bin/Q.avg.pkl"
+    A_MATRIX = "./bin/A.avg.pkl"
+    Q_SEG_MATRIX = Q_MATRIX
+    A_SEG_MATRIX = A_MATRIX
+    ParaMap_MATRIX = "./bin/ParaMap.pkl"
+    MODULE_FNAME = "./bin/CCA.avg.pkl"
 
-    args = parser.parse_args()
-    feature = args.feature
-    INF_FREQ = args.freq
-    k = args.svds
-    sparse = args.sparse
-    full_svd = k == -1
-    PROCESS_NUM = args.worker
-    MAX_HOLD = INF_FREQ // 4
+    para_1, para_2 = load(ParaMap_MATRIX)                       # R^300 x 300
+    _, para_1_width = para_1.shape
+    _, para_2_width = para_2.shape
+    para_width = para_1_width + para_2_width
 
-    # middle-fix for dump binary file name
-    mid_fix = feature
+    c_qq = np.zeros((para_width, para_width))                    # R^600 x 600
+    c_aa = np.zeros((a_width, a_width))                          # R^300 x 300
+    c_qa = np.zeros((para_width, a_width))                       # R^600 x 300
+    for seg_Q, seg_A in zip(segment_generator(Q_SEG_MATRIX),
+                            segment_generator(A_SEG_MATRIX)):
+        seg_Q = seg_Q.astype('float64')
+        seg_A = seg_A.astype('float64')
+        logging.info("product with Para map 1")
+        seg_Q_Para_map_1 = seg_Q.dot(para_1)                    # R^10000 x 300
+        logging.info("product with Para map 2")
+        seg_Q_Para_map_2 = seg_Q.dot(para_2)                    # R^10000 x 300
+        logging.info("Join together")
+        seg_Q_Para_map = np.hstack((seg_Q_Para_map_1, seg_Q_Para_map_2))     # R^10000 x 600
+        del seg_Q_Para_map_1, seg_Q_Para_map_2
 
-    # 1/2 stage CCA
-    cca_stage = args.CCA_stage
-    assert cca_stage in [1, 2, -1], "can only use 1 stage CCA or 2 stage CCA"
-    use_paraphrase_map = False
-    if cca_stage == -1:
-        mid_fix = 'paramap'
-        train_two_stage_cca = True
-    else:
-        train_two_stage_cca = False
-        if cca_stage == 2:
-            use_paraphrase_map = True
-            PARA_MAP_FILE = args.para_map_file
-            assert feature in ['avg', 'holographic'], "%s is not supported by 2 stage CCA"
-            assert os.path.exists(PARA_MAP_FILE), "%s not exist" % PARA_MAP_FILE
+        logging.info("refresh c_qq")
+        c_qq += seg_Q_Para_map.T.dot(seg_Q_Para_map)
+        logging.info("refresh c_aa")
+        c_aa += seg_A.T.dot(seg_A)
+        logging.info("refresh c_qa")
+        c_qa += seg_Q_Para_map.T.dot(seg_A)
 
-    # reuse trained model
-    reuse_stage = 0
-    file = None
-    reuse_arg = args.reuse
-    reuse_stages = ['features', 'xcov']
-    if reuse_arg:
-        reuse_stage_name, file = reuse_arg
-        try:
-            reuse_stage = reuse_stages.index(reuse_stage_name) + 1
-        except ValueError:
-            raise AssertionError("reuse can only be set as %s" % " ".join(reuse_stages))
+    logging.info("keep only diagonal")
+    c_qq = np.diag(np.diag(c_qq))                           # R^600 x 600, keep only diagnal values
+    c_aa = np.diag(np.diag(c_aa))                           # R^300 x 300, keep only diagnal values
+    c_qa /= sample_num                                      # R^600 x 300
 
-    # dump file name
-    QA_PAIR_FILE = QA_PAIR_FILE % mid_fix
-    XCOV_FILE = XCOV_FILE % mid_fix
-    if train_two_stage_cca:
-        MODULE_FILE = PARA_MAP_FILE
-    else:
-        if use_paraphrase_map:
-            MODULE_FILE = CCA_FILE % mid_fix
-        else:
-            MODULE_FILE = CCA_FILE % mid_fix
+    logging.info("doing square root and invert for C_AA")
+    c_qq_sqrt = dense_inv(dense_sqrt(c_qq)) / sample_num    # R^600 x 600
+    logging.info("doing square root and invert for C_BB")
+    c_aa_sqrt = dense_inv(dense_sqrt(c_aa)) / sample_num    # R^300 x 300
+    logging.info("C_AA * C_AB * C_BB")
+    result = c_qq_sqrt.dot(c_qa).dot(c_aa_sqrt)             # R^600 x 300
 
-    if reuse_stage == 0:
-        # not reuse half-finished pretrained model
-        logging.info("constructing train data")
-        if sparse:
-            generate_part = generate_part_sparse
-            generate = generate_sparse
-        else:
-            generate_part = generate_part_dense
-            generate = generate_dense
-
-        feats_queue = Queue()
-        qa_queue = Queue()
-        q_indx, a_indx, feats = feats_loader(feature, usage='train', train_two_stage_cca=train_two_stage_cca)
-        length = len(feats)
-
-        p_list = [Process(target=generate_part, args=(feats_queue, qa_queue, q_indx, a_indx))
-                  for i in range(PROCESS_NUM)]
-
-        for p in p_list:
-            p.daemon = True
-            p.start()
-
-        for feat in feats:
-            feats_queue.put(feat)
-
-        Qs, As = generate(qa_queue, length)
-        with open(QA_PAIR_FILE, 'wb') as f:
-            pkl.dump((Qs, As), f, protocol=4)
-
-        for p in p_list:
-            p.join()
-
-    if reuse_stage == 1:
-        # reuse QA pair data
-        logging.info("loading pre-constructed data")
-        assert file is not None
-        with open(file, 'rb') as f:
-            Qs, As = pkl.load(f)
-
-    if sparse:
-        logging.info("using sparse matrix")
-    else:
-        logging.info("using dense matrix")
-
-    if use_paraphrase_map:
-        logging.info("load paraphrase questions data")
-        with open(PARA_MAP_FILE, 'rb') as f:
-            paraphrase_map_U, paraphrase_map_V = pkl.load(f)
-        logging.info("project question matrix use paraphrase questions")
-        Qs1 = Qs.dot(paraphrase_map_U)
-        Qs2 = Qs.dot(paraphrase_map_V)
-        Qs = np.hstack((Qs1, Qs2))
-
-    if 0 <= reuse_stage <= 1:
-        c_qq_sqrt, c_aa_sqrt, result = xcov(Qs, As, sparse=sparse)
-        with open(XCOV_FILE, 'wb') as f:
-            pkl.dump((c_qq_sqrt, c_aa_sqrt, result), f, protocol=4)
-
-    if reuse_stage == 2:
-        logging.info("loading pre-trained xcov")
-        assert file is not None
-        with open(file, 'rb') as f:
-            c_qq_sqrt, c_aa_sqrt, result = pkl.load(f)
-
+    k = 100
+    logging.info("decompose on cross covariant matrix \in R^%d x %d" % (result.shape[0], result.shape[1]))
+    full_svd = True
     if full_svd:
-        logging.info("running CCA, using full SVD")
+        U, s, V = np.linalg.svd(result, full_matrices=False)    # U \in R^600 x
+                                                                # V \in R^k x 300
     else:
-        logging.info("running CCA, using SVDs, k=%d" % k)
+        U, s, V = svds(result, k=k)
 
-    Q_k, A_k = decompose(c_qq_sqrt, c_aa_sqrt, result, full_svd=full_svd, k=k)
-
-    with open(MODULE_FILE, 'wb') as f:
-        pkl.dump((Q_k, A_k), f, protocol=4)
-
-    logging.info("Done")
-
+    Q_k = c_qq_sqrt.dot(U)                                      # R^600 x k
+    A_k = c_aa_sqrt.dot(V.T)                                    # R^300 x k
+    dump((Q_k, A_k), MODULE_FNAME)

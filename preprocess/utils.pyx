@@ -1,8 +1,8 @@
 from libc.stdlib cimport free
 import numpy as np
 cimport numpy as np
-DTYPE = np.float32
-ctypedef np.float32_t DTYPE_t
+DTYPE = np.float64
+ctypedef np.float64_t DTYPE_t
 
 cdef class Utils(object):
     cdef np.ndarray avg_emb_cdef(self, list sentence, unsigned int EMBEDDING_SIZE):
