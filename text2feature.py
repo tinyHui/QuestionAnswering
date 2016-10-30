@@ -38,8 +38,7 @@ def generate_part_dense(feats_queue, qa_queue, q_indx, a_indx):
     hold = 0
     while True:
         try:
-            d, f = feats_queue.get(timeout=5)
-            feat = f(d)
+            feat = feats_queue.get(timeout=5)
 
             Qs.append(feat[q_indx])
             As.append(feat[a_indx])
@@ -63,8 +62,7 @@ def generate_part_sparse(feats_queue, qa_queue, q_indx, a_indx):
     hold = 0
     while True:
         try:
-            d, f = feats_queue.get(timeout=5)
-            feat = f(d)
+            feat = feats_queue.get(timeout=5)
 
             Qs.append(feat[q_indx])
             As.append(feat[a_indx])
@@ -81,58 +79,59 @@ def generate_part_sparse(feats_queue, qa_queue, q_indx, a_indx):
     logging.info("Stop part consumer")
 
 
-def generate_dense(qa_queue, length):
+def generate_dense(qa_queue, length, l_matrix_fname, r_matrix_fname):
     logging.info("Start consumer")
     Qs = []
     As = []
     part_file_count = 0
-    count = 0
+    part_count = 0
+    overall_count = 0
     while True:
         try:
-            Qs_temp, As_temp = qa_queue.get(timeout=480)
-            count += Qs_temp.shape[0]
+            Qs_temp, As_temp = qa_queue.get(timeout=120)
+            part_count += Qs_temp.shape[0]
+            overall_count += Qs_temp.shape[0]
             Qs.append(Qs_temp)
             As.append(As_temp)
-            if count == length:
+            if overall_count == length:
                 raise Empty
-            if count % INF_FREQ == 0:
-                logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+            if overall_count % INF_FREQ == 0:
+                logging.info("loading: %d/%d, %.2f%%" % (overall_count, length, overall_count / length * 100))
 
-            if count >= MAX_PART_H:
-                part_Qs = np.vstack(Qs[:count])
-                Qs = Qs[count:]
-                with open("{}.part{}".format(Q_MATRIX, part_file_count), 'wb') as f:
+            if part_count >= MAX_PART_H:
+                part_Qs = np.vstack(Qs[:MAX_PART_H])
+                Qs = Qs[MAX_PART_H:]
+                with open("{}.part{}".format(l_matrix_fname, part_file_count), 'wb') as f:
                     pkl.dump(part_Qs, f, protocol=4)
 
-                part_As = np.vstack(As[:count])
-                As = As[count:]
-                with open("{}.part{}".format(A_MATRIX, part_file_count), 'wb') as f:
+                part_As = np.vstack(As[:MAX_PART_H])
+                As = As[MAX_PART_H:]
+                with open("{}.part{}".format(r_matrix_fname, part_file_count), 'wb') as f:
                     pkl.dump(part_As, f, protocol=4)
 
-                count -= MAX_PART_H
+                part_count -= MAX_PART_H
+                part_file_count += 1
 
         except Empty:
-            logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
+            logging.info("loading: %d/%d, %.2f%%" % (overall_count, length, overall_count / length * 100))
+            with open("{}.part{}".format(l_matrix_fname, part_file_count), 'wb') as f:
+                pkl.dump(Qs, f, protocol=4)
+            with open("{}.part{}".format(r_matrix_fname, part_file_count), 'wb') as f:
+                pkl.dump(As, f, protocol=4)
             break
 
-    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
     logging.info("Stop consumer")
     logging.info("saving the list version of features")
-    Qs_m = np.vstack(Qs)
-    del Qs
-    As_m = np.vstack(As)
-    del As
-    return Qs_m, As_m
 
 
-def generate_sparse(qa_queue, length):
+def generate_sparse(qa_queue, length, l_matrix_fname, r_matrix_fname):
     logging.info("Start consumer")
     Qs = None
     As = None
     count = 0
     while True:
         try:
-            Qs_temp, As_temp = qa_queue.get(timeout=480)
+            Qs_temp, As_temp = qa_queue.get(timeout=120)
             count += Qs_temp.shape[0]
             if Qs is None:
                 Qs = Qs_temp
@@ -148,9 +147,11 @@ def generate_sparse(qa_queue, length):
             logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
             break
 
-    logging.info("loading: %d/%d, %.2f%%" % (count, length, count / length * 100))
     logging.info("Stop consumer")
-    return Qs, As
+    with open(l_matrix_fname, 'wb') as f:
+        pkl.dump(Qs, f, protocol=4)
+    with open(r_matrix_fname, 'wb') as f:
+        pkl.dump(As, f, protocol=4)
 
 
 if __name__ == "__main__":
@@ -177,13 +178,15 @@ if __name__ == "__main__":
     assert cca_stage in [1, 2, -1], "can only use 1 stage CCA or 2 stage CCA"
     use_paraphrase_map = False
     if cca_stage == -1:
-        mid_fix = 'paramap'
         train_two_stage_cca = True
+        # dump file name
+        l_matrix_fname = PARA_1_MATRIX % mid_fix
+        r_matrix_fname = PARA_2_MATRIX % mid_fix
     else:
         train_two_stage_cca = False
         # dump file name
-        Q_MATRIX = Q_MATRIX % mid_fix
-        A_MATRIX = A_MATRIX % mid_fix
+        l_matrix_fname = Q_MATRIX % mid_fix
+        r_matrix_fname = A_MATRIX % mid_fix
 
     logging.info("constructing train data")
     if sparse:
@@ -208,7 +211,7 @@ if __name__ == "__main__":
         p.daemon = True
         p.start()
 
-    generate(qa_queue, length)
+    generate(qa_queue, length, l_matrix_fname, r_matrix_fname)
 
     for p in p_list:
         p.join()

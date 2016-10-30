@@ -41,20 +41,26 @@ def segment_dump(m, base_fname):
         part_count += 1
 
 
-def segment_generator(base_fname):
-    fname_list = []
-    main_fpath = os.path.dirname(base_fname)
-    main_fname = os.path.basename(base_fname)
-    for fname in os.listdir(main_fpath):
-        if fname.startswith(main_fname):
-            fname_list.append(fname)
+def segment_generator(base_fname, use_segment):
+    if use_segment:
+        fname_list = []
+        main_fpath = os.path.dirname(base_fname)
+        main_fname = os.path.basename(base_fname)
+        for fname in os.listdir(main_fpath):
+            if fname.startswith(main_fname):
+                fname_list.append(fname)
 
-    file_number = len(fname_list)
-    logging.info("Found %d files" % file_number)
-    for part_count in range(file_number - 1):
-        fname = "{}.part{}".format(base_fname, part_count)
-        with open(fname, 'rb') as f:
-            logging.info("loading: %s, %d/%d" % (fname, part_count+1, len(fname_list)))
+        file_number = len(fname_list)
+        logging.info("Found %d files" % file_number)
+        for part_count in range(file_number - 1):
+            fname = "{}.part{}".format(base_fname, part_count)
+            with open(fname, 'rb') as f:
+                logging.info("loading: %s, %d/%d" % (fname, part_count+1, len(fname_list)))
+                m = pkl.load(f)
+            yield m
+    else:
+        with open(base_fname, 'rb') as f:
+            logging.info("loading: %s, no segment files" % base_fname)
             m = pkl.load(f)
         yield m
 
@@ -63,10 +69,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Define training process.')
     parser.add_argument('--feature', type=str, default='unigram', help="Feature option: %s" % (", ".join(FEATURE_OPTS)))
     parser.add_argument('--stage', type=str, help="Tain paraphrase data/1-stage CCA/2-stage CCA")
+    parser.add_argument('--segment', action='store_true', default=False, help="Target matrix stored in segments")
 
     args = parser.parse_args()
     feature = args.feature
     stage_name = args.stage
+    use_segment = args.segment
 
     if stage_name == "paraphrase":
         stage = -1
@@ -106,8 +114,8 @@ if __name__ == '__main__':
 
     c_aa = np.zeros((EMBEDDING_SIZE, EMBEDDING_SIZE))           # R^300 x 300
 
-    for seg_Q, seg_A in zip(segment_generator(L_SEG_MATRIX),
-                            segment_generator(R_SEG_MATRIX)):
+    for seg_Q, seg_A in zip(segment_generator(L_SEG_MATRIX, use_segment),
+                            segment_generator(R_SEG_MATRIX, use_segment)):
         seg_Q = seg_Q.astype('float64')
         seg_A = seg_A.astype('float64')
         logging.info("product with Para map 1")

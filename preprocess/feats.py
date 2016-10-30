@@ -121,7 +121,7 @@ class Ngram(object):
 
     def __iter__(self):
         for d in self.data:
-            yield d, self.__generate__
+            yield self.__generate__(d)
 
     def __generate__(self, d):
             param_num = len(d)
@@ -170,7 +170,7 @@ class AvgEmbedding(object):
 
     def __iter__(self):
         for d in self.data:
-            yield d, self.__generate__
+            yield self.__generate__(d)
 
     def __generate__(self, d):
             param_num = len(d)
@@ -202,10 +202,9 @@ class Holographic(object):
 
     def __iter__(self):
         for d_emb, d_struct in zip(self.data_emb, self.data_struct):
-            yield (d_emb, d_struct), self.__generate__
+            yield self.__generate__(d_emb, d_struct)
 
-    def __generate__(self, d):
-            d_emb, d_struct = d
+    def __generate__(self, d_emb, d_struct):
             # assert len(d_emb) == len(d_struct)
             param_num = len(d_emb)
             feat = [None] * param_num

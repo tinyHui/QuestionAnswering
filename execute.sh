@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -u
 set -e
 set -v
@@ -16,7 +17,7 @@ env/bin/python hash_embedding.py
 
 # get paragraph Q projector vector
 env/bin/python text2feature.py --feature avg --CCA_stage -1 --worker 40 --freq 2000
-env/bin/python train.py --feature avg --stage 1stage
+env/bin/python train.py --feature avg --stage paraphrase
 
 # train 2-stage CCA
 env/bin/python text2feature.py --feature avg --CCA_stage 2 --worker 40 --freq 2000
