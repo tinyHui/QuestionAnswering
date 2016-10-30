@@ -6,7 +6,6 @@ from nltk.tree import Tree
 import sqlite3
 import re
 import os
-import numpy as np
 import logging
 
 
@@ -267,8 +266,8 @@ class WordEmbeddingRaw(object):
 
 # paraphrase
 class ParaphraseWikiAnswer(object):
-    def __init__(self, mode='raw'):
-        if mode not in ['raw', 'embedding', 'structure']:
+    def __init__(self, mode='raw_token'):
+        if mode not in ['raw', 'raw_token', 'embedding', 'structure']:
             raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
 
         if mode == 'embedding':
@@ -288,13 +287,16 @@ class ParaphraseWikiAnswer(object):
     def __iter__(self):
         for line in open(self.__file, 'r'):
             q1, q2 = line.strip().split('\t')
+            q1 = no_symbol(q1)
+            q2 = no_symbol(q2)
+
             if self.__mode == 'raw':
-                yield no_symbol(q1), no_symbol(q2)
+                yield q1, q2
                 continue
 
             # to token
             if self.__mode == 'raw_token':
-                q1_tokens, q2_tokens = [no_symbol(s).split() for s in [q1, q2]]
+                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
                 yield q1_tokens, q2_tokens
             elif self.__mode == 'embedding':
                 q1_tokens = [word2hash(token, self.voc_dict) for token in q1]

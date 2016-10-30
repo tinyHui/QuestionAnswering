@@ -118,18 +118,25 @@ if __name__ == '__main__':
                             segment_generator(R_SEG_MATRIX, use_segment)):
         seg_Q = seg_Q.astype('float64')
         seg_A = seg_A.astype('float64')
-        logging.info("product with Para map 1")
-        seg_Q_Para_map_1 = seg_Q.dot(para_1)                    # R^10000 x 300
-        logging.info("product with Para map 2")
-        seg_Q_Para_map_2 = seg_Q.dot(para_2)                    # R^10000 x 300
-        logging.info("Join together")
-        seg_Q_Para_map = np.hstack((seg_Q_Para_map_1, seg_Q_Para_map_2))     # R^10000 x 600
-        del seg_Q_Para_map_1, seg_Q_Para_map_2
+        if stage == 2:
+            logging.info("product with Para map 1")
+            seg_Q_Para_map_1 = seg_Q.dot(para_1)                    # R^10000 x 300
+            logging.info("product with Para map 2")
+            seg_Q_Para_map_2 = seg_Q.dot(para_2)                    # R^10000 x 300
+            logging.info("Join together")
+            seg_Q_Para_map = np.hstack((seg_Q_Para_map_1, seg_Q_Para_map_2))     # R^10000 x 600
+            del seg_Q_Para_map_1, seg_Q_Para_map_2
 
         logging.info("refresh c_qq, c_aa, c_qa")
-        c_qq += seg_Q_Para_map.T.dot(seg_Q_Para_map)
-        c_aa += seg_A.T.dot(seg_A)
-        c_qa += seg_Q_Para_map.T.dot(seg_A)
+
+        if stage == 2:
+            c_qq += seg_Q_Para_map.T.dot(seg_Q_Para_map)
+            c_aa += seg_A.T.dot(seg_A)
+            c_qa += seg_Q_Para_map.T.dot(seg_A)
+        else:
+            c_qq += seg_Q.T.dot(seg_Q)
+            c_aa += seg_A.T.dot(seg_A)
+            c_qa += seg_Q.T.dot(seg_A)
 
     logging.info("keep only diagonal")
     c_qq = np.diag(np.diag(c_qq))                           # R^600 x 600, keep only diagnal values

@@ -1,6 +1,6 @@
 if __name__ == "__main__":
-    from preprocess.data import ParaphraseWikiAnswer, UNKNOWN_TOKEN
-    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE
+    from preprocess.data import UNKNOWN_TOKEN
+    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE, Combine
     from preprocess.data import WordEmbeddingRaw
     from collections import defaultdict
     import pickle as pkl
@@ -35,12 +35,11 @@ if __name__ == "__main__":
     # get token occur time
     logging.info("calculating embedding for UNKNOWN token")
     token_occur_count = defaultdict(int)
-    src_data = ParaphraseWikiAnswer(mode='raw')
+    src_data = Combine()
     for line in src_data:
-        for i in src_data.sent_indx:
-            for token in line[i]:
-                token_occur_count[token] += 1
-    
+        for token in line:
+            token_occur_count += 1
+
     unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float64')
     unknown_count = 0
     low_freq_token_list = []
@@ -54,7 +53,8 @@ if __name__ == "__main__":
             except KeyError:
                 continue
     # get average of embedding
-    unknown_emb /= float(unknown_count)
+    if unknown_count > 0:
+        unknown_emb /= float(unknown_count)
     word_emb_hash[UNKNOWN_TOKEN] = unknown_emb
     
     logging.info("Saving word embedding dictionary")
