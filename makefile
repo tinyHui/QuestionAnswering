@@ -1,6 +1,6 @@
 clean:
-	rm -f utils.*.so
-	rm -f utils.c
-	rm -rf build
+	rm -f preprocess/utils.*.so
+	rm -rf build/
+	rm -f preprocess/utils.c
 all:
-	python setup.py build_ext --inplace
+	env/bin/python setup.py build_ext --inplace
