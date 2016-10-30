@@ -4,22 +4,9 @@ LOW_FREQ_TOKEN_FILE = './bin/unigram_low_freq_voc.pkl'
 EMBEDDING_SIZE = 300
 
 
-# combine gigaword and paraphrase
-class Combine(object):
-    def __iter__(self):
-        data = ParaphraseWikiAnswer(mode='raw_token')
-        for line in data:
-            for i in data.sent_indx:
-                yield line[i]
-
-        data = GigawordRaw()
-        for line in data:
-            yield line
-
-
 if __name__ == "__main__":
+    from preprocess.data import Combine
     from gensim.models import Word2Vec
-    from preprocess.data import GigawordRaw, ParaphraseWikiAnswer
     import os
     import sys
     import logging

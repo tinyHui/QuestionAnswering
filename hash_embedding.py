@@ -1,6 +1,6 @@
 if __name__ == "__main__":
-    from preprocess.data import UNKNOWN_TOKEN
-    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE, Combine
+    from preprocess.data import UNKNOWN_TOKEN, Combine
+    from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE
     from preprocess.data import WordEmbeddingRaw
     from collections import defaultdict
     import pickle as pkl
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     src_data = Combine()
     for line in src_data:
         for token in line:
-            token_occur_count += 1
+            token_occur_count[token] += 1
 
     unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float64')
     unknown_count = 0

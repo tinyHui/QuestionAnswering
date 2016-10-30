@@ -17,11 +17,11 @@ env/bin/python hash_embedding.py
 
 # get paragraph Q projector vector
 env/bin/python text2feature.py --feature avg --CCA_stage -1 --worker 40 --freq 2000
-env/bin/python train.py --feature avg --stage paraphrase
+env/bin/python train.py --feature avg --stage paraphrase --segment
 
 # train 2-stage CCA
 env/bin/python text2feature.py --feature avg --CCA_stage 2 --worker 40 --freq 2000
-env/bin/python train.py --feature avg --stage 2stage
+env/bin/python train.py --feature avg --stage 2stage --segment
 
 # test
 env/bin/python test.py --CCA_stage 2 --feature avg ./bin/2_stage/CCA.avg.pkl --para_map_file ./bin/2_stage/ParaMap.pkl
