@@ -14,8 +14,7 @@ source env/bin/activate
 
 # hash to embedding
 # python word2vec.py
-# python hash_embedding.py
-# python raw_converter.py --mode embedding
+python hash_embedding.py
 
 # get paragraph Q projector vector
 python text2feature.py --feature avg --CCA_stage -1 --worker 40 --freq 2000
