@@ -26,7 +26,7 @@ if __name__ == "__main__":
         sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
         sys.stdout.flush()
         line_num += 1
-        word_emb_hash[w] = np.asarray(emb, dtype='float32')
+        word_emb_hash[w] = np.asarray(emb, dtype='float64')
     sys.stdout.write("\n")
 
     #
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             for token in line[i]:
                 token_occur_count[token] += 1
     
-    unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float32')
+    unknown_emb = np.zeros(EMBEDDING_SIZE, dtype='float64')
     unknown_count = 0
     low_freq_token_list = []
     for token, occur_count in token_occur_count.items():
