@@ -52,7 +52,7 @@ def segment_generator(base_fname, use_segment):
 
         file_number = len(fname_list)
         logging.info("Found %d files" % file_number)
-        for part_count in range(file_number - 1):
+        for part_count in range(file_number):
             fname = "{}.part{}".format(base_fname, part_count)
             with open(fname, 'rb') as f:
                 logging.info("loading: %s, %d/%d" % (fname, part_count+1, len(fname_list)))
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     sample_num = len(ReVerbPairs(usage='train'))
 
     if stage == 2:
-        ParaMap_MATRIX = "./bin/ParaMap.pkl"
+        ParaMap_MATRIX = "./bin/ParaMap.%s.pkl" % feature
         para_1, para_2 = load(ParaMap_MATRIX)                   # R^300 x 300
         _, para_1_width = para_1.shape
         _, para_2_width = para_2.shape
@@ -123,7 +123,7 @@ if __name__ == '__main__':
             seg_Q_Para_map_1 = seg_Q.dot(para_1)                    # R^10000 x 300
             logging.info("product with Para map 2")
             seg_Q_Para_map_2 = seg_Q.dot(para_2)                    # R^10000 x 300
-            logging.info("Join together")
+            logging.info("join together")
             seg_Q_Para_map = np.hstack((seg_Q_Para_map_1, seg_Q_Para_map_2))     # R^10000 x 600
             del seg_Q_Para_map_1, seg_Q_Para_map_2
 

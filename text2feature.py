@@ -115,9 +115,9 @@ def generate_dense(qa_queue, length, l_matrix_fname, r_matrix_fname):
         except Empty:
             logging.info("loading: %d/%d, %.2f%%" % (overall_count, length, overall_count / length * 100))
             with open("{}.part{}".format(l_matrix_fname, part_file_count), 'wb') as f:
-                pkl.dump(Qs, f, protocol=4)
+                pkl.dump(np.vstack(Qs), f, protocol=4)
             with open("{}.part{}".format(r_matrix_fname, part_file_count), 'wb') as f:
-                pkl.dump(As, f, protocol=4)
+                pkl.dump(np.vstack(As), f, protocol=4)
             break
 
     logging.info("Stop consumer")

@@ -24,10 +24,9 @@ def distance(proj_q, proj_a):
 def loader(feats_queue, results, length, Q_k=None, A_k=None, use_paraphrase_map=False, Q1_k=None, Q2_k=None):
     while True:
         try:
-            indx, (d, f) = feats_queue.get(timeout=5)
+            indx, feat = feats_queue.get(timeout=5)
             stdout.write("\rTesting: %d/%d" % (indx+1, length))
             stdout.flush()
-            feat = f(d)
             _, crt_q_v, crt_a_v, _ = feat
             if Q_k is not None and A_k is not None:
                 if use_paraphrase_map:

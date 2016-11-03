@@ -24,5 +24,6 @@ env/bin/python text2feature.py --feature avg --CCA_stage 2 --worker 40 --freq 20
 env/bin/python train.py --feature avg --stage 2stage --segment
 
 # test
-env/bin/python test.py --CCA_stage 2 --feature avg ./bin/2_stage/CCA.avg.pkl --para_map_file ./bin/2_stage/ParaMap.pkl
-sh run_eval.sh ./data/questions.txt ./data/labels.txt ./result/2_stage/reverb-test-with_dist.avg.txt
+env/bin/python test.py --CCA_stage 2 --feature avg ./bin/CCA.avg.pkl --para_map_file ./bin/ParaMap.avg.pkl
+sh run_eval.sh ./data/questions.txt ./data/labels.txt ./result/2_stage/reverb-test-with_dist.avg.txt > ./result/best.txt
+cat ./result/best.txt

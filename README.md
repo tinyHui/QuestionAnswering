@@ -83,7 +83,7 @@ python test.py --CCA_stage 1 --feature avg ./bin/1_stage/CCA.avg.pkl
 ```
 
 ```
-python test.py --CCA_stage 2 --feature avg ./bin/2_stage/CCA.avg.pkl --para_map_file ./bin/2_stage/ParaMap.pk
+python test.py --CCA_stage 2 --feature avg ./bin/2_stage/CCA.avg.pkl --para_map_file ./bin/2_stage/ParaMap.pkl
 ```
 
 ```
