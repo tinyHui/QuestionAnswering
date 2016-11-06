@@ -1,11 +1,11 @@
-WORD_EMBEDDING_FILE = './data/embedding.gigapara.txt'
+WORD_EMBEDDING_FILE = './data/embedding.Gigaword.txt'
 WORD_EMBEDDING_BIN_FILE = './bin/unigram_embedding.pkl'
 LOW_FREQ_TOKEN_FILE = './bin/unigram_low_freq_voc.pkl'
 EMBEDDING_SIZE = 300
 
 
 if __name__ == "__main__":
-    from preprocess.data import Combine
+    from preprocess.data import GigawordRaw
     from gensim.models import Word2Vec
     import os
     import sys
@@ -17,7 +17,7 @@ if __name__ == "__main__":
         logging.info("Word embedding text file exists, exit")
         sys.exit(0)
 
-    sentences = Combine()
+    sentences = GigawordRaw()
     # calculate embedding vector
     logging.info("Generating embedding vectors")
     model = Word2Vec(sentences, size=EMBEDDING_SIZE, window=5, min_count=1, workers=40)

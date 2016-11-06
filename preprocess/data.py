@@ -499,15 +499,3 @@ class ReVerbPairs(object):
 
     def __str__(self):
         return "ReVerb QA pairs"
-
-
-class Combine(object):
-    def __iter__(self):
-        data = ParaphraseWikiAnswer(mode='proc_token')
-        for line in data:
-            for i in data.sent_indx:
-                yield line[i]
-
-        data = GigawordRaw()
-        for line in data:
-            yield line

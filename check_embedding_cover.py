@@ -21,7 +21,7 @@ if __name__ == '__main__':
     for fname, emb_voc_dict in zip(embedding_models_files, embedding_models):
         print("# Result of %s:" % fname)
 
-        reverb_train = ReVerbPairs(usage='train', mode='raw_token', grams=1)
+        reverb_train = ReVerbPairs(usage='train', mode='proc_token', grams=1)
         reverb_test = ReVerbPairs(usage='test', mode='raw_token', grams=1)
         para_wiki = ParaphraseWikiAnswer(mode='raw_token')
         # para_msr = ParaphraseMicrosoftRaw(mode='raw_token')

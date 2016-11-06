@@ -1,5 +1,5 @@
 if __name__ == "__main__":
-    from preprocess.data import UNKNOWN_TOKEN, Combine
+    from preprocess.data import UNKNOWN_TOKEN, GigawordRaw
     from word2vec import WORD_EMBEDDING_BIN_FILE, EMBEDDING_SIZE, LOW_FREQ_TOKEN_FILE
     from preprocess.data import WordEmbeddingRaw
     from collections import defaultdict
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # get token occur time
     logging.info("calculating embedding for UNKNOWN token")
     token_occur_count = defaultdict(int)
-    src_data = Combine()
+    src_data = GigawordRaw()
     for line in src_data:
         for token in line:
             token_occur_count[token] += 1
