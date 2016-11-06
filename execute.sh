@@ -13,7 +13,7 @@ set -v
 # env/bin/python hash_index.py --source para
 
 # hash to embedding
-# env/bin/python word2vec.py
+env/bin/python word2vec.py
 env/bin/python hash_embedding.py
 
 # get paragraph Q projector vector

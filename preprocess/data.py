@@ -237,6 +237,7 @@ class GigawordRaw(object):
             with open(fname_abs, 'r') as f:
                 for line in f:
                     content = line.strip()
+                    content = tokenize(content)
                     tokens = content.split()
                     yield tokens
 
