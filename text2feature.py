@@ -114,10 +114,12 @@ def generate_dense(qa_queue, length, l_matrix_fname, r_matrix_fname):
 
         except Empty:
             logging.info("loading: %d/%d, %.2f%%" % (overall_count, length, overall_count / length * 100))
+            part_Qs = np.vstack(Qs)
             with open("{}.part{}".format(l_matrix_fname, part_file_count), 'wb') as f:
-                pkl.dump(np.vstack(Qs), f, protocol=4)
+                pkl.dump(part_Qs, f, protocol=4)
+            part_As = np.vstack(As)
             with open("{}.part{}".format(r_matrix_fname, part_file_count), 'wb') as f:
-                pkl.dump(np.vstack(As), f, protocol=4)
+                pkl.dump(part_As, f, protocol=4)
             break
 
     logging.info("Stop consumer")

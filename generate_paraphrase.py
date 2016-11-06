@@ -49,6 +49,10 @@ if __name__ == '__main__':
                     _, q, _, lemma = content.split('\t')
                     # remove symbols
                     q = no_symbol(q)
+                    # replace "' '" to ""
+                    q = q.replace(" ' ' ", " ")
+                    # uppercase first letter
+                    q = q.capitalize()
 
                     # get corresponde lemma sentences
                     q_para_lemma_list = para_lemma_map[lemma]
@@ -60,6 +64,10 @@ if __name__ == '__main__':
 
                         # remove symbols
                         q_para = no_symbol(q_para)
+                        # remove symbols
+                        q_para = q_para.replace(" ' ' ", " ")
+                        # uppercase first letter
+                        q_para = q_para.capitalize()
 
                         # record down
                         fw.write("{}\t{}\n".format(q, q_para))

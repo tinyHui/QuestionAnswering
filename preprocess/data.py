@@ -31,13 +31,14 @@ def tokenize(raw):
     TIME = r'[0-2]?[0-9]:[0-5][0-9][ \-]?(am|pm)?'
     MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
     PRESENT = r'[-+]?\d+(\,\d+)?(\.\d+)?[ \-]?\%'
-    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?(st|nd|rd|th)?'
+    METRIC = r'\d+ ?(ml|cc|l)'
+    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?( \d+)?(st|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     SPACES = r' +'
     # replace all matched phrase to TOKEN name
     RE_SET = [(DATE, ' DATE '), (YEAR, ' DATE '), (TIME, ' TIME '), (MONEY, ' MONEY '),
-              (PRESENT, ' PRESENT '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '), (SPACES, ' ')]
+              (PRESENT, ' PRESENT '), (METRIC, ' MTC '), (NUMBER, ' NUM '), (EMAIL, ' EMAIL '), (SPACES, ' '), (SPACES, ' ')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = s.strip()
@@ -49,7 +50,9 @@ def no_symbol(s):
     SYM = r'(\.|\?|\$|\#|\&|\,|\!|\;|\`|\~|\"|\\|\:|\+|\-|\*|\/)'
     SYM_AT = r'\@'
     SPACES = r' +'
-    RE_SET = [(GRAMMAR_SYM, ' \\1'), (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' ')]
+    START_QUOTE = r'^[\' ]+'
+    END_QUOTE = r'[\' ]+$'
+    RE_SET = [(GRAMMAR_SYM, ' \\1'), (SYM, ' '), (SYM_AT, ' at '), (SPACES, ' '), (START_QUOTE, ''), (END_QUOTE, '')]
     for p, t in RE_SET:
         s = re.sub(p, t, s)
     s = s.strip()
@@ -267,8 +270,8 @@ class WordEmbeddingRaw(object):
 # paraphrase
 class ParaphraseWikiAnswer(object):
     def __init__(self, mode='raw_token'):
-        if mode not in ['raw', 'raw_token', 'embedding', 'structure']:
-            raise AttributeError("Mode can be only 'raw', 'embedding', 'structure'")
+        if mode not in ['raw', 'raw_token', 'proc_token', 'embedding', 'structure']:
+            raise AttributeError("Mode can be only 'raw', 'raw_token', 'proc_token', 'embedding', 'structure'")
 
         if mode == 'embedding':
             import pickle as pkl
@@ -293,6 +296,10 @@ class ParaphraseWikiAnswer(object):
             if self.__mode == 'raw':
                 yield q1, q2
                 continue
+
+            if self.__mode in ['proc_token', 'embedding']:
+                q1 = tokenize(q1)
+                q2 = tokenize(q2)
 
             # to token
             if self.__mode == 'raw_token':
@@ -321,7 +328,7 @@ class ParaphraseWikiAnswer(object):
 
     def __len__(self):
         # full WikiAnswer Paraphrase Questions
-        return 13710104
+        return 13710072
 
         # main train
         # return 300000
@@ -395,7 +402,7 @@ class ReVerbPairs(object):
                     # test
                     yield (q_id, q, a, l)
             else:
-                if self.__mode == 'proc_token':
+                if self.__mode in ['proc_token', 'embedding']:
                     q = tokenize(q)
                     a = tokenize(a)
 
@@ -496,7 +503,7 @@ class ReVerbPairs(object):
 
 class Combine(object):
     def __iter__(self):
-        data = ParaphraseWikiAnswer(mode='raw_token')
+        data = ParaphraseWikiAnswer(mode='proc_token')
         for line in data:
             for i in data.sent_indx:
                 yield line[i]
