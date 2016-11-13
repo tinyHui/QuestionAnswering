@@ -13,8 +13,8 @@ set -v
 # env/bin/python hash_index.py --source para
 
 # hash to embedding
-env/bin/python word2vec.py
-env/bin/python hash_embedding.py
+# env/bin/python word2vec.py
+# env/bin/python hash_embedding.py
 
 # get paragraph Q projector vector
 env/bin/python text2feature.py --feature avg --CCA_stage -1 --worker 40 --freq 2000

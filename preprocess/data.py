@@ -14,6 +14,9 @@ UNKNOWN_TOKEN_INDX = 0
 
 
 def tokenize(raw):
+    if raw.upper() == raw:
+        return raw
+
     # to lower case
     s = raw.lower()
 
@@ -32,7 +35,7 @@ def tokenize(raw):
     MONEY = r'\$[ \-]?\d+(\,\d+)?\.?\d+'
     PRESENT = r'[-+]?\d+(\,\d+)?(\.\d+)?[ \-]?\%'
     METRIC = r'\d+ ?(ml|cc|l)'
-    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?( \d+)?(st|nd|rd|th)?'
+    NUMBER = r'[-+]?\d+(\,\d+)?(\.\d+)?( \d+)?(stz|nd|rd|th)?'
     EMAIL = r'[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+' \
             r'(\.[a-z0-9-]+)*\.(([0-9]{1,3})|([a-z]{2,3})|(aero|coop|info|museum|name))'
     SPACES = r' +'
@@ -237,6 +240,7 @@ class GigawordRaw(object):
             with open(fname_abs, 'r') as f:
                 for line in f:
                     content = line.strip()
+                    content = no_symbol(content)
                     content = tokenize(content)
                     tokens = content.split()
                     yield tokens
