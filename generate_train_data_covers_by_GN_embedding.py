@@ -1,11 +1,11 @@
 import pickle as pkl
 from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer
-from word2vec import WORD_EMBEDDING_FILE
+from word2vec import WORD_EMBEDDING_BIN_FILE
 from sys import stdout
 
 
 if __name__ == '__main__':
-    with open(WORD_EMBEDDING_FILE, 'rb') as f:
+    with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
         embedding_dict = pkl.load(f)
         embedding_tokens = embedding_dict.keys()
         del embedding_dict
