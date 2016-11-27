@@ -175,12 +175,19 @@ class ReVerbTrainRaw(object):
 
             # find the suitable pattern
             # random choose some for training, reduce training size
+            # if r.endswith('-in'):
+            #     q_pattern_list = sample(self.__special_in_q_pattern_list, 1)
+            # elif r.endswith('-on'):
+            #     q_pattern_list = sample(self.__special_on_q_pattern_list, 1)
+            # else:
+            #     q_pattern_list = sample(self.__normal_q_pattern_list, 3)
+            # choose full pattern
             if r.endswith('-in'):
-                q_pattern_list = sample(self.__special_in_q_pattern_list, 1)
+                q_pattern_list = self.__special_in_q_pattern_list
             elif r.endswith('-on'):
-                q_pattern_list = sample(self.__special_on_q_pattern_list, 1)
+                q_pattern_list = self.__special_on_q_pattern_list
             else:
-                q_pattern_list = sample(self.__normal_q_pattern_list, 3)
+                q_pattern_list = self.__normal_q_pattern_list
             a_pattern = self.__normal_a_pattern
             # generate the question
             for q_pattern in q_pattern_list:
@@ -241,7 +248,6 @@ class GigawordRaw(object):
                 for line in f:
                     content = line.strip()
                     content = no_symbol(content)
-                    content = tokenize(content)
                     tokens = content.split()
                     yield tokens
 
@@ -302,17 +308,18 @@ class ParaphraseWikiAnswer(object):
                 yield q1, q2
                 continue
 
-            if self.__mode in ['proc_token', 'embedding']:
+            if self.__mode == 'proc_token':
                 q1 = tokenize(q1)
                 q2 = tokenize(q2)
 
+            q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+
             # to token
-            if self.__mode == 'raw_token':
-                q1_tokens, q2_tokens = [s.split() for s in [q1, q2]]
+            if self.__mode in ['raw_token', 'proc_token']:
                 yield q1_tokens, q2_tokens
             elif self.__mode == 'embedding':
-                q1_tokens = [word2hash(token, self.voc_dict) for token in q1]
-                q2_tokens = [word2hash(token, self.voc_dict) for token in q2]
+                q1_tokens = [word2hash(token, self.voc_dict) for token in q1_tokens]
+                q2_tokens = [word2hash(token, self.voc_dict) for token in q2_tokens]
                 yield q1_tokens, q2_tokens
 
     def is_q_indx(self, i):
@@ -333,7 +340,10 @@ class ParaphraseWikiAnswer(object):
 
     def __len__(self):
         # full WikiAnswer Paraphrase Questions
-        return 13710072
+        return 13710104
+
+        # filter
+        # return 41
 
         # main train
         # return 300000
@@ -407,16 +417,16 @@ class ReVerbPairs(object):
                     # test
                     yield (q_id, q, a, l)
             else:
-                if self.__mode in ['proc_token', 'embedding']:
+                if self.__mode == 'proc_token':
                     q = tokenize(q)
                     a = tokenize(a)
 
                 q_tokens = q.split()
-                a_tokens = a.split()
+
+                e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
+                a_tokens = e1_tokens + r_tokens + e2_tokens
 
                 if self.__mode in ['raw_token', 'proc_token']:
-                    e1_tokens, r_tokens, e2_tokens = [t.strip().split() for t in a.split('|')]
-                    a_tokens = e1_tokens + r_tokens + e2_tokens
                     if self.__grams > 1:
                         q_tokens = [" ".join(ws) for ws in zip(*[q_tokens[j:] for j in range(self.__grams)])]
                 elif self.__mode == 'index':
@@ -491,10 +501,13 @@ class ReVerbPairs(object):
             # return 269979
 
             # 3 patterns, use all triples
-            return 43133211
+            # return 43133211
+
+            # filtered
+            # return 41592028
 
             # full patterns
-            # return 117202052
+            return 143777370
 
             # prove performance of uni-/bi-/tri-grams
             # return 1000000
@@ -504,3 +517,4 @@ class ReVerbPairs(object):
 
     def __str__(self):
         return "ReVerb QA pairs"
+

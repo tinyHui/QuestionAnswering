@@ -19,6 +19,7 @@ PARA_2_MATRIX = "./bin/Para2.%s.pkl"
 INF_FREQ = 2000  # information message frequency
 PROCESS_NUM = 15
 MAX_HOLD = INF_FREQ / 4
+# MAX_PART_H = 500000
 MAX_PART_H = 500000
 
 

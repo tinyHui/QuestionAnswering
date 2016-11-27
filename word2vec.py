@@ -1,4 +1,4 @@
-WORD_EMBEDDING_FILE = './data/embedding.Gigaword.txt'
+WORD_EMBEDDING_FILE = './data/embedding.GoogleNews.txt'
 WORD_EMBEDDING_BIN_FILE = './bin/unigram_embedding.pkl'
 LOW_FREQ_TOKEN_FILE = './bin/unigram_low_freq_voc.pkl'
 EMBEDDING_SIZE = 300
