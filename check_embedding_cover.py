@@ -6,7 +6,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 if __name__ == '__main__':
-    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw
+    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer
 
     embedding_models_files = sys.argv[1:]
     assert len(sys.argv) > 1, "must provide at one embedding binary file"
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     for fname, emb_voc_dict in zip(embedding_models_files, embedding_models):
         print("# Result of %s:" % fname)
 
-        reverb_train = ReVerbPairs(usage='train', mode='proc_token', grams=1)
+        reverb_train = ReVerbPairs(usage='train', mode='raw_token', grams=1)
         reverb_test = ReVerbPairs(usage='test', mode='raw_token', grams=1)
         para_wiki = ParaphraseWikiAnswer(mode='raw_token')
         # para_msr = ParaphraseMicrosoftRaw(mode='raw_token')
@@ -61,4 +61,4 @@ if __name__ == '__main__':
                     _ = emb_voc_dict[token]
                 except KeyError:
                     unseen_num += 1
-            print("\tConsider Only Token: {}/{}={}% unseen".format(description, voc_num, float(unseen_num) / voc_num * 100))
+            print("\tConsider Only Token: {}/{}={}% unseen".format(unseen_num, voc_num, float(unseen_num) / voc_num * 100))
