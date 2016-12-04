@@ -14,37 +14,41 @@ ln -s ../data_full ./data
 
 # use Google News embedding
 # 1 stage
+rm -f ./bin
 ln -s ../full_GoogleNews_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../full_GoogleNews_2stage ./bin
 sh execute2stage.sh
 
 
 # use Giga embedding
 # 1 stage
+rm -f ./bin
 ln -s ../full_Giga_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../full_Giga_2stage ./bin
 sh execute2stage.sh
 
 
 # use GigaPara embedding
 # 1 stage
+rm -f ./bin
 ln -s ../full_GigaPara_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../full_GigaPara_2stage ./bin
 sh execute2stage.sh
 
 rm -f ./data
+rm -f ./bin
 
 ################################
 #
