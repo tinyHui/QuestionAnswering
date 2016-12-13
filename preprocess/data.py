@@ -1,6 +1,5 @@
 from calendar import month_name, month_abbr
 from collections import UserDict
-from random import sample
 from word2vec import WORD_EMBEDDING_FILE
 from nltk.tree import Tree
 import sqlite3
@@ -174,13 +173,6 @@ class ReVerbTrainRaw(object):
             r, e1, e2 = [no_symbol(w) for w in [r, e1, e2]]
 
             # find the suitable pattern
-            # random choose some for training, reduce training size
-            # if r.endswith('-in'):
-            #     q_pattern_list = sample(self.__special_in_q_pattern_list, 1)
-            # elif r.endswith('-on'):
-            #     q_pattern_list = sample(self.__special_on_q_pattern_list, 1)
-            # else:
-            #     q_pattern_list = sample(self.__normal_q_pattern_list, 3)
             # choose full pattern
             if r.endswith('-in'):
                 q_pattern_list = self.__special_in_q_pattern_list
@@ -341,9 +333,6 @@ class ParaphraseWikiAnswer(object):
     def __len__(self):
         # full WikiAnswer Paraphrase Questions
         return 13710104
-
-        # filter
-        # return 41
 
         # main train
         # return 300000

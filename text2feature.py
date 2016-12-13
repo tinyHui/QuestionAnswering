@@ -45,13 +45,13 @@ def generate_part_dense(feats_queue, qa_queue, q_indx, a_indx):
             As.append(feat[a_indx])
             hold += 1
             if hold == MAX_HOLD:
-                qa_queue.put((np.asarray(Qs, dtype='float64'), np.asarray(As, dtype='float64')))
+                qa_queue.put((np.asarray(Qs), np.asarray(As)))
                 hold = 0
                 Qs = []
                 As = []
         except Empty:
             if Qs:
-                qa_queue.put((np.asarray(Qs, dtype='float64'), np.asarray(As, dtype='float64')))
+                qa_queue.put((np.asarray(Qs), np.asarray(As)))
             break
     logging.info("Stop part consumer")
 
@@ -69,13 +69,13 @@ def generate_part_sparse(feats_queue, qa_queue, q_indx, a_indx):
             As.append(feat[a_indx])
             hold += 1
             if hold == MAX_HOLD:
-                qa_queue.put((csr_matrix(Qs, dtype='float64'), csr_matrix(As, dtype='float64')))
+                qa_queue.put((csr_matrix(Qs, dtype='float32'), csr_matrix(As, dtype='float32')))
                 hold = 0
                 Qs = []
                 As = []
         except Empty:
             if Qs:
-                qa_queue.put((csr_matrix(Qs, dtype='float64'), csr_matrix(As, dtype='float64')))
+                qa_queue.put((csr_matrix(Qs, dtype='float32'), csr_matrix(As, dtype='float32')))
             break
     logging.info("Stop part consumer")
 

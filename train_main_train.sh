@@ -50,4 +50,4 @@ rm -f ./data
 rm -f ./bin
 
 # show results
-tail -n +1 ../main_train_*_*stage/result/*
+tail -n +1 ../main_train_*_*stage/result/result.txt

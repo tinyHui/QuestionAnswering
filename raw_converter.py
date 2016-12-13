@@ -5,12 +5,9 @@ DUMP_PARA_MS_FILE = "./data/paraphrases.ms.%s"
 
 
 if __name__ == '__main__':
-    from hash_index import UNIGRAM_DICT_FILE, BIGRAM_DICT_FILE, TRIGRAM_DICT_FILE
-    from word2vec import WORD_EMBEDDING_BIN_FILE
-    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer, ParaphraseMicrosoftRaw,\
+    from preprocess.data import ReVerbPairs, ParaphraseWikiAnswer,\
         UNKNOWN_TOKEN_INDX, UNKNOWN_TOKEN
     from preprocess.feats import get_parse_tree
-    import pickle as pkl
     import os
     import sys
     import argparse
@@ -31,7 +28,7 @@ if __name__ == '__main__':
         return '|'.join(map(str, value))
 
 
-    mode_support = ['unigram', 'bigram', 'trigram', 'embedding', 'structure']
+    mode_support = ['unigram', 'bigram', 'trigram', 'embedding', 'structure', 'raw']
 
     parser = argparse.ArgumentParser(description='Define mode to choose version for converting.')
     parser.add_argument('--mode', type=str,
@@ -40,39 +37,32 @@ if __name__ == '__main__':
     mode = args.mode
 
     print("converting raw string file into %s" % mode)
+    gram = 1
     # load dictionary
     if mode == mode_support[0]:
         print("loading vocabulary index")
-        data_mode = 'proc_token'
-        suf = 'uni'
+        data_mode = 'index'
         gram = 1
-        with open(UNIGRAM_DICT_FILE % "qa", 'rb') as f:
-            qa_voc_dict = pkl.load(f)
     elif mode == mode_support[1]:
         print("loading vocabulary index")
-        data_mode = 'proc_token'
+        data_mode = 'index'
         suf = 'bi'
         gram = 2
-        with open(BIGRAM_DICT_FILE % "qa", 'rb') as f:
-            qa_voc_dict = pkl.load(f)
     elif mode == mode_support[2]:
         print("loading vocabulary index")
-        data_mode = 'proc_token'
+        data_mode = 'index'
         suf = 'tri'
         gram = 3
-        with open(TRIGRAM_DICT_FILE % "qa", 'rb') as f:
-            qa_voc_dict = pkl.load(f)
     elif mode == mode_support[3]:
         print("loading embedding hash")
-        data_mode = 'raw_token'
+        data_mode = 'embedding'
         suf = 'emb'
-        gram = 1
-        with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
-            emb_voc_dict = pkl.load(f)
     elif mode == mode_support[4]:
-        data_mode = 'raw'
+        data_mode = 'structure'
         suf = 'struct'
-        gram = 1
+    elif mode == mode_support[5]:
+        data_mode = 'raw_token'
+        suf = 'raw'
     else:
         raise SystemError("mode must be %s" % ', '.join(mode_support))
 
@@ -94,10 +84,6 @@ if __name__ == '__main__':
         path = DUMP_PARA_PARALEX_FILE % suf
         data_list.append((data, path))
 
-        # data = ParaphraseMicrosoftRaw(mode=data_mode)
-        # path = DUMP_PARA_MS_FILE % suf
-        # data_list.append((data, path))
-
     job_id = 0
     for data, path in data_list:
         line_num = 0
@@ -107,23 +93,7 @@ if __name__ == '__main__':
             print("index version data %s exists" % path)
             continue
 
-        is_reverb_test = False
-        if isinstance(data, ReVerbPairs):
-            if data.get_usage() == 'test':
-                is_reverb_test = True
-
-        voc_hash = {}
-        if mode in mode_support[0:3]:
-            if isinstance(data, ReVerbPairs):
-                if data.get_usage() == 'train':
-                    voc_hash = qa_voc_dict
-                elif data.get_usage() == 'test':
-                    # for the reverb test data, each iteration return 4 items,
-                    # q, a are located in index 1 and 2
-                    voc_hash[1] = qa_voc_dict[0]
-                    voc_hash[2] = qa_voc_dict[1]
-
-        with open(path, 'a') as f:
+        with open(path, 'w') as f:
             length = len(data)
 
             for d in data:
@@ -135,18 +105,21 @@ if __name__ == '__main__':
                 for i in range(param_num):
                     if i in data.sent_indx:
                         if mode in mode_support[0:3]:
-                            tokens = [str(word2index(token, voc_hash[i])) for token in d[i]]
+                            tokens = d[i]
                             sentence = " ".join(tokens)
                         elif mode == mode_support[3]:
-                            tokens = [str(word2hash(token, emb_voc_dict)) for token in d[i]]
+                            tokens = ['|'.join(map(str, token)) for token in d[i]]
                             sentence = " ".join(tokens)
-                        else:
+                        elif mode == mode_support[4]:
                             # mode == mode_support[3]:
                             if data.is_q_indx(i):
                                 sentence = get_parse_tree(d[i], job_id)
                                 job_id += 1
                             else:
                                 sentence = d[i]
+                        else:
+                            tokens = d[i]
+                            sentence = " ".join(tokens)
                     else:
                         sentence = d[i]
                     if i+1 != param_num:

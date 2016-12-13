@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -u
 set -e
 
 if [[ $1 =~ ^Y$|^$ ]]

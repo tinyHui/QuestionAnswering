@@ -52,7 +52,7 @@ rm -f ./bin
 
 ################################
 #
-# train "full"
+# train "actual full"
 #
 ################################
 
@@ -60,11 +60,12 @@ ln -s ../data_actual_full ./data
 
 # use Google News embedding
 # 1 stage
+rm -f ./bin
 ln -s ../actual_full_GoogleNews_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../actual_full_GoogleNews_2stage ./bin
 ln -s ../full_GoogleNews_2stage/ParaMap.avg.pkl ./bin/ParaMap.avg.pkl
 sh execute2stage.sh N
@@ -72,11 +73,12 @@ sh execute2stage.sh N
 
 # use Giga embedding
 # 1 stage
+rm -f ./bin
 ln -s ../actual_full_Giga_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../actual_full_Giga_2stage ./bin
 ln -s ../full_Giga_2stage/ParaMap.avg.pkl ./bin/ParaMap.avg.pkl
 sh execute2stage.sh N
@@ -84,11 +86,12 @@ sh execute2stage.sh N
 
 # use GigaPara embedding
 # 1 stage
+rm -f ./bin
 ln -s ../actual_full_GigaPara_1stage ./bin
 sh execute1stage.sh
 
 # 2 stage
-rm ./bin
+rm -f ./bin
 ln -s ../actual_full_GigaPara_2stage ./bin
 ln -s ../full_GigaPara_2stage/ParaMap.avg.pkl ./bin/ParaMap.avg.pkl
 sh execute2stage.sh N
@@ -96,4 +99,4 @@ sh execute2stage.sh N
 rm ./data
 
 # show results
-tail -n +1 ../*full_*_*stage/result/*
+tail -n +1 ../*full_*_*stage/result/result.txt
