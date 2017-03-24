@@ -11,23 +11,25 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-    if os.path.exists(WORD_EMBEDDING_BIN_FILE):
+    if not os.path.exists(WORD_EMBEDDING_BIN_FILE):
+        # the word embedding text file use raw word
+        src_data = WordEmbeddingRaw()
+
+        logging.info("converting raw embedding text")
+        word_emb_hash = {}
+
+        line_num = 1
+        for w, emb in src_data:
+            sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
+            sys.stdout.flush()
+            line_num += 1
+            word_emb_hash[w] = np.asarray(emb, dtype='float64')
+        sys.stdout.write("\n")
+
+    else:
         logging.info("Word embedding dictionary file exists, skip")
-        sys.exit(0)
-
-    # the word embedding text file use raw word
-    src_data = WordEmbeddingRaw()
-
-    logging.info("converting raw embedding text")
-    word_emb_hash = {}
-
-    line_num = 1
-    for w, emb in src_data:
-        sys.stdout.write("\rLoad: %d/%d, %.2f%%" % (line_num, len(src_data), line_num/len(src_data)*100))
-        sys.stdout.flush()
-        line_num += 1
-        word_emb_hash[w] = np.asarray(emb, dtype='float64')
-    sys.stdout.write("\n")
+        with open(WORD_EMBEDDING_BIN_FILE, 'rb') as f:
+            word_emb_hash = pkl.load(f)
 
     #
     #  calculate embedding for UNKNOWN token

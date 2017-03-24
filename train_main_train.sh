@@ -38,6 +38,7 @@ sh execute2stage.sh
 
 # use GigaPara embedding
 # 1 stage
+rm -f ./bin
 ln -s ../main_train_GigaPara_1stage ./bin
 sh execute1stage.sh
 
